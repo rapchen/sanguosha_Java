@@ -15,35 +15,26 @@ public class AIPlayer extends Player {
     }
 
     @Override
-    protected boolean askForPlayCard() {
-        if (handCards.isEmpty()) return false;
-        Card card = handCards.get(0);
-        useCard(card);
-        // TODO 选择了牌还需要选目标
-        return card != null;
-    }
-
-    @Override
-    protected void askForDiscard(int count) {
-        for (int i = 0; i < count; i++) {
-            discard(handCards.get(0));
-        }
-    }
-
-    @Override
-    protected Card askForChooseCard(List<Card> cards, String prompt, boolean forced) {
+    protected Card choosePlayCard(List<Card> cards) {
+        if (cards.isEmpty()) return null;
         return cards.get(0);
     }
 
     @Override
-    protected int askForNumber(int max, boolean forced) {
-        return 1;
+    protected Card chooseDiscard() {
+        if (handCards.isEmpty()) return null;
+        return handCards.get(0);
     }
 
     @Override
-    public boolean askForJink() {
-        // TODO
-        return false;
+    protected Card chooseCard(List<Card> cards, String prompt, boolean forced) {
+        if (cards.isEmpty() && !forced) return null;
+        return cards.get(0);  // TODO 非forced情况可以考虑放弃
+    }
+
+    @Override
+    protected int chooseNumber(int max, boolean forced) {
+        return 1;
     }
 
 }

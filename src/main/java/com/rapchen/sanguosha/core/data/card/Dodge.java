@@ -16,10 +16,4 @@ public class Dodge extends Card {
         subType = SubType.BASIC;
     }
 
-    @Override
-    public void doUseToOne(Player source, Player target) {
-        if (!target.askForJink()) {
-            source.doDamage(target, 1);
-        }
-    }
 }

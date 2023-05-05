@@ -19,26 +19,22 @@ public class UserPlayer extends Player {
     }
 
     @Override
-    protected boolean askForPlayCard() {
-        Card card = askForChooseCard(handCards, "请使用一张牌，0结束：", false);
-        if (card != null) useCard(card);
-        // TODO 选择了牌还需要选目标
-        return card != null;
+    protected Card choosePlayCard(List<Card> cards) {
+        return chooseCard(cards, "请使用一张牌，0结束：", false);
     }
 
     @Override
-    protected void askForDiscard(int count) {
-        for (int i = 0; i < count; i++) {
-            Card card = askForChooseCard(handCards, "请弃置一张手牌：", true);
-            discard(card);
-        }
+    protected Card chooseDiscard() {
+        return chooseCard(handCards, "请弃置一张手牌：", true);
     }
 
-    @Override
-    public boolean askForJink() {
-        // TODO
-        return false;
-    }
+//    @Override
+//    public boolean askForDodge() {
+//        List<Card> dodges = handCards.stream().filter(card -> card instanceof Dodge).toList();
+//        Card card = askForChooseCard(dodges, "请使用一张闪，0放弃：", false);
+//        if (card != null) useCard(card);
+//        return card != null;
+//    }
 
     /**
      * 要求用户选一张牌
@@ -48,19 +44,19 @@ public class UserPlayer extends Player {
      * @return 选择的牌。如果不选，就返回null。
      */
     @Override
-    protected Card askForChooseCard(List<Card> cards, String prompt, boolean forced) {
+    protected Card chooseCard(List<Card> cards, String prompt, boolean forced) {
         log.warn(prompt);  // TODO 目前打给用户的都用WARN，后台的用INFO
         log.warn(Card.cardsToString(cards, true));
-        int chosen = askForNumber(cards.size(), forced);
+        int chosen = chooseNumber(cards.size(), forced);
         return chosen == 0 ? null : cards.get(chosen - 1);
     }
 
     /**
-     * 要求用户选一个数 [1,max]。 -1可以调出查看界面，目前只是打印牌桌
+     * 要求用户选一个数 [1,max]。 -1可以调出查看界面，目前只是打印牌桌。-2是debug
      * @param forced 是否必须选择，非必选的话可以用0跳过
      */
     @Override
-    protected int askForNumber(int max, boolean forced) {
+    protected int chooseNumber(int max, boolean forced) {
         Scanner sc = new Scanner(System.in);
         int chosen = 0;
         while (true) {
@@ -68,6 +64,7 @@ public class UserPlayer extends Player {
             if (chosen >= 1 && chosen <= max) break;
             if (chosen == 0 && !forced) break;  // 跳过选择
             if (chosen == -1) printTable();
+            if (chosen == -2) engine.printTable();
             else log.warn("请重新选择：");
             // TODO 这里可以把提示文字重新打一遍
         }

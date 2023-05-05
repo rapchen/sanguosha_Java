@@ -18,7 +18,7 @@ public class Slash extends Card {
 
     @Override
     public void doUseToOne(Player source, Player target) {
-        if (!target.askForJink()) {
+        if (!target.askForDodge()) {
             source.doDamage(target, 1);
         }
     }

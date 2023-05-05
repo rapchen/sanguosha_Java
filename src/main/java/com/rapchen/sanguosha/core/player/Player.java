@@ -2,7 +2,7 @@ package com.rapchen.sanguosha.core.player;
 
 import com.rapchen.sanguosha.core.Engine;
 import com.rapchen.sanguosha.core.data.card.Card;
-import com.rapchen.sanguosha.exception.CardPlaceException;
+import com.rapchen.sanguosha.core.data.card.Dodge;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -109,13 +109,16 @@ public abstract class Player {
      * 弃牌。目前只是弃自己的牌
      * @param card 牌
      */
-    protected void discard(Card card) {
-        if (!handCards.contains(card)) {
-            throw new CardPlaceException(
-                    String.format("弃牌不是自己的牌，player:%s, card:%s", this, card));
-        }
+    protected void doDiscard(Card card) {
+//        if (!handCards.contains(card)) {
+//            throw new CardPlaceException(
+//                    String.format("弃牌不是自己的牌，player:%s, card:%s", this, card));
+//        }
         handCards.remove(card);
         engine.table.discardPile.addLast(card);
+    }
+    protected void doDiscard(List<Card> cards) {
+        engine.table.discardPile.addAll(cards);
     }
 
     /**
@@ -190,16 +193,35 @@ public abstract class Player {
     /* =============== begin 要求玩家操作的方法，通常是abstract ================ */
 
     /**
-     * 玩家出牌
+     * 玩家出牌。这里是通用逻辑，具体策略交给askForPlayCard
      * @return 是否出牌。false时出牌结束
      */
-    protected abstract boolean askForPlayCard();
+    public boolean askForPlayCard() {
+        // 先找出可以使用的牌 TODO 后面用canUse
+        List<Card> cards = handCards.stream().filter(card -> !(card instanceof Dodge)).toList();
+        Card card = choosePlayCard(cards);
+        if (card != null) useCard(card);
+        // TODO 选择了牌还需要选目标
+        return card != null;
+    }
+    protected abstract Card choosePlayCard(List<Card> cards);
 
     /**
-     * 要求弃牌
+     * 要求弃牌  TODO 非强制弃牌
      * @param count 弃牌数量
      */
-    protected abstract void askForDiscard(int count);
+    public boolean askForDiscard(int count) {
+        List<Card> cards = new ArrayList<>();
+        for (int i = 0; i < count; i++) {
+            Card card = chooseDiscard();
+            cards.add(card);
+            handCards.remove(card);  // TODO 这里弃牌时机应该是一起发生
+        }
+        doDiscard(cards);
+        log.info("{} 弃了{}张牌：{}", this.name, cards.size(), Card.cardsToString(cards));
+        return true;
+    }
+    protected abstract Card chooseDiscard();
 
     /**
      * 要求用户选一张牌
@@ -208,13 +230,18 @@ public abstract class Player {
      * @param forced 是否必须选择
      * @return 选择的牌。如果不选，就返回null。
      */
-    protected abstract Card askForChooseCard(List<Card> cards, String prompt, boolean forced);
+    protected abstract Card chooseCard(List<Card> cards, String prompt, boolean forced);
 
     /**
      * 要求用户选一个数 [1,max]。 -1可以调出查看界面，目前只是打印牌桌
      * @param forced 是否必须选择，非必选的话可以用0跳过
      */
-    protected abstract int askForNumber(int max, boolean forced);
+    protected abstract int chooseNumber(int max, boolean forced);
 
-    public abstract boolean askForJink();
+    public boolean askForDodge() {
+        List<Card> dodges = handCards.stream().filter(card -> card instanceof Dodge).toList();
+        Card card = chooseCard(dodges, "请使用一张闪，0放弃：", false);
+        if (card != null) useCard(card);
+        return card != null;
+    }
 }
