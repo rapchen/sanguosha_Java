@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
  * @author Chen Runwen
  * @time 2023/4/24 17:41
  */
+@Deprecated
 @Service
 public class GameStartServiceImpl implements GameStartService {
 

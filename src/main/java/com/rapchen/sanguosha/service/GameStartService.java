@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
  * @author Chen Runwen
  * @time 2023/4/24 17:40
  */
+@Deprecated
 public interface GameStartService {
 
     void gameStart();

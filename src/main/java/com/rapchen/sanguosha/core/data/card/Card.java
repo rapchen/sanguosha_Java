@@ -1,13 +1,19 @@
 package com.rapchen.sanguosha.core.data.card;
 
+import com.rapchen.sanguosha.core.player.Player;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
 
 /**
  * @author Chen Runwen
  * @time 2023/4/14 12:17
  */
+@Slf4j
 @Data
 public abstract class Card {
+
     enum Color {
         NO_COLOR, RED, BLACK;
     }
@@ -67,8 +73,52 @@ public abstract class Card {
         this.id = id;
     }
 
+    /**
+     * 使用牌，执行牌的效果
+     * @param source  使用者
+     * @param targets 目标
+     */
+    public void doUse(Player source, List<Player> targets) {
+        log.info("{} 对 {} 使用了 {}", source, Player.playersToString(targets), this);
+        // 弃牌 TODO 不在手牌？虚拟牌？
+        source.handCards.remove(this);
+        source.engine.table.discardPile.add(this);
+        // 执行效果
+        doUseToAll(source, targets);
+        for (Player target : targets) {
+            doUseToOne(source, target);
+        }
+    }
+
+    /**
+     * 对所有人使用的效果。如果对每个人效果都一样，那可以直接实现doUseToOne。
+     */
+    public void doUseToAll(Player source, List<Player> targets) {}
+
+    /**
+     * 对单个目标使用的效果。如果对每个人效果都一样，那可以直接实现这个，否则用doUseToAll。
+     */
+    public void doUseToOne(Player source, Player target) {}
+
     @Override
     public String toString() {
         return nameZh + "[" + suit + point + "]" + id;
+    }
+
+    public static String cardsToString(List<Card> cards) {
+        return cardsToString(cards, false);
+    }
+
+    public static String cardsToString(List<Card> cards, boolean withNumber) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < cards.size(); i++) {
+            Card card = cards.get(i);
+            if (withNumber) {
+                sb.append(i + 1).append(": ");
+            }
+            sb.append(card);
+            if (i < cards.size() - 1) sb.append(", ");
+        }
+        return sb.toString();
     }
 }

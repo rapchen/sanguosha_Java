@@ -33,4 +33,11 @@ public class Table {
         }
         return sb.toString();
     }
+
+    public String printForPlayer() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("摸牌堆: ").append(drawPile.size());
+        sb.append(", 弃牌堆: ").append(discardPile.size());
+        return sb.toString();
+    }
 }
