@@ -1,19 +1,17 @@
-package com.rapchen.sanguosha.core.data.card;
+package com.rapchen.sanguosha.core.data.card.trick;
 
 import com.rapchen.sanguosha.core.player.Player;
 
 /**
- * 杀
+ * 万箭齐发
  * @author Chen Runwen
- * @time 2023/4/24 22:23
+ * @time 2023/5/5 18:46
  */
-public class Slash extends Card {
-
-    public Slash(Suit suit, Point point) {
+public class ArchersAttack extends ImmediateTrickCard {
+    public ArchersAttack(Suit suit, Point point) {
         super(suit, point);
-        name = "Slash";
-        nameZh = "杀";
-        subType = SubType.BASIC;
+        name = "ArchersAttack";
+        nameZh = "万箭齐发";
     }
 
     @Override
@@ -22,4 +20,5 @@ public class Slash extends Card {
             source.doDamage(target, 1);
         }
     }
+
 }

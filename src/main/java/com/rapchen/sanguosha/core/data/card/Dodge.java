@@ -11,7 +11,7 @@ public class Dodge extends Card {
 
     public Dodge(Suit suit, Point point) {
         super(suit, point);
-        name = "dodge";
+        name = "Dodge";
         nameZh = "闪";
         subType = SubType.BASIC;
     }

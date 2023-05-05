@@ -3,9 +3,11 @@ package com.rapchen.sanguosha.core.player;
 import com.rapchen.sanguosha.core.Engine;
 import com.rapchen.sanguosha.core.data.card.Card;
 import com.rapchen.sanguosha.core.data.card.Dodge;
+import com.rapchen.sanguosha.core.data.card.Slash;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -125,8 +127,8 @@ public abstract class Player {
      * 使用牌 TODO 加上使用目标
      * @param card
      */
-    protected void useCard(Card card) {
-        card.doUse(this, getOtherPlayers());
+    protected void useCard(Card card, List<Player> targets) {
+        card.doUse(this, targets);
     }
 
     /**
@@ -200,10 +202,29 @@ public abstract class Player {
         // 先找出可以使用的牌 TODO 后面用canUse
         List<Card> cards = handCards.stream().filter(card -> !(card instanceof Dodge)).toList();
         Card card = choosePlayCard(cards);
-        if (card != null) useCard(card);
-        // TODO 选择了牌还需要选目标
+        if (card != null) {
+            List<Player> targets = chooseTargets(card);
+            useCard(card, targets);
+        }
         return card != null;
     }
+
+    /**
+     * 选择牌的目标 TODO 现在自动选目标，后面要改成手动选
+     * @param card 使用的牌
+     */
+    private List<Player> chooseTargets(Card card) {
+        return switch (card.getName()) {
+            case "Slash" -> getOtherPlayers();
+            case "Dismantlement" -> getOtherPlayers();
+            case "ArchersAttack" -> getOtherPlayers();
+            case "BarbarianInvasion" -> getOtherPlayers();
+            case "Dodge" -> new ArrayList<>();
+            case "ExNihilo" -> Collections.singletonList(this);
+            default -> new ArrayList<>();
+        };
+    }
+
     protected abstract Card choosePlayCard(List<Card> cards);
 
     /**
@@ -241,7 +262,14 @@ public abstract class Player {
     public boolean askForDodge() {
         List<Card> dodges = handCards.stream().filter(card -> card instanceof Dodge).toList();
         Card card = chooseCard(dodges, "请使用一张闪，0放弃：", false);
-        if (card != null) useCard(card);
+        if (card != null) useCard(card, new ArrayList<>());
+        return card != null;
+    }
+
+    public boolean askForSlash() {
+        List<Card> dodges = handCards.stream().filter(card -> card instanceof Slash).toList();
+        Card card = chooseCard(dodges, "请打出一张杀，0放弃：", false);
+        if (card != null) useCard(card, new ArrayList<>());  // TODO 这里改成打出，还有闪也有打出
         return card != null;
     }
 }

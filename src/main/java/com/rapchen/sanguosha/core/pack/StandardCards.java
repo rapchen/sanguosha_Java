@@ -4,6 +4,10 @@ import com.rapchen.sanguosha.core.Engine;
 import com.rapchen.sanguosha.core.data.card.Card;
 import com.rapchen.sanguosha.core.data.card.Dodge;
 import com.rapchen.sanguosha.core.data.card.Slash;
+import com.rapchen.sanguosha.core.data.card.trick.ArchersAttack;
+import com.rapchen.sanguosha.core.data.card.trick.BarbarianInvasion;
+import com.rapchen.sanguosha.core.data.card.trick.Dismantlement;
+import com.rapchen.sanguosha.core.data.card.trick.ExNihilo;
 
 /**
  * 标准卡牌包
@@ -71,5 +75,21 @@ public class StandardCards extends Package {
         addCard(new Dodge(Card.Suit.DIAMOND, Card.Point.POINT_10));
         addCard(new Dodge(Card.Suit.DIAMOND, Card.Point.POINT_J));
         addCard(new Dodge(Card.Suit.DIAMOND, Card.Point.POINT_J));
+
+        // 锦囊
+        addCard(new ArchersAttack(Card.Suit.HEART, Card.Point.POINT_A));
+        addCard(new BarbarianInvasion(Card.Suit.SPADE, Card.Point.POINT_7));
+        addCard(new BarbarianInvasion(Card.Suit.SPADE, Card.Point.POINT_K));
+        addCard(new BarbarianInvasion(Card.Suit.CLUB, Card.Point.POINT_7));
+        addCard(new ExNihilo(Card.Suit.HEART, Card.Point.POINT_7));
+        addCard(new ExNihilo(Card.Suit.HEART, Card.Point.POINT_8));
+        addCard(new ExNihilo(Card.Suit.HEART, Card.Point.POINT_9));
+        addCard(new ExNihilo(Card.Suit.HEART, Card.Point.POINT_J));
+        addCard(new Dismantlement(Card.Suit.SPADE, Card.Point.POINT_3));
+        addCard(new Dismantlement(Card.Suit.SPADE, Card.Point.POINT_4));
+        addCard(new Dismantlement(Card.Suit.SPADE, Card.Point.POINT_Q));
+        addCard(new Dismantlement(Card.Suit.CLUB, Card.Point.POINT_3));
+        addCard(new Dismantlement(Card.Suit.CLUB, Card.Point.POINT_4));
+        addCard(new Dismantlement(Card.Suit.HEART, Card.Point.POINT_Q));
     }
 }
