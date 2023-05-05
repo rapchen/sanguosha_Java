@@ -4,6 +4,7 @@ import com.rapchen.sanguosha.core.data.Table;
 import com.rapchen.sanguosha.core.data.UserTableVO;
 import com.rapchen.sanguosha.core.data.card.Card;
 import com.rapchen.sanguosha.core.data.card.Slash;
+import com.rapchen.sanguosha.core.pack.StandardCards;
 import com.rapchen.sanguosha.core.player.*;
 import com.rapchen.sanguosha.exception.GameOverException;
 import lombok.extern.slf4j.Slf4j;
@@ -66,14 +67,18 @@ public class Engine {
     }
 
     private void initPile() {
-        int cardId = 1;
-        List<Card> cards = new ArrayList<>();
-        for (Card.Suit suit : Card.Suit.REGULAR_SUITS) {
-            for (Card.Point point : Card.Point.REGULAR_POINTS) {
-                cards.add(new Slash(suit, point, cardId++));
-            }
-        }
+        new StandardCards(this).init();
+//        int cardId = 1;
+//        List<Card> cards = new ArrayList<>();
+//        for (Card.Suit suit : Card.Suit.REGULAR_SUITS) {
+//            for (Card.Point point : Card.Point.REGULAR_POINTS) {
+//                cards.add(new Slash(suit, point, cardId++));
+//            }
+//        }
+        // 洗牌
+        List<Card> cards = new ArrayList<>(table.drawPile);
         Collections.shuffle(cards);
+        table.drawPile.clear();
         table.drawPile.addAll(cards);
         // TODO 可配置的扩展包
     }

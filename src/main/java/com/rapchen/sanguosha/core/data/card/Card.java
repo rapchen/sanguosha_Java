@@ -15,11 +15,11 @@ import java.util.List;
 public abstract class Card {
 
     enum Color {
-        NO_COLOR, RED, BLACK;
+        COLOR_NO, RED, BLACK;
     }
 
     public enum Suit {
-        SUIT_NO(Color.NO_COLOR, "无色"),
+        SUIT_NO(Color.COLOR_NO, "无色"),
         HEART(Color.RED, "♥"),
         DIAMOND(Color.RED, "♦"),
         SPADE(Color.BLACK, "♠"),
@@ -61,16 +61,59 @@ public abstract class Card {
         }
     }
 
+    enum Type {
+        TYPE_NO("无类别"), BASIC("基本牌"), TRICK("锦囊牌"), EQUIPMENT("装备牌");
+
+        public final String name;
+
+        Type(String name) {
+            this.name = name;
+        }
+        @Override
+        public String toString() {
+            return name;
+        }
+        public static final Type[] REGULAR_TYPES = new Type[]{BASIC, TRICK, EQUIPMENT};
+    }
+
+    public enum SubType {
+        SUBTYPE_NO(Type.TYPE_NO, "无子类别"),
+        BASIC(Type.BASIC, "基本牌"),
+        TRICK_DELAYED(Type.TRICK, "延时锦囊"),
+        TRICK_IMMEDIATE(Type.TRICK, "非延时锦囊"),
+        EQUIP_WEAPON(Type.EQUIPMENT, "武器"),
+        EQUIP_ARMOR(Type.EQUIPMENT, "防具"),
+        EQUIP_HORSE_ATTACK(Type.EQUIPMENT, "进攻马"),
+        EQUIP_HORSE_DEFEND(Type.EQUIPMENT, "防御马"),
+        EQUIP_TREASURE(Type.EQUIPMENT, "宝物");
+
+        public final Type type;
+        public final String name;
+
+        SubType(Type type, String name) {
+            this.type = type;
+            this.name = name;
+        }
+
+        @Override
+        public String toString() {
+            return name;
+        }
+    }
+
     public Suit suit;
     public Point point;
+    public SubType subType;
     protected int id;  // 在牌堆里的唯一ID，从1开始。虚拟卡<0
     protected String name;  // 牌名。不考虑扩展包的情况下也可以用instanceof判断
     protected String nameZh;  // 中文牌名，用于显示。
+    public static int nextCardId = 1;  // 保证卡牌唯一性
 
-    public Card(Suit suit, Point point, int id) {
+    public Card(Suit suit, Point point) {
         this.suit = suit;
         this.point = point;
-        this.id = id;
+        this.id = nextCardId;
+        nextCardId++;
     }
 
     /**
