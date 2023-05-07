@@ -24,8 +24,8 @@ public class UserPlayer extends Player {
     }
 
     @Override
-    protected Card chooseDiscard() {
-        return chooseCard(handCards, "请弃置一张手牌：", true);
+    protected Card chooseDiscard(Player target, List<Card> cards) {
+        return chooseCard(cards, "请弃置一张手牌：", true);
     }
 
 //    @Override

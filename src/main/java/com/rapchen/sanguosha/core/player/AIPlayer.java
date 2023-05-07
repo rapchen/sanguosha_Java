@@ -21,9 +21,9 @@ public class AIPlayer extends Player {
     }
 
     @Override
-    protected Card chooseDiscard() {
-        if (handCards.isEmpty()) return null;
-        return handCards.get(0);
+    protected Card chooseDiscard(Player target, List<Card> cards) {
+        if (cards.isEmpty()) return null;
+        return cards.get(0);
     }
 
     @Override

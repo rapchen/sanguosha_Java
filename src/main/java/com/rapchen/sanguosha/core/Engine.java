@@ -3,7 +3,6 @@ package com.rapchen.sanguosha.core;
 import com.rapchen.sanguosha.core.data.Table;
 import com.rapchen.sanguosha.core.data.UserTableVO;
 import com.rapchen.sanguosha.core.data.card.Card;
-import com.rapchen.sanguosha.core.data.card.Slash;
 import com.rapchen.sanguosha.core.pack.StandardCards;
 import com.rapchen.sanguosha.core.player.*;
 import com.rapchen.sanguosha.exception.GameOverException;
@@ -13,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 /**
  * 单例Engine，实际控制游戏流程
@@ -28,7 +28,11 @@ public class Engine {
     // 包括死亡武将在内的
     public List<Player> playersWithDead;
 
+    public Random random;
+
     public void gameStart() {
+        // 准备工作
+        random = new Random();
         // 创建table
         table = new Table();
         // 初始化角色 TODO 多人局
@@ -67,6 +71,7 @@ public class Engine {
     }
 
     private void initPile() {
+        Card.nextCardId = 1;  // 重置Card的自增ID
         new StandardCards(this).init();
 //        int cardId = 1;
 //        List<Card> cards = new ArrayList<>();

@@ -4,6 +4,7 @@ import com.rapchen.sanguosha.core.player.Player;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -108,7 +109,12 @@ public abstract class Card {
     protected String name;  // 牌名。不考虑扩展包的情况下也可以用instanceof判断
     protected String nameZh;  // 中文牌名，用于显示。
     public static int nextCardId = 1;  // 保证卡牌唯一性
+    public boolean virtual = false;  // 是否虚拟卡
+    public List<Card> subCards;  // 子卡，通常用于虚拟卡
 
+    /**
+     * 创建真实卡牌，ID自增
+     */
     public Card(Suit suit, Point point) {
         this.suit = suit;
         this.point = point;
@@ -117,12 +123,43 @@ public abstract class Card {
     }
 
     /**
+     * ID自定，通常是虚拟卡牌
+     */
+    public Card(Suit suit, Point point, int id) {
+        this.suit = suit;
+        this.point = point;
+        this.id = id;
+    }
+
+    public void addSubCards(List<Card> cards) {
+        if (subCards == null) subCards = new ArrayList<>();
+        subCards.addAll(cards);
+    }
+    public void addSubCard(Card card) {
+        if (subCards == null) subCards = new ArrayList<>();
+        subCards.add(card);
+    }
+
+    /* =============== end 通用功能执行 ================ */
+
+    /* =============== begin 子类需要实现的具体功能 ================ */
+
+    /**
+     * 出牌阶段是否可用。默认可用
+     * @param player 使用者
+     */
+    public boolean canUseInPlayPhase(Player player) {
+        return true;
+    }
+
+    /**
      * 使用牌，执行牌的效果
      * @param source  使用者
      * @param targets 目标
      */
     public void doUse(Player source, List<Player> targets) {
-        log.info("{} 对 {} 使用了 {}", source, Player.playersToString(targets), this);
+        log.info("{} {} 使用了 {}", source,
+                targets.isEmpty() ? "" : "对 " + Player.playersToString(targets), this);
         // 弃牌 TODO 不在手牌？虚拟牌？
         source.handCards.remove(this);
         source.engine.table.discardPile.add(this);
@@ -131,6 +168,18 @@ public abstract class Card {
         for (Player target : targets) {
             doUseToOne(source, target);
         }
+    }
+
+    /**
+     * 打出牌
+     * @param source  使用者
+     * @param targets 目标。例如冲阵可能会用
+     */
+    public void doResponse(Player source, List<Player> targets) {
+        log.info("{} 打出了 {}", source, this);
+        // 弃牌 TODO 不在手牌？虚拟牌？
+        source.handCards.remove(this);
+        source.engine.table.discardPile.add(this);
     }
 
     /**

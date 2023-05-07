@@ -16,7 +16,7 @@ public class ArchersAttack extends ImmediateTrickCard {
 
     @Override
     public void doUseToOne(Player source, Player target) {
-        if (!target.askForDodge()) {
+        if (!target.askForDodge(false)) {
             source.doDamage(target, 1);
         }
     }

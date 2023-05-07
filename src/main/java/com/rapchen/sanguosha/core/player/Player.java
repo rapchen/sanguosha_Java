@@ -3,12 +3,14 @@ package com.rapchen.sanguosha.core.player;
 import com.rapchen.sanguosha.core.Engine;
 import com.rapchen.sanguosha.core.data.card.Card;
 import com.rapchen.sanguosha.core.data.card.Dodge;
+import com.rapchen.sanguosha.core.data.card.FakeCard;
 import com.rapchen.sanguosha.core.data.card.Slash;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 /**
  * 角色对象。可以是人或AI
@@ -26,6 +28,7 @@ public abstract class Player {
     public int hp;
     public int maxHp;
     public List<Card> handCards;
+    public int slashTimes = 1;
 
     public Player(Engine engine, int id, String name) {
         this.engine = engine;
@@ -76,6 +79,7 @@ public abstract class Player {
      * 出牌阶段
      */
     private void doPlayPhase() {
+        slashTimes = 1;
         while (true) {
             if (!askForPlayCard()) break;
         }
@@ -124,17 +128,23 @@ public abstract class Player {
     }
 
     /**
-     * 使用牌 TODO 加上使用目标
-     * @param card
+     * 使用牌
      */
     protected void useCard(Card card, List<Player> targets) {
         card.doUse(this, targets);
     }
 
     /**
+     * 打出牌
+     */
+    protected void responseCard(Card card, List<Player> targets) {
+        card.doResponse(this, targets);
+    }
+
+    /**
      * 获取其他玩家
      */
-    private List<Player> getOtherPlayers() {
+    public List<Player> getOtherPlayers() {
         List<Player> players = new ArrayList<>(engine.players);
         players.remove(this);
         return players;
@@ -200,7 +210,7 @@ public abstract class Player {
      */
     public boolean askForPlayCard() {
         // 先找出可以使用的牌 TODO 后面用canUse
-        List<Card> cards = handCards.stream().filter(card -> !(card instanceof Dodge)).toList();
+        List<Card> cards = handCards.stream().filter(card -> card.canUseInPlayPhase(this)).toList();
         Card card = choosePlayCard(cards);
         if (card != null) {
             List<Player> targets = chooseTargets(card);
@@ -210,13 +220,14 @@ public abstract class Player {
     }
 
     /**
-     * 选择牌的目标 TODO 现在自动选目标，后面要改成手动选
+     * 选择牌的目标 TODO 现在自动选目标，后面要改成手动选，每张卡牌有一个方法返回合法目标
      * @param card 使用的牌
      */
     private List<Player> chooseTargets(Card card) {
         return switch (card.getName()) {
             case "Slash" -> getOtherPlayers();
             case "Dismantlement" -> getOtherPlayers();
+            case "Snatch" -> getOtherPlayers();
             case "ArchersAttack" -> getOtherPlayers();
             case "BarbarianInvasion" -> getOtherPlayers();
             case "Dodge" -> new ArrayList<>();
@@ -228,21 +239,77 @@ public abstract class Player {
     protected abstract Card choosePlayCard(List<Card> cards);
 
     /**
-     * 要求弃牌  TODO 非强制弃牌
-     * @param count 弃牌数量
+     * 弃自己的牌
      */
     public boolean askForDiscard(int count) {
-        List<Card> cards = new ArrayList<>();
+        return askForDiscard(count, this);
+    }
+    /**
+     * 要求弃牌  TODO 非强制弃牌
+     * @param count  弃牌数量
+     * @param target 弃牌目标
+     */
+    public boolean askForDiscard(int count, Player target) {
+        List<Card> discards = new ArrayList<>();
         for (int i = 0; i < count; i++) {
-            Card card = chooseDiscard();
-            cards.add(card);
-            handCards.remove(card);  // TODO 这里弃牌时机应该是一起发生
+            List<Card> choices = new ArrayList<>();
+            if (target == this) {  // 弃自己牌
+                choices.addAll(handCards); // TODO 弃装备牌
+            } else {  // 弃他人牌
+                if (target.handCards.size() > 0) {  // 所有手牌作为一个选项，随机弃一张
+                    Card hCards = new FakeCard( target.handCards.size() + "张手牌");
+                    hCards.addSubCards(target.handCards);
+                    choices.add(hCards);
+                }
+            }
+            if (!choices.isEmpty()) {
+                Card card = chooseDiscard(target, choices);
+                if (card.isVirtual()) {
+                    int num = engine.random.nextInt(card.subCards.size());
+                    card = card.subCards.get(num);
+                }
+                discards.add(card);
+                target.handCards.remove(card);  // TODO 这里弃牌时机应该是一起发生
+            }
         }
-        doDiscard(cards);
-        log.info("{} 弃了{}张牌：{}", this.name, cards.size(), Card.cardsToString(cards));
+        doDiscard(discards);
+        log.info("{} 弃了 {} {}张牌：{}", this.name, target.name, discards.size(), Card.cardsToString(discards));
         return true;
     }
-    protected abstract Card chooseDiscard();
+
+
+    protected Card chooseDiscard(Player target) {
+        return chooseDiscard(target, target.handCards);
+    }
+    protected abstract Card chooseDiscard(Player target, List<Card> cards);
+
+    /**
+     * 要求角色从目标角色的牌中选一张牌
+     * @param target 目标角色
+     * @param prompt 给用户的提示语
+     * @param forced 是否必须选择
+     * @return 选择的牌。如果不选或无牌可选，就返回null。
+     */
+    public Card askForCardFromPlayer(Player target, String prompt, boolean forced) {
+        // 准备选项
+        List<Card> choices = new ArrayList<>();
+        if (target == this) {  // 选自己的牌
+            choices.addAll(handCards); // TODO 弃装备牌
+        } else {  // 选他人牌
+            if (target.handCards.size() > 0) {  // 所有手牌作为一个选项，随机选一张
+                Card hCards = new FakeCard( target.handCards.size() + "张手牌");
+                hCards.addSubCards(target.handCards);
+                choices.add(hCards);
+            }
+        }
+        if (!choices.isEmpty()) {
+            return chooseCard(choices, prompt, forced);
+        }
+        return null;  // 无牌可选
+    }
+    public Card askForCardFromPlayer(Player target) {
+        return askForCardFromPlayer(target, "请选择一张牌：", true);
+    }
 
     /**
      * 要求用户选一张牌
@@ -259,17 +326,28 @@ public abstract class Player {
      */
     protected abstract int chooseNumber(int max, boolean forced);
 
-    public boolean askForDodge() {
+    /**
+     * 要求角色使用/打出一张闪
+     * @param isUse true是使用，false是打出
+     * @return 是否使用/打出
+     */
+    public boolean askForDodge(boolean isUse) {
         List<Card> dodges = handCards.stream().filter(card -> card instanceof Dodge).toList();
-        Card card = chooseCard(dodges, "请使用一张闪，0放弃：", false);
-        if (card != null) useCard(card, new ArrayList<>());
+        Card card = chooseCard(dodges, isUse ? "请使用一张闪，0放弃：" : "请打出一张闪，0放弃：", false);
+        if (card != null) {
+            if (isUse) {
+                useCard(card, new ArrayList<>());
+            } else {
+                responseCard(card, new ArrayList<>());
+            }
+        }
         return card != null;
     }
 
     public boolean askForSlash() {
         List<Card> dodges = handCards.stream().filter(card -> card instanceof Slash).toList();
         Card card = chooseCard(dodges, "请打出一张杀，0放弃：", false);
-        if (card != null) useCard(card, new ArrayList<>());  // TODO 这里改成打出，还有闪也有打出
+        if (card != null) responseCard(card, new ArrayList<>());
         return card != null;
     }
 }

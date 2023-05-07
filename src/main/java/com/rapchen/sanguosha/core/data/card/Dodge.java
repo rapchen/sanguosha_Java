@@ -16,4 +16,9 @@ public class Dodge extends Card {
         subType = SubType.BASIC;
     }
 
+    @Override
+    public boolean canUseInPlayPhase(Player player) {
+        return false;
+    }
+
 }

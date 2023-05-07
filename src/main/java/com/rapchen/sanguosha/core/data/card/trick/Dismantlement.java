@@ -16,9 +16,13 @@ public class Dismantlement extends ImmediateTrickCard {
     }
 
     @Override
+    public boolean canUseInPlayPhase(Player player) {
+        return player.getOtherPlayers().get(0).handCards.size() > 0;
+    }
+
+    @Override
     public void doUseToOne(Player source, Player target) {
-        // TODO 实际是source要选牌
-        target.askForDiscard(1);
+        source.askForDiscard(1, target);
     }
 
 }
