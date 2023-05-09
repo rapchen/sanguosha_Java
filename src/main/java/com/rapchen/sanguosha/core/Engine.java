@@ -25,8 +25,8 @@ public class Engine {
 
     public Table table;
     public List<Player> players;
-    // 包括死亡武将在内的
-    public List<Player> playersWithDead;
+    public List<Player> playersWithDead;  // 包括死亡武将在内的
+    public Player currentPlayer;  // 当前回合角色
 
     public Random random;
 
@@ -115,6 +115,19 @@ public class Engine {
             cards.add(card);
         }
         return cards;
+    }
+
+    /** 获取所有玩家，从当前回合角色开始 */
+    public List<Player> getAllPlayers() {
+        List<Player> result = new ArrayList<>();
+        if (currentPlayer == null || !currentPlayer.alive) {
+            result.addAll(players);
+        } else {
+            int idx = players.indexOf(currentPlayer);
+            result.addAll(players.subList(idx, players.size()));
+            result.addAll(players.subList(0, idx));
+        }
+        return result;
     }
 
     /**

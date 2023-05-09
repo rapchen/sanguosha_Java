@@ -22,7 +22,7 @@ public class Dismantlement extends ImmediateTrickCard {
 
     @Override
     public void doUseToOne(Player source, Player target) {
-        source.askForDiscard(1, target);
+        source.askForDiscard(1, target, true);
     }
 
 }

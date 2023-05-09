@@ -4,6 +4,7 @@ import com.rapchen.sanguosha.core.Engine;
 import com.rapchen.sanguosha.core.data.card.Card;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
 
@@ -44,7 +45,7 @@ public class UserPlayer extends Player {
      * @return 选择的牌。如果不选，就返回null。
      */
     @Override
-    protected Card chooseCard(List<Card> cards, String prompt, boolean forced) {
+    public Card chooseCard(List<Card> cards, String prompt, boolean forced) {
         log.warn(prompt);  // TODO 目前打给用户的都用WARN，后台的用INFO
         log.warn(Card.cardsToString(cards, true));
         int chosen = chooseNumber(cards.size(), forced);
@@ -60,11 +61,16 @@ public class UserPlayer extends Player {
         Scanner sc = new Scanner(System.in);
         int chosen = 0;
         while (true) {
-            chosen = sc.nextInt();
-            if (chosen >= 1 && chosen <= max) break;
+            try {
+                chosen = sc.nextInt();
+            } catch (InputMismatchException e) {
+                log.warn("请重新选择：");
+                continue;
+            }
+            if (chosen >= 1 && chosen <= max) break;  // 选择完成
             if (chosen == 0 && !forced) break;  // 跳过选择
-            if (chosen == -1) printTable();
-            if (chosen == -2) engine.printTable();
+            if (chosen == -1) printTable();  // 打印桌面
+            if (chosen == -2) engine.printTable();  // 打印桌面（Debug模式）
             else log.warn("请重新选择：");
             // TODO 这里可以把提示文字重新打一遍
         }

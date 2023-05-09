@@ -80,6 +80,11 @@ public class StandardCards extends Package {
         addCard(new BarbarianInvasion(Card.Suit.SPADE, Card.Point.POINT_K));
         addCard(new BarbarianInvasion(Card.Suit.CLUB, Card.Point.POINT_7));
 
+        addCard(new PeachOrchard(Card.Suit.HEART, Card.Point.POINT_A));
+
+        addCard(new GrainHarvest(Card.Suit.HEART, Card.Point.POINT_3));
+        addCard(new GrainHarvest(Card.Suit.HEART, Card.Point.POINT_4));
+
         addCard(new ExNihilo(Card.Suit.HEART, Card.Point.POINT_7));
         addCard(new ExNihilo(Card.Suit.HEART, Card.Point.POINT_8));
         addCard(new ExNihilo(Card.Suit.HEART, Card.Point.POINT_9));
@@ -97,5 +102,9 @@ public class StandardCards extends Package {
         addCard(new Snatch(Card.Suit.SPADE, Card.Point.POINT_J));
         addCard(new Snatch(Card.Suit.DIAMOND, Card.Point.POINT_3));
         addCard(new Snatch(Card.Suit.DIAMOND, Card.Point.POINT_4));
+
+        addCard(new Duel(Card.Suit.SPADE, Card.Point.POINT_A));
+        addCard(new Duel(Card.Suit.CLUB, Card.Point.POINT_A));
+        addCard(new Duel(Card.Suit.DIAMOND, Card.Point.POINT_A));
     }
 }

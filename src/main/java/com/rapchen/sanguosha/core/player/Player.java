@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 
 /**
  * 角色对象。可以是人或AI
@@ -44,6 +43,7 @@ public abstract class Player {
      * 进行一个回合
      */
     public void doTurn() {
+        engine.currentPlayer = this;  // 切换当前回合角色
         // TODO 回合开始时机
         doPreparePhase();
         doJudgePhase();
@@ -121,7 +121,7 @@ public abstract class Player {
 //                    String.format("弃牌不是自己的牌，player:%s, card:%s", this, card));
 //        }
         handCards.remove(card);
-        engine.table.discardPile.addLast(card);
+        engine.table.discardPile.add(card);
     }
     protected void doDiscard(List<Card> cards) {
         engine.table.discardPile.addAll(cards);
@@ -141,18 +141,14 @@ public abstract class Player {
         card.doResponse(this, targets);
     }
 
-    /**
-     * 获取其他玩家
-     */
+    /** 获取其他玩家 TODO 当前回合角色顺序 */
     public List<Player> getOtherPlayers() {
         List<Player> players = new ArrayList<>(engine.players);
         players.remove(this);
         return players;
     }
 
-    /**
-     * 玩家视角的打印桌面
-     */
+    /** 玩家视角的打印桌面 */
     protected void printTable() {
         log.warn(engine.table.printForPlayer());
         log.warn(getDetail());
@@ -164,13 +160,13 @@ public abstract class Player {
 
     @Override
     public String toString() {
-        return "Player " + id + '(' + name + ")";
+        return name;  // TODO 将名+位置？
     }
 
     public String getDetail() {
         return "Player " + id + '(' + name +
                 ") HP " + hp + '/' + maxHp +
-                "\n手牌: " + Card.cardsToString(handCards);
+                ", 手牌: " + Card.cardsToString(handCards);
     }
 
     public String getDetailForOthers() {
@@ -200,6 +196,14 @@ public abstract class Player {
         engine.doDamage(this, target, damageCount);
     }
 
+    /**
+     * 回复体力
+     */
+    public void doRecover(int count) {
+        hp = Math.min(maxHp, hp + count);
+        log.info("{} 回复了 {}点体力，目前体力为：{}/{}", this.name, count, hp, maxHp);
+    }
+
     /* =============== end 功能执行 ================ */
 
     /* =============== begin 要求玩家操作的方法，通常是abstract ================ */
@@ -219,6 +223,8 @@ public abstract class Player {
         return card != null;
     }
 
+    protected abstract Card choosePlayCard(List<Card> cards);
+
     /**
      * 选择牌的目标 TODO 现在自动选目标，后面要改成手动选，每张卡牌有一个方法返回合法目标
      * @param card 使用的牌
@@ -226,57 +232,43 @@ public abstract class Player {
     private List<Player> chooseTargets(Card card) {
         return switch (card.getName()) {
             case "Slash" -> getOtherPlayers();
+            case "Dodge" -> new ArrayList<>();
             case "Dismantlement" -> getOtherPlayers();
             case "Snatch" -> getOtherPlayers();
+            case "Duel" -> getOtherPlayers();
             case "ArchersAttack" -> getOtherPlayers();
             case "BarbarianInvasion" -> getOtherPlayers();
-            case "Dodge" -> new ArrayList<>();
             case "ExNihilo" -> Collections.singletonList(this);
+            case "PeachOrchard" -> engine.getAllPlayers();
+            case "GrainHarvest" -> engine.getAllPlayers();
             default -> new ArrayList<>();
         };
     }
-
-    protected abstract Card choosePlayCard(List<Card> cards);
 
     /**
      * 弃自己的牌
      */
     public boolean askForDiscard(int count) {
-        return askForDiscard(count, this);
+        return askForDiscard(count, this, true);
     }
     /**
-     * 要求弃牌  TODO 非强制弃牌
+     * 要求弃牌
      * @param count  弃牌数量
      * @param target 弃牌目标
+     * @param forced 是否必须选择
      */
-    public boolean askForDiscard(int count, Player target) {
+    public boolean askForDiscard(int count, Player target, boolean forced) {
         List<Card> discards = new ArrayList<>();
         for (int i = 0; i < count; i++) {
-            List<Card> choices = new ArrayList<>();
-            if (target == this) {  // 弃自己牌
-                choices.addAll(handCards); // TODO 弃装备牌
-            } else {  // 弃他人牌
-                if (target.handCards.size() > 0) {  // 所有手牌作为一个选项，随机弃一张
-                    Card hCards = new FakeCard( target.handCards.size() + "张手牌");
-                    hCards.addSubCards(target.handCards);
-                    choices.add(hCards);
-                }
-            }
-            if (!choices.isEmpty()) {
-                Card card = chooseDiscard(target, choices);
-                if (card.isVirtual()) {
-                    int num = engine.random.nextInt(card.subCards.size());
-                    card = card.subCards.get(num);
-                }
-                discards.add(card);
-                target.handCards.remove(card);  // TODO 这里弃牌时机应该是一起发生
-            }
+            Card card = askForCardFromPlayer(target, "请弃置一张牌：", forced);
+            if (card == null) continue;
+            discards.add(card);
+            target.handCards.remove(card);  // TODO 这里弃牌时机应该是一起发生
         }
         doDiscard(discards);
         log.info("{} 弃了 {} {}张牌：{}", this.name, target.name, discards.size(), Card.cardsToString(discards));
         return true;
     }
-
 
     protected Card chooseDiscard(Player target) {
         return chooseDiscard(target, target.handCards);
@@ -288,7 +280,7 @@ public abstract class Player {
      * @param target 目标角色
      * @param prompt 给用户的提示语
      * @param forced 是否必须选择
-     * @return 选择的牌。如果不选或无牌可选，就返回null。
+     * @return 选择的牌。如果选择了虚拟牌，会自动随机其中的子卡。如果不选或无牌可选，就返回null。
      */
     public Card askForCardFromPlayer(Player target, String prompt, boolean forced) {
         // 准备选项
@@ -303,7 +295,12 @@ public abstract class Player {
             }
         }
         if (!choices.isEmpty()) {
-            return chooseCard(choices, prompt, forced);
+            Card card = chooseCard(choices, prompt, forced);
+            if (card.isVirtual()) {  // 对于虚拟牌（如所有手牌）自动随机其中一张子卡
+                int num = engine.random.nextInt(card.subCards.size());
+                card = card.subCards.get(num);
+            }
+            return card;
         }
         return null;  // 无牌可选
     }
@@ -318,7 +315,7 @@ public abstract class Player {
      * @param forced 是否必须选择
      * @return 选择的牌。如果不选，就返回null。
      */
-    protected abstract Card chooseCard(List<Card> cards, String prompt, boolean forced);
+    public abstract Card chooseCard(List<Card> cards, String prompt, boolean forced);
 
     /**
      * 要求用户选一个数 [1,max]。 -1可以调出查看界面，目前只是打印牌桌

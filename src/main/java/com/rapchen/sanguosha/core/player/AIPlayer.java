@@ -27,7 +27,7 @@ public class AIPlayer extends Player {
     }
 
     @Override
-    protected Card chooseCard(List<Card> cards, String prompt, boolean forced) {
+    public Card chooseCard(List<Card> cards, String prompt, boolean forced) {
         if (cards.isEmpty() && !forced) return null;
         return cards.get(0);  // TODO 非forced情况可以考虑放弃
     }

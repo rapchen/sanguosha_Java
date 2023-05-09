@@ -168,7 +168,21 @@ public abstract class Card {
         for (Player target : targets) {
             doUseToOne(source, target);
         }
+        doAfterUse(source, targets);
     }
+
+    /**
+     * 对所有人使用的效果。如果对每个人效果都一样，那可以直接实现doUseToOne。
+     */
+    public void doUseToAll(Player source, List<Player> targets) {}
+
+    /**
+     * 对单个目标使用的效果。如果对每个人效果都一样，那可以直接实现这个，否则用doUseToAll。
+     */
+    public void doUseToOne(Player source, Player target) {}
+
+    /** 牌使用完的后处理（如五谷牌进弃牌堆） */
+    public void doAfterUse(Player source, List<Player> targets) {}
 
     /**
      * 打出牌
@@ -181,16 +195,6 @@ public abstract class Card {
         source.handCards.remove(this);
         source.engine.table.discardPile.add(this);
     }
-
-    /**
-     * 对所有人使用的效果。如果对每个人效果都一样，那可以直接实现doUseToOne。
-     */
-    public void doUseToAll(Player source, List<Player> targets) {}
-
-    /**
-     * 对单个目标使用的效果。如果对每个人效果都一样，那可以直接实现这个，否则用doUseToAll。
-     */
-    public void doUseToOne(Player source, Player target) {}
 
     @Override
     public String toString() {
