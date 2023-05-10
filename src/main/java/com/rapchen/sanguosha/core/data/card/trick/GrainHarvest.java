@@ -25,6 +25,11 @@ public class GrainHarvest extends ImmediateTrickCard {
     }
 
     @Override
+    public boolean canUseTo(Player source, Player target) {
+        return true;
+    }
+
+    @Override
     public void doUseToAll(CardUse use) {
         choiceCards = use.source.engine.getCardsFromDrawPile(use.targets.size());
         log.info("{} 翻开了五谷牌：{}", use.source.name, Card.cardsToString(choiceCards));

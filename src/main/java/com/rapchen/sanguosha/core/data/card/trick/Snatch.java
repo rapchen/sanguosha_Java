@@ -18,9 +18,9 @@ public class Snatch extends ImmediateTrickCard {
     }
 
     @Override
-    public boolean canUseInPlayPhase(Player player) {
+    public boolean canUseTo(Player source, Player target) {
         // TODO 顺手距离是1
-        return player.getOtherPlayers().get(0).handCards.size() > 0;
+        return target != source && target.handCards.size() > 0;
     }
 
     @Override

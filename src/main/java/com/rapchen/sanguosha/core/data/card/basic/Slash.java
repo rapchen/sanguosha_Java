@@ -18,8 +18,13 @@ public class Slash extends BasicCard {
     }
 
     @Override
-    public boolean canUseInPlayPhase(Player player) {
+    public boolean validInPlayPhase(Player player) {
         return player.slashTimes > 0;
+    }
+
+    @Override
+    public boolean canUseTo(Player source, Player target) {
+        return super.canUseTo(source, target);  // TODO 算攻击范围
     }
 
     @Override

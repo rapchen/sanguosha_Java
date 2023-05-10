@@ -148,11 +148,37 @@ public abstract class Card {
     /* =============== begin 子类需要实现的具体功能 ================ */
 
     /**
-     * 出牌阶段是否可用。默认可用
+     * 检查出牌阶段是否可使用。模板方法，先检查是否合法，然后检查是否有可用目标
      * @param player 使用者
      */
-    public boolean canUseInPlayPhase(Player player) {
+    public final boolean canUseInPlayPhase(Player player) {
+        return validInPlayPhase(player) && !getAvailableTargets(player).isEmpty();
+    }
+
+    /** 出牌阶段是否合法。这里不检查目标。 */
+    public boolean validInPlayPhase(Player player) {
         return true;
+    }
+
+    /**
+     * 此牌可用的所有目标。使用canUseTo依次检测
+     * @param source 使用者
+     */
+    public List<Player> getAvailableTargets(Player source) {
+        List<Player> targets = new ArrayList<>();
+        for (Player target : source.engine.getAllPlayers()) {
+            if (canUseTo(source, target)) targets.add(target);
+        }
+        return targets;
+    }
+
+    /**
+     * 检测此牌是否可用。默认能对所有其他角色使用。
+     * @param source 使用者
+     * @param target 目标
+     */
+    public boolean canUseTo(Player source, Player target) {
+        return target != source;
     }
 
     /**

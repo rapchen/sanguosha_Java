@@ -16,8 +16,10 @@ public class Peach extends BasicCard {
     }
 
     @Override
-    public boolean canUseInPlayPhase(Player player) {
-        return player.hp < player.maxHp;
+    public boolean canUseTo(Player source, Player target) {
+        // 对自己用；或者对濒死角色用
+        return (target == source && target.hp < target.maxHp)
+                || target.hp <= 0;
     }
 
     @Override

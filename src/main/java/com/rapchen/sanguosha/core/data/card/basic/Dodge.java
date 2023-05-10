@@ -17,7 +17,7 @@ public class Dodge extends BasicCard {
     }
 
     @Override
-    public boolean canUseInPlayPhase(Player player) {
+    public boolean validInPlayPhase(Player player) {
         return false;
     }
 

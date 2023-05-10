@@ -85,7 +85,7 @@ public class UserPlayer extends Player {
         List<Card> cards = new ArrayList<>(table.drawPile);
         cards.addAll(table.discardPile);
         Card card = chooseCard(cards, false, "选择你要的牌：", "cheatGetCard");
-        if (card == null) {
+        if (card != null) {
             table.drawPile.remove(card);
             table.discardPile.remove(card);
             player.handCards.add(card);

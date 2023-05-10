@@ -18,6 +18,11 @@ public class ExNihilo extends ImmediateTrickCard {
     }
 
     @Override
+    public boolean canUseTo(Player source, Player target) {
+        return target == source;
+    }
+
+    @Override
     public void doUseToOne(Player source, Player target) {
         target.drawCards(2);
     }

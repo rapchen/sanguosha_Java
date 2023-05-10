@@ -243,22 +243,7 @@ public abstract class Player {
      * @param card 使用的牌
      */
     private List<Player> chooseTargets(Card card) {
-//        return card.getAvailableTargets(this);
-        return switch (card.getName()) {
-            case "Slash" -> getOtherPlayers();
-            case "Dodge" -> new ArrayList<>();
-            case "Peach" -> Collections.singletonList(this);
-            case "Nullification" -> new ArrayList<>();
-            case "Dismantlement" -> getOtherPlayers();
-            case "Snatch" -> getOtherPlayers();
-            case "Duel" -> getOtherPlayers();
-            case "ArchersAttack" -> getOtherPlayers();
-            case "BarbarianInvasion" -> getOtherPlayers();
-            case "ExNihilo" -> Collections.singletonList(this);
-            case "PeachOrchard" -> engine.getAllPlayers();
-            case "GrainHarvest" -> engine.getAllPlayers();
-            default -> new ArrayList<>();
-        };
+        return card.getAvailableTargets(this);
     }
 
     /**

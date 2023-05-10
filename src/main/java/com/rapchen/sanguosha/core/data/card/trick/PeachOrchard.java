@@ -16,6 +16,11 @@ public class PeachOrchard extends ImmediateTrickCard {
     }
 
     @Override
+    public boolean canUseTo(Player source, Player target) {
+        return true;
+    }
+
+    @Override
     public void doUseToOne(Player source, Player target) {
         target.doRecover(1);
     }
