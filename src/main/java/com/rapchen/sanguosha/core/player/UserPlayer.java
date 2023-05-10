@@ -41,39 +41,44 @@ public class UserPlayer extends Player {
      */
     @Override
     public Card chooseCard(List<Card> cards, boolean forced, String prompt, String reason) {
-        log.warn(prompt);  // TODO 目前打给用户的都用WARN，后台的用INFO。之后可以打到不同的输出
-        log.warn(Card.cardsToString(cards, true));
-        int chosen = chooseNumber(cards.size(), forced);
-        return chosen == 0 ? null : cards.get(chosen - 1);
+        while (true) {
+            log.warn(prompt);  // TODO 目前打给用户的都用WARN，后台的用INFO。之后可以打到不同的输出
+            log.warn(Card.cardsToString(cards, true));
+            int chosen = chooseNumber(cards.size(), forced);
+            if (chosen >= 0) {
+                return chosen == 0 ? null : cards.get(chosen - 1);
+            }
+            log.warn("请重新选择：");  // 返回<0的结果就重新询问
+        }
     }
 
     /**
-     * 要求用户选一个数 [1,max]。 -1可以调出查看界面，目前只是打印牌桌。-2是debug
+     * 要求用户选一个数 [1,max]。
+     * 用户输入[1,max]时直接返回，输入0时如果可跳过则返回0，否则返回-1。
+     * 输入-1可以调出查看界面，目前只是打印牌桌。-2是debug。-3~-6是作弊。注意，这些结果都会返回-1。
      * @param forced 是否必须选择，非必选的话可以用0跳过
+     * @return 合法且>=0的输入会直接返回。所有其他输入会返回-1，意味需要重新输入。
      */
     @Override
     protected int chooseNumber(int max, boolean forced) {
         Scanner sc = new Scanner(System.in);
         int chosen = 0;
-        while (true) {
-            try {
-                chosen = sc.nextInt();
-            } catch (InputMismatchException e) {
-                log.warn("请重新选择：");
-                continue;
-            }
-            if (chosen >= 1 && chosen <= max) break;  // 选择完成
-            if (chosen == 0 && !forced) break;  // 跳过选择
-            if (chosen == -1) printTable();  // 打印桌面
-            if (chosen == -2) engine.printTable();  // 打印桌面（Debug模式）
-            if (chosen == -3) cheatGetCard(this);  // 作弊，给自己牌
-            if (chosen == -4) cheatGetCard(getOtherPlayers().get(0));  // 作弊，给对面牌
-            if (chosen == -5) cheatDamage(this, getOtherPlayers().get(0));  // 作弊，打伤害
-            if (chosen == -6) cheatDamage(getOtherPlayers().get(0), this);  // 作弊，打伤害
-            log.warn("请重新选择：");
-            // TODO 这里可以把提示文字重新打一遍
+        try {
+            chosen = sc.nextInt();
+        } catch (InputMismatchException e) {
+            log.warn("输入非法");
+            return -1;
         }
-        return chosen;
+        if (chosen >= 1 && chosen <= max) return chosen;  // 选择完成
+        if (chosen == 0 && !forced) return chosen;  // 跳过选择
+
+        if (chosen == -1) printTable();  // 打印桌面
+        if (chosen == -2) engine.printTable();  // 打印桌面（Debug模式）
+        if (chosen == -3) cheatGetCard(this);  // 作弊，给自己牌
+        if (chosen == -4) cheatGetCard(getOtherPlayers().get(0));  // 作弊，给对面牌
+        if (chosen == -5) cheatDamage(this, getOtherPlayers().get(0));  // 作弊，打伤害
+        if (chosen == -6) cheatDamage(getOtherPlayers().get(0), this);  // 作弊，打伤害
+        return -1;  // 失败返回-1
     }
 
     /**
