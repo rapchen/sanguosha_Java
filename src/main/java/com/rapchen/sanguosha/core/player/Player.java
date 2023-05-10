@@ -1,10 +1,9 @@
 package com.rapchen.sanguosha.core.player;
 
 import com.rapchen.sanguosha.core.Engine;
-import com.rapchen.sanguosha.core.data.card.Card;
-import com.rapchen.sanguosha.core.data.card.Dodge;
-import com.rapchen.sanguosha.core.data.card.FakeCard;
-import com.rapchen.sanguosha.core.data.card.Slash;
+import com.rapchen.sanguosha.core.common.Fields;
+import com.rapchen.sanguosha.core.data.card.*;
+import com.rapchen.sanguosha.core.data.card.trick.Nullification;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -28,6 +27,7 @@ public abstract class Player {
     public int maxHp;
     public List<Card> handCards;
     public int slashTimes = 1;
+    public Fields xFields;  // 额外字段，用于临时存储一些数据
 
     public Player(Engine engine, int id, String name) {
         this.engine = engine;
@@ -37,6 +37,7 @@ public abstract class Player {
         // TODO 武将
         this.hp = 4;
         this.maxHp = 4;
+        this.xFields = new Fields();
     }
 
     /**
@@ -233,6 +234,7 @@ public abstract class Player {
         return switch (card.getName()) {
             case "Slash" -> getOtherPlayers();
             case "Dodge" -> new ArrayList<>();
+            case "Nullification" -> new ArrayList<>();
             case "Dismantlement" -> getOtherPlayers();
             case "Snatch" -> getOtherPlayers();
             case "Duel" -> getOtherPlayers();
@@ -295,7 +297,7 @@ public abstract class Player {
             }
         }
         if (!choices.isEmpty()) {
-            Card card = chooseCard(choices, prompt, forced);
+            Card card = chooseCard(choices, forced, prompt, "askForCardFromPlayer");  // TODO
             if (card.isVirtual()) {  // 对于虚拟牌（如所有手牌）自动随机其中一张子卡
                 int num = engine.random.nextInt(card.subCards.size());
                 card = card.subCards.get(num);
@@ -310,12 +312,14 @@ public abstract class Player {
 
     /**
      * 要求用户选一张牌
-     * @param cards 可选牌的列表
-     * @param prompt 给用户的提示语
+     * @param cards  可选牌的列表
      * @param forced 是否必须选择
+     * @param prompt 给用户的提示语
+     * @param reason 选牌原因，通常给AI做判断用
      * @return 选择的牌。如果不选，就返回null。
      */
-    public abstract Card chooseCard(List<Card> cards, String prompt, boolean forced);
+    public abstract Card chooseCard(List<Card> cards, boolean forced, String prompt, String reason);
+
 
     /**
      * 要求用户选一个数 [1,max]。 -1可以调出查看界面，目前只是打印牌桌
@@ -330,7 +334,7 @@ public abstract class Player {
      */
     public boolean askForDodge(boolean isUse) {
         List<Card> dodges = handCards.stream().filter(card -> card instanceof Dodge).toList();
-        Card card = chooseCard(dodges, isUse ? "请使用一张闪，0放弃：" : "请打出一张闪，0放弃：", false);
+        Card card = chooseCard(dodges, false, isUse ? "请使用一张闪，0放弃：" : "请打出一张闪，0放弃：", "");
         if (card != null) {
             if (isUse) {
                 useCard(card, new ArrayList<>());
@@ -341,10 +345,47 @@ public abstract class Player {
         return card != null;
     }
 
+    /**
+     * 要求角色打出一张杀
+     * @return 是否打出
+     */
     public boolean askForSlash() {
-        List<Card> dodges = handCards.stream().filter(card -> card instanceof Slash).toList();
-        Card card = chooseCard(dodges, "请打出一张杀，0放弃：", false);
+        List<Card> slashes = handCards.stream().filter(card -> card instanceof Slash).toList();
+        Card card = chooseCard(slashes, false, "请打出一张杀，0放弃：", "");
         if (card != null) responseCard(card, new ArrayList<>());
         return card != null;
+    }
+
+    /**
+     * 要求角色使用一张无懈可击
+     *
+     * @param useToOne 无懈的目标卡牌
+     * @return 是否使用
+     */
+    public boolean askForNullification(CardUseToOne useToOne) {
+        List<Card> nullis = handCards.stream().filter(card -> card instanceof Nullification).toList();
+        if (nullis.isEmpty()) return false;  // 没有无懈，用不了
+        // 用户提示语
+        Card card = useToOne.getCard();
+        String target = card instanceof Nullification ?  // 无懈的目标是牌的使用，其他牌的目标是角色
+                ((Nullification) card).targetUse.toString():
+                useToOne.target.toString();
+        String prompt = String.format("%s 使用了 %s, 目标是 %s, 是否使用无懈可击？0放弃：",
+                useToOne.getSource(), card, target);
+
+        Nullification nulli = null;  // 使用的无懈卡牌
+        try (Fields.TmpField tf = xFields.tmpField("askForNullification_CardUse", useToOne)) {
+            nulli = (Nullification) chooseCard(nullis, false, prompt, "askForNullification");
+        }
+        if (nulli != null) {
+            nulli.targetUse = useToOne;  // 标记这张无懈的目标牌
+            useCard(nulli, new ArrayList<>());
+            nulli.targetUse = null;
+            if (nulli.xFields.containsKey("Nullified")) {
+                nulli.xFields.remove("Nullified");
+                nulli = null;
+            }
+        }
+        return nulli != null;
     }
 }

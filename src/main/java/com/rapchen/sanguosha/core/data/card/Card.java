@@ -1,5 +1,6 @@
 package com.rapchen.sanguosha.core.data.card;
 
+import com.rapchen.sanguosha.core.common.Fields;
 import com.rapchen.sanguosha.core.player.Player;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -102,23 +103,24 @@ public abstract class Card {
         }
     }
 
+    public static int nextCardId = 1;  // 自增ID，从1开始。保证实体卡牌的唯一性
+
     public Suit suit;
     public Point point;
     public SubType subType;
     protected int id;  // 在牌堆里的唯一ID，从1开始。虚拟卡<0
     protected String name;  // 牌名。不考虑扩展包的情况下也可以用instanceof判断
     protected String nameZh;  // 中文牌名，用于显示。
-    public static int nextCardId = 1;  // 保证卡牌唯一性
     public boolean virtual = false;  // 是否虚拟卡
     public List<Card> subCards;  // 子卡，通常用于虚拟卡
+    public Fields xFields;  // 额外字段，用于临时存储一些数据
+    public boolean good = false;  // 是否是好牌（对目标来说）
 
     /**
      * 创建真实卡牌，ID自增
      */
     public Card(Suit suit, Point point) {
-        this.suit = suit;
-        this.point = point;
-        this.id = nextCardId;
+        this(suit, point, nextCardId);
         nextCardId++;
     }
 
@@ -129,6 +131,7 @@ public abstract class Card {
         this.suit = suit;
         this.point = point;
         this.id = id;
+        this.xFields = new Fields();
     }
 
     public void addSubCards(List<Card> cards) {
@@ -154,27 +157,46 @@ public abstract class Card {
 
     /**
      * 使用牌，执行牌的效果
+     *
      * @param source  使用者
      * @param targets 目标
      */
     public void doUse(Player source, List<Player> targets) {
-        log.info("{} {} 使用了 {}", source,
-                targets.isEmpty() ? "" : "对 " + Player.playersToString(targets), this);
+        doUseLog(source, targets);
         // 弃牌 TODO 不在手牌？虚拟牌？
         source.handCards.remove(this);
         source.engine.table.discardPile.add(this);
         // 执行效果
-        doUseToAll(source, targets);
+        CardUse use = new CardUse(this, source, targets);
+        doUseToAll(use);
         for (Player target : targets) {
-            doUseToOne(source, target);
+            CardUseToOne useToOne = new CardUseToOne(use, target);
+            use.currentTarget = target;
+            // 对每个目标生效前，询问无懈
+            if (!checkCanceled(useToOne)) {
+                doUseToOne(source, target);  // TODO 改use
+            }
         }
         doAfterUse(source, targets);
+    }
+
+    private void doUseLog(Player source, List<Player> targets) {
+        log.info("{} {} 使用了 {}", source,
+                targets.isEmpty() ? "" : ("对 " + Player.playersToString(targets)),
+                this);
     }
 
     /**
      * 对所有人使用的效果。如果对每个人效果都一样，那可以直接实现doUseToOne。
      */
-    public void doUseToAll(Player source, List<Player> targets) {}
+    public void doUseToAll(CardUse use) {}
+
+    /**
+     * 判断是否需要取消对单个目标使用的效果。如询问无懈可击
+     */
+    public boolean checkCanceled(CardUseToOne useToOne) {
+        return false;  // 默认不取消
+    }
 
     /**
      * 对单个目标使用的效果。如果对每个人效果都一样，那可以直接实现这个，否则用doUseToAll。

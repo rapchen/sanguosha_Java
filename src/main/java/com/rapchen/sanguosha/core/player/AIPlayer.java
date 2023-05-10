@@ -2,6 +2,7 @@ package com.rapchen.sanguosha.core.player;
 
 import com.rapchen.sanguosha.core.Engine;
 import com.rapchen.sanguosha.core.data.card.Card;
+import com.rapchen.sanguosha.core.data.card.CardUse;
 
 import java.util.List;
 
@@ -27,9 +28,20 @@ public class AIPlayer extends Player {
     }
 
     @Override
-    public Card chooseCard(List<Card> cards, String prompt, boolean forced) {
-        if (cards.isEmpty() && !forced) return null;
-        return cards.get(0);  // TODO 非forced情况可以考虑放弃
+    public Card chooseCard(List<Card> cards, boolean forced, String prompt, String reason) {
+        if (cards.isEmpty()) return null;
+        switch (reason) {
+            case "askForNullification":  // TODO 加各种时机
+                CardUse use = (CardUse) xFields.getOrDefault("askForNullification_CardUse", null);
+                if (use == null) return null;
+                if (use.card.good == (use.currentTarget != this))  // 如果对我有坏处，或者对别人有好处，就用无懈
+                    return cards.get(0);
+                return null;
+            default:  // 默认逻辑：必须选就选一张，否则放弃
+                return cards.get(0);
+//                return forced ? cards.get(0) : null;
+        }
+        // return cards.get(0);
     }
 
     @Override

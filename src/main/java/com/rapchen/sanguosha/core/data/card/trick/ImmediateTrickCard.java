@@ -1,6 +1,8 @@
 package com.rapchen.sanguosha.core.data.card.trick;
 
 import com.rapchen.sanguosha.core.data.card.Card;
+import com.rapchen.sanguosha.core.data.card.CardUseToOne;
+import com.rapchen.sanguosha.core.player.Player;
 
 /**
  * 非延时类锦囊
@@ -11,5 +13,16 @@ public abstract class ImmediateTrickCard extends TrickCard {
     public ImmediateTrickCard(Card.Suit suit, Card.Point point) {
         super(suit, point);
         subType = Card.SubType.TRICK_IMMEDIATE;
+    }
+
+    @Override
+    public boolean checkCanceled(CardUseToOne useToOne) {
+        // 询问无懈可击 TODO 应该是同时询问。以及现在如果第一个人用的无懈被无懈了，还会问第二个人
+        for (Player player : useToOne.getSource().engine.players) {
+            if (player.askForNullification(useToOne)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -21,12 +21,12 @@ public class UserPlayer extends Player {
 
     @Override
     protected Card choosePlayCard(List<Card> cards) {
-        return chooseCard(cards, "请使用一张牌，0结束：", false);
+        return chooseCard(cards, false, "请使用一张牌，0结束：", "");
     }
 
     @Override
     protected Card chooseDiscard(Player target, List<Card> cards) {
-        return chooseCard(cards, "请弃置一张手牌：", true);
+        return chooseCard(cards, true, "请弃置一张手牌：", "");
     }
 
 //    @Override
@@ -39,14 +39,15 @@ public class UserPlayer extends Player {
 
     /**
      * 要求用户选一张牌
-     * @param cards 可选牌的列表
-     * @param prompt 给用户的提示语
+     * @param cards  可选牌的列表
      * @param forced 是否必须选择
+     * @param prompt 给用户的提示语
+     * @param reason 选牌原因，通常给AI做判断用
      * @return 选择的牌。如果不选，就返回null。
      */
     @Override
-    public Card chooseCard(List<Card> cards, String prompt, boolean forced) {
-        log.warn(prompt);  // TODO 目前打给用户的都用WARN，后台的用INFO
+    public Card chooseCard(List<Card> cards, boolean forced, String prompt, String reason) {
+        log.warn(prompt);  // TODO 目前打给用户的都用WARN，后台的用INFO。之后可以打到不同的输出
         log.warn(Card.cardsToString(cards, true));
         int chosen = chooseNumber(cards.size(), forced);
         return chosen == 0 ? null : cards.get(chosen - 1);

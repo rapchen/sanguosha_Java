@@ -1,6 +1,7 @@
 package com.rapchen.sanguosha.core.data.card.trick;
 
 import com.rapchen.sanguosha.core.data.card.Card;
+import com.rapchen.sanguosha.core.data.card.CardUse;
 import com.rapchen.sanguosha.core.player.Player;
 import lombok.extern.slf4j.Slf4j;
 
@@ -20,18 +21,19 @@ public class GrainHarvest extends ImmediateTrickCard {
         super(suit, point);
         name = "GrainHarvest";
         nameZh = "五谷丰登";
+        good = true;
     }
 
     @Override
-    public void doUseToAll(Player source, List<Player> targets) {
-        choiceCards = source.engine.getCardsFromDrawPile(targets.size());
-        log.info("{} 翻开了五谷牌：{}", source.name, Card.cardsToString(choiceCards));
+    public void doUseToAll(CardUse use) {
+        choiceCards = use.source.engine.getCardsFromDrawPile(use.targets.size());
+        log.info("{} 翻开了五谷牌：{}", use.source.name, Card.cardsToString(choiceCards));
     }
 
     @Override
     public void doUseToOne(Player source, Player target) {
         if (choiceCards == null || choiceCards.isEmpty()) return;
-        Card card = target.chooseCard(choiceCards, "请选择一张五谷牌：", true);
+        Card card = target.chooseCard(choiceCards, true, "请选择一张五谷牌：", "GrainHarvest");
         choiceCards.remove(card);
         target.handCards.add(card);
         log.info("{} 获得了五谷牌：{}", target.name, card);

@@ -2,8 +2,6 @@ package com.rapchen.sanguosha.core.data.card;
 
 import com.rapchen.sanguosha.core.player.Player;
 
-import java.util.List;
-
 /**
  * 杀
  * @author Chen Runwen
@@ -24,8 +22,8 @@ public class Slash extends Card {
     }
 
     @Override
-    public void doUseToAll(Player source, List<Player> targets) {
-        source.slashTimes--;
+    public void doUseToAll(CardUse use) {
+        use.source.slashTimes--;
     }
 
     @Override

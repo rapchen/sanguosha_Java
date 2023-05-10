@@ -12,6 +12,7 @@ public class PeachOrchard extends ImmediateTrickCard {
         super(suit, point);
         name = "PeachOrchard";
         nameZh = "桃园结义";
+        good = true;
     }
 
     @Override
