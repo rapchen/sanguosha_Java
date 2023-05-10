@@ -3,6 +3,7 @@ package com.rapchen.sanguosha.core.player;
 import com.rapchen.sanguosha.core.Engine;
 import com.rapchen.sanguosha.core.common.Fields;
 import com.rapchen.sanguosha.core.data.card.*;
+import com.rapchen.sanguosha.core.data.card.basic.*;
 import com.rapchen.sanguosha.core.data.card.trick.Nullification;
 import lombok.extern.slf4j.Slf4j;
 
@@ -44,6 +45,7 @@ public abstract class Player {
      * 进行一个回合
      */
     public void doTurn() {
+        log.warn("---------------------- 回合开始 ----------------------");
         engine.currentPlayer = this;  // 切换当前回合角色
         // TODO 回合开始时机
         doPreparePhase();
@@ -205,6 +207,16 @@ public abstract class Player {
         log.info("{} 回复了 {}点体力，目前体力为：{}/{}", this.name, count, hp, maxHp);
     }
 
+    /**  濒死，请求救援 */
+    public void callRescue() {
+        // 求桃，对每个角色依次求桃，每个角色可以给多次
+        for (Player player : engine.getAllPlayers()) {
+            while (hp <= 0) {
+                if (!player.askForPeach(this)) break;
+            }
+        }
+    }
+
     /* =============== end 功能执行 ================ */
 
     /* =============== begin 要求玩家操作的方法，通常是abstract ================ */
@@ -227,13 +239,15 @@ public abstract class Player {
     protected abstract Card choosePlayCard(List<Card> cards);
 
     /**
-     * 选择牌的目标 TODO 现在自动选目标，后面要改成手动选，每张卡牌有一个方法返回合法目标
+     * 选择牌的目标 TODO 现在自动选目标，后面要改成手动选
      * @param card 使用的牌
      */
     private List<Player> chooseTargets(Card card) {
+//        return card.getAvailableTargets(this);
         return switch (card.getName()) {
             case "Slash" -> getOtherPlayers();
             case "Dodge" -> new ArrayList<>();
+            case "Peach" -> Collections.singletonList(this);
             case "Nullification" -> new ArrayList<>();
             case "Dismantlement" -> getOtherPlayers();
             case "Snatch" -> getOtherPlayers();
@@ -361,6 +375,24 @@ public abstract class Player {
         List<Card> slashes = handCards.stream().filter(card -> card instanceof Slash).toList();
         Card card = chooseCard(slashes, false, "请打出一张杀，0放弃：", "askForSlash");
         if (card != null) responseCard(card, new ArrayList<>());
+        return card != null;
+    }
+
+    /**
+     * 要求角色使用一张桃
+     * @param target 求桃角色
+     * @return 是否使用
+     */
+    private boolean askForPeach(Player target) {
+        List<Card> peaches = handCards.stream().filter(card -> card instanceof Peach).toList();
+        String prompt = String.format("%s 濒死，请求你使用一张桃，0放弃：", target);
+        Card card = null;  // 使用的无懈卡牌
+        try (Fields.TmpField tf = xFields.tmpField("askForPeach_Target", target)) {
+            card = chooseCard(peaches, false, prompt, "askForPeach");
+        }
+        if (card != null) {
+            useCard(card, Collections.singletonList(target));
+        }
         return card != null;
     }
 

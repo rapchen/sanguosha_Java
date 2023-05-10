@@ -18,7 +18,7 @@ public abstract class ImmediateTrickCard extends TrickCard {
     @Override
     public boolean checkCanceled(CardUseToOne useToOne) {
         // 询问无懈可击 TODO 应该是同时询问。以及现在如果第一个人用的无懈被无懈了，还会问第二个人
-        for (Player player : useToOne.getSource().engine.players) {
+        for (Player player : useToOne.getSource().engine.getAllPlayers()) {
             if (player.askForNullification(useToOne)) {
                 return true;
             }

@@ -1,9 +1,11 @@
 package com.rapchen.sanguosha.core.player;
 
 import com.rapchen.sanguosha.core.Engine;
+import com.rapchen.sanguosha.core.data.Table;
 import com.rapchen.sanguosha.core.data.card.Card;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
@@ -64,9 +66,35 @@ public class UserPlayer extends Player {
             if (chosen == 0 && !forced) break;  // 跳过选择
             if (chosen == -1) printTable();  // 打印桌面
             if (chosen == -2) engine.printTable();  // 打印桌面（Debug模式）
-            else log.warn("请重新选择：");
+            if (chosen == -3) cheatGetCard(this);  // 作弊，给自己牌
+            if (chosen == -4) cheatGetCard(getOtherPlayers().get(0));  // 作弊，给对面牌
+            if (chosen == -5) cheatDamage(this, getOtherPlayers().get(0));  // 作弊，打伤害
+            if (chosen == -6) cheatDamage(getOtherPlayers().get(0), this);  // 作弊，打伤害
+            log.warn("请重新选择：");
             // TODO 这里可以把提示文字重新打一遍
         }
         return chosen;
+    }
+
+    /**
+     * 作弊发牌，从摸牌/弃牌堆里发
+     * @param player 牌给谁
+     */
+    private void cheatGetCard(Player player) {
+        Table table = engine.table;
+        List<Card> cards = new ArrayList<>(table.drawPile);
+        cards.addAll(table.discardPile);
+        Card card = chooseCard(cards, false, "选择你要的牌：", "cheatGetCard");
+        if (card == null) {
+            table.drawPile.remove(card);
+            table.discardPile.remove(card);
+            player.handCards.add(card);
+        }
+    }
+
+    /** 作弊伤害 */
+    private void cheatDamage(Player source, Player target) {
+        int damageCnt = chooseNumber(10000, false);
+        engine.doDamage(source, target, damageCnt);
     }
 }

@@ -141,16 +141,17 @@ public class Engine {
 
     /**
      * 判断角色是否死亡
-     * @param player
      */
     private void checkDeath(Player player) {
         if (player.hp <= 0) {
             log.info("{} 陷入濒死！", player);
-            // TODO 濒死求桃
-            log.info("{} 死亡！", player);
-            player.alive = false;
-            players.remove(player);
-            checkGameOver();
+            player.callRescue();  // 求桃
+            if (player.hp <= 0) {
+                log.info("{} 死亡！", player);
+                player.alive = false;
+                players.remove(player);
+                checkGameOver();
+            }
         }
     }
 

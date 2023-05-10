@@ -1,4 +1,4 @@
-package com.rapchen.sanguosha.core.data.card;
+package com.rapchen.sanguosha.core.data.card.basic;
 
 import com.rapchen.sanguosha.core.player.Player;
 
@@ -7,7 +7,7 @@ import com.rapchen.sanguosha.core.player.Player;
  * @author Chen Runwen
  * @time 2023/4/24 22:23
  */
-public class Dodge extends Card {
+public class Dodge extends BasicCard {
 
     public Dodge(Suit suit, Point point) {
         super(suit, point);

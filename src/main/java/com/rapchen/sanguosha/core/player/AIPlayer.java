@@ -34,7 +34,10 @@ public class AIPlayer extends Player {
         switch (reason) {
             case "askForDodge", "askForSlash" -> {  // 要求出杀闪：总是出
                 return cards.get(0);
-            } case "askForNullification" -> {  // 要求无懈：如果对我有坏处，或者对别人有好处，就用无懈
+            } case "askForPeach" -> {  // 求桃：只给自己
+                Player target = (Player) xFields.getOrDefault("askForPeach_Target", null);
+                return target == this ? cards.get(0) : null;
+            } case "askForNullification" -> {  // 要求无懈：如果对我有坏处（或者对别人有好处），就用无懈
                 CardUseToOne use = (CardUseToOne) xFields.getOrDefault("askForNulli_CardUseToOne", null);
                 if (use == null) return null;
                 if (calcBenefit(use) < 0)
@@ -61,6 +64,7 @@ public class AIPlayer extends Player {
             if (nulli.targetUse == null) return 0;
             else return -calcBenefit(nulli.targetUse);
         }
+        // 如果有目标，看目标是谁，如果是对面，则与牌原本的有益性相反
         if (useToOne.target == null) return 0;
         else return useToOne.getCard().benefit * (useToOne.target == this ? 1 : -1);
     }
