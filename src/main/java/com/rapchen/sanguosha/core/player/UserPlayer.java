@@ -21,21 +21,13 @@ public class UserPlayer extends Player {
 
     @Override
     protected Card choosePlayCard(List<Card> cards) {
-        return chooseCard(cards, false, "请使用一张牌，0结束：", "");
+        return chooseCard(cards, false, "请使用一张牌，0结束：", "choosePlayCard");
     }
 
     @Override
     protected Card chooseDiscard(Player target, List<Card> cards) {
-        return chooseCard(cards, true, "请弃置一张手牌：", "");
+        return chooseCard(cards, true, "请弃置一张手牌：", "chooseDiscard");
     }
-
-//    @Override
-//    public boolean askForDodge() {
-//        List<Card> dodges = handCards.stream().filter(card -> card instanceof Dodge).toList();
-//        Card card = askForChooseCard(dodges, "请使用一张闪，0放弃：", false);
-//        if (card != null) useCard(card);
-//        return card != null;
-//    }
 
     /**
      * 要求用户选一张牌

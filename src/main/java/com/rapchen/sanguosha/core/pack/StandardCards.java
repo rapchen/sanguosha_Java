@@ -106,5 +106,9 @@ public class StandardCards extends Package {
         addCard(new Duel(Card.Suit.SPADE, Card.Point.POINT_A));
         addCard(new Duel(Card.Suit.CLUB, Card.Point.POINT_A));
         addCard(new Duel(Card.Suit.DIAMOND, Card.Point.POINT_A));
+
+        addCard(new Nullification(Card.Suit.SPADE, Card.Point.POINT_J));
+        addCard(new Nullification(Card.Suit.CLUB, Card.Point.POINT_Q));
+        addCard(new Nullification(Card.Suit.CLUB, Card.Point.POINT_K));
     }
 }

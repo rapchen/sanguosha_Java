@@ -262,7 +262,7 @@ public abstract class Player {
     public boolean askForDiscard(int count, Player target, boolean forced) {
         List<Card> discards = new ArrayList<>();
         for (int i = 0; i < count; i++) {
-            Card card = askForCardFromPlayer(target, "请弃置一张牌：", forced);
+            Card card = askForCardFromPlayer(target, forced, "请弃置一张牌：", "askForDiscard");
             if (card == null) continue;
             discards.add(card);
             target.handCards.remove(card);  // TODO 这里弃牌时机应该是一起发生
@@ -279,12 +279,14 @@ public abstract class Player {
 
     /**
      * 要求角色从目标角色的牌中选一张牌
+     *
      * @param target 目标角色
-     * @param prompt 给用户的提示语
      * @param forced 是否必须选择
+     * @param prompt 给用户的提示语
+     * @param reason 选牌原因，通常给AI做判断用
      * @return 选择的牌。如果选择了虚拟牌，会自动随机其中的子卡。如果不选或无牌可选，就返回null。
      */
-    public Card askForCardFromPlayer(Player target, String prompt, boolean forced) {
+    public Card askForCardFromPlayer(Player target, boolean forced, String prompt, String reason) {
         // 准备选项
         List<Card> choices = new ArrayList<>();
         if (target == this) {  // 选自己的牌
@@ -297,7 +299,12 @@ public abstract class Player {
             }
         }
         if (!choices.isEmpty()) {
-            Card card = chooseCard(choices, forced, prompt, "askForCardFromPlayer");  // TODO
+            Card card;
+            try (Fields.TmpField tf = xFields.tmpField("askForCardFromPlayer_Reason", reason);
+                    Fields.TmpField tf2 = xFields.tmpField("askForCardFromPlayer_Target", target)) {
+                card = chooseCard(choices, forced, prompt, "askForCardFromPlayer");
+            }
+            if (card == null) return null;
             if (card.isVirtual()) {  // 对于虚拟牌（如所有手牌）自动随机其中一张子卡
                 int num = engine.random.nextInt(card.subCards.size());
                 card = card.subCards.get(num);
@@ -306,9 +313,9 @@ public abstract class Player {
         }
         return null;  // 无牌可选
     }
-    public Card askForCardFromPlayer(Player target) {
-        return askForCardFromPlayer(target, "请选择一张牌：", true);
-    }
+//    public Card askForCardFromPlayer(Player target, String reason) {
+//        return askForCardFromPlayer(target, "请选择一张牌：", true, reason);
+//    }
 
     /**
      * 要求用户选一张牌
@@ -334,7 +341,8 @@ public abstract class Player {
      */
     public boolean askForDodge(boolean isUse) {
         List<Card> dodges = handCards.stream().filter(card -> card instanceof Dodge).toList();
-        Card card = chooseCard(dodges, false, isUse ? "请使用一张闪，0放弃：" : "请打出一张闪，0放弃：", "");
+        Card card = chooseCard(dodges, false,
+                isUse ? "请使用一张闪，0放弃：" : "请打出一张闪，0放弃：", "askForDodge");
         if (card != null) {
             if (isUse) {
                 useCard(card, new ArrayList<>());
@@ -351,14 +359,13 @@ public abstract class Player {
      */
     public boolean askForSlash() {
         List<Card> slashes = handCards.stream().filter(card -> card instanceof Slash).toList();
-        Card card = chooseCard(slashes, false, "请打出一张杀，0放弃：", "");
+        Card card = chooseCard(slashes, false, "请打出一张杀，0放弃：", "askForSlash");
         if (card != null) responseCard(card, new ArrayList<>());
         return card != null;
     }
 
     /**
      * 要求角色使用一张无懈可击
-     *
      * @param useToOne 无懈的目标卡牌
      * @return 是否使用
      */
@@ -374,7 +381,7 @@ public abstract class Player {
                 useToOne.getSource(), card, target);
 
         Nullification nulli = null;  // 使用的无懈卡牌
-        try (Fields.TmpField tf = xFields.tmpField("askForNullification_CardUse", useToOne)) {
+        try (Fields.TmpField tf = xFields.tmpField("askForNulli_CardUseToOne", useToOne)) {
             nulli = (Nullification) chooseCard(nullis, false, prompt, "askForNullification");
         }
         if (nulli != null) {

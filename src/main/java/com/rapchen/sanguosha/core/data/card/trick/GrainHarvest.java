@@ -21,7 +21,7 @@ public class GrainHarvest extends ImmediateTrickCard {
         super(suit, point);
         name = "GrainHarvest";
         nameZh = "五谷丰登";
-        good = true;
+        benefit = 100;
     }
 
     @Override

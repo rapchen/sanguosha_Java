@@ -2,7 +2,8 @@ package com.rapchen.sanguosha.core.player;
 
 import com.rapchen.sanguosha.core.Engine;
 import com.rapchen.sanguosha.core.data.card.Card;
-import com.rapchen.sanguosha.core.data.card.CardUse;
+import com.rapchen.sanguosha.core.data.card.CardUseToOne;
+import com.rapchen.sanguosha.core.data.card.trick.Nullification;
 
 import java.util.List;
 
@@ -31,17 +32,37 @@ public class AIPlayer extends Player {
     public Card chooseCard(List<Card> cards, boolean forced, String prompt, String reason) {
         if (cards.isEmpty()) return null;
         switch (reason) {
-            case "askForNullification":  // TODO 加各种时机
-                CardUse use = (CardUse) xFields.getOrDefault("askForNullification_CardUse", null);
+            case "askForDodge", "askForSlash" -> {  // 要求出杀闪：总是出
+                return cards.get(0);
+            } case "askForNullification" -> {  // 要求无懈：如果对我有坏处，或者对别人有好处，就用无懈
+                CardUseToOne use = (CardUseToOne) xFields.getOrDefault("askForNulli_CardUseToOne", null);
                 if (use == null) return null;
-                if (use.card.good == (use.currentTarget != this))  // 如果对我有坏处，或者对别人有好处，就用无懈
+                if (calcBenefit(use) < 0)
                     return cards.get(0);
                 return null;
-            default:  // 默认逻辑：必须选就选一张，否则放弃
-                return cards.get(0);
-//                return forced ? cards.get(0) : null;
+            } case "askForCardFromPlayer" -> {  // 要求一角色处的一张牌：目前默认是坏事，别人的总是选，自己的尽量不选
+                String reason1 = (String) xFields.getOrDefault("askForCardFromPlayer_Reason", "");
+                Player target = (Player) xFields.getOrDefault("askForCardFromPlayer_Target", null);
+                if (target == this) return forced ? cards.get(0) : null;
+                else return cards.get(0);
+            } default -> {  // 默认逻辑：必须选就选一张，否则放弃
+                return forced ? cards.get(0) : null;
+            }
         }
         // return cards.get(0);
+    }
+
+    /**
+     * 判断一张卡牌的使用是否对我有益。越大越有益，0为无关，负数有害
+     */
+    private int calcBenefit(CardUseToOne useToOne) {
+        Card card = useToOne.getCard();
+        if (card instanceof Nullification nulli) {  // 如果是无懈，则与无懈的目标相反
+            if (nulli.targetUse == null) return 0;
+            else return -calcBenefit(nulli.targetUse);
+        }
+        if (useToOne.target == null) return 0;
+        else return useToOne.getCard().benefit * (useToOne.target == this ? 1 : -1);
     }
 
     @Override

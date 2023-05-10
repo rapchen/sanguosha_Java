@@ -114,7 +114,7 @@ public abstract class Card {
     public boolean virtual = false;  // 是否虚拟卡
     public List<Card> subCards;  // 子卡，通常用于虚拟卡
     public Fields xFields;  // 额外字段，用于临时存储一些数据
-    public boolean good = false;  // 是否是好牌（对目标来说）
+    public int benefit = -100;  // 对于目标来说的有益程度。越大越有益，0为无关，负数有害
 
     /**
      * 创建真实卡牌，ID自增

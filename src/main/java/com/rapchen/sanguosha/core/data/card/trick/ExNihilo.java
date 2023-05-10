@@ -14,7 +14,7 @@ public class ExNihilo extends ImmediateTrickCard {
         super(suit, point);
         name = "ExNihilo";
         nameZh = "无中生有";
-        good = true;
+        benefit = 100;
     }
 
     @Override
