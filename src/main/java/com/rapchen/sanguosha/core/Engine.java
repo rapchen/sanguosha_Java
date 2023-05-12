@@ -73,13 +73,6 @@ public class Engine {
     private void initPile() {
         Card.nextCardId = 1;  // 重置Card的自增ID
         new StandardCards(this).init();
-//        int cardId = 1;
-//        List<Card> cards = new ArrayList<>();
-//        for (Card.Suit suit : Card.Suit.REGULAR_SUITS) {
-//            for (Card.Point point : Card.Point.REGULAR_POINTS) {
-//                cards.add(new Slash(suit, point, cardId++));
-//            }
-//        }
         // 洗牌
         List<Card> cards = new ArrayList<>(table.drawPile);
         Collections.shuffle(cards);
@@ -105,7 +98,7 @@ public class Engine {
     }
 
     /**
-     * 从牌堆取牌
+     * 从牌堆取多张牌
      * @param count 张数
      */
     public List<Card> getCardsFromDrawPile(int count) {
@@ -115,6 +108,16 @@ public class Engine {
             cards.add(card);
         }
         return cards;
+    }
+
+    /**
+     * 将牌放入弃牌堆（不管移除，只管添加到弃牌堆）
+     */
+    public void moveToDiscard(Card card) {
+        table.discardPile.add(card);
+    }
+    public void moveToDiscard(List<Card> cards) {
+        table.discardPile.addAll(cards);
     }
 
     /** 获取所有玩家，从当前回合角色开始 */
@@ -135,7 +138,11 @@ public class Engine {
      */
     public void doDamage(Player source, Player target, int damageCount) {
         target.hp -= damageCount;
-        log.info("{} 对 {} 造成了 {} 点伤害", source, target, damageCount);
+        if (source == null) {
+            log.info("{} 受到了 {} 点伤害，无伤害来源", target, damageCount);
+        } else {
+            log.info("{} 对 {} 造成了 {} 点伤害", source, target, damageCount);
+        }
         checkDeath(target);
     }
 

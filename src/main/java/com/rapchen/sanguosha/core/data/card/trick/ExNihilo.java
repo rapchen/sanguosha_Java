@@ -23,7 +23,7 @@ public class ExNihilo extends ImmediateTrickCard {
     }
 
     @Override
-    public void doUseToOne(Player source, Player target) {
+    public void doEffect(Player source, Player target) {
         target.drawCards(2);
     }
 

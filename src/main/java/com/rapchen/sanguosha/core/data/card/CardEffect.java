@@ -2,18 +2,16 @@ package com.rapchen.sanguosha.core.data.card;
 
 import com.rapchen.sanguosha.core.player.Player;
 
-import java.util.List;
-
 /**
- * 卡牌对单使用对象。描述卡牌针对某一个人的使用，从属于CardUse
+ * 卡牌使用效果。描述卡牌针对某一个人的使用效果，一个CardUse通常会对每个对象产生一个CardEffect
  * @author Chen Runwen
  * @time 2023/5/10 12:45
  */
-public class CardUseToOne {
+public class CardEffect {
     public CardUse use;
     public Player target;
 
-    public CardUseToOne(CardUse use, Player target) {
+    public CardEffect(CardUse use, Player target) {
         this.use = use;
         this.target = target;
     }

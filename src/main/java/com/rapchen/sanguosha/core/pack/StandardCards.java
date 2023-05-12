@@ -123,5 +123,11 @@ public class StandardCards extends Package {
         addCard(new Nullification(SPADE, POINT_J));
         addCard(new Nullification(CLUB, POINT_Q));
         addCard(new Nullification(CLUB, POINT_K));
+
+        addCard(new Indulgence(SPADE, POINT_6));
+        addCard(new Indulgence(CLUB, POINT_6));
+        addCard(new Indulgence(HEART, POINT_6));
+
+        addCard(new Lightning(SPADE, POINT_A));
     }
 }

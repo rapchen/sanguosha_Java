@@ -36,7 +36,7 @@ public class GrainHarvest extends ImmediateTrickCard {
     }
 
     @Override
-    public void doUseToOne(Player source, Player target) {
+    public void doEffect(Player source, Player target) {
         if (choiceCards == null || choiceCards.isEmpty()) return;
         Card card = target.chooseCard(choiceCards, true, "请选择一张五谷牌：", "GrainHarvest");
         choiceCards.remove(card);
@@ -47,7 +47,7 @@ public class GrainHarvest extends ImmediateTrickCard {
     @Override
     public void doAfterUse(Player source, List<Player> targets) {
         if (!choiceCards.isEmpty()) {
-            source.engine.table.discardPile.addAll(choiceCards);
+            source.engine.moveToDiscard(choiceCards);
             log.info("{}张五谷牌被置入弃牌堆：{}", choiceCards.size(), Card.cardsToString(choiceCards));
         }
     }

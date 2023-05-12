@@ -33,7 +33,7 @@ public class Slash extends BasicCard {
     }
 
     @Override
-    public void doUseToOne(Player source, Player target) {
+    public void doEffect(Player source, Player target) {
         if (!target.askForDodge(true)) {
             source.doDamage(target, 1);
         }

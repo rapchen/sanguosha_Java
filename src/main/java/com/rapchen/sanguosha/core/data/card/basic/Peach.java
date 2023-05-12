@@ -23,7 +23,7 @@ public class Peach extends BasicCard {
     }
 
     @Override
-    public void doUseToOne(Player source, Player target) {
+    public void doEffect(Player source, Player target) {
         target.doRecover(1);
     }
 

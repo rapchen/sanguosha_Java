@@ -2,14 +2,17 @@ package com.rapchen.sanguosha.core.player;
 
 import com.rapchen.sanguosha.core.Engine;
 import com.rapchen.sanguosha.core.common.Fields;
+import com.rapchen.sanguosha.core.data.Judgement;
 import com.rapchen.sanguosha.core.data.card.*;
 import com.rapchen.sanguosha.core.data.card.basic.*;
+import com.rapchen.sanguosha.core.data.card.trick.DelayedTrickCard;
 import com.rapchen.sanguosha.core.data.card.trick.Nullification;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 
 /**
  * 角色对象。可以是人或AI
@@ -26,7 +29,9 @@ public abstract class Player {
     public boolean alive = true;
     public int hp;
     public int maxHp;
-    public List<Card> handCards;
+    public List<Card> handCards;  // 手牌
+//    public Map<Card.SubType, EquipCard> equips;  // 装备，每种类型一个
+    public List<DelayedTrickCard> judgeArea;  // 判定区的延时类锦囊列表，按照使用顺序排列
     public int slashTimes = 1;
     public Fields xFields;  // 额外字段，用于临时存储一些数据
 
@@ -35,6 +40,7 @@ public abstract class Player {
         this.id = id;
         this.name = name;
         this.handCards = new ArrayList<>();
+        this.judgeArea = new ArrayList<>();
         // TODO 武将
         this.hp = 4;
         this.maxHp = 4;
@@ -48,10 +54,13 @@ public abstract class Player {
         log.warn("---------------------- 回合开始 ----------------------");
         engine.currentPlayer = this;  // 切换当前回合角色
         // TODO 回合开始时机
+        // TODO 要能获取用户当前阶段
         doPreparePhase();
         doJudgePhase();
         doDrawPhase();
-        doPlayPhase();
+        if (!isPhaseSkipped("Play")) {
+            doPlayPhase();
+        }
         doDiscardPhase();
         doEndPhase();
         // TODO 回合结束时机
@@ -69,6 +78,20 @@ public abstract class Player {
      * 判定阶段
      */
     private void doJudgePhase() {
+        // 闪电判定之后有可能回到原角色判定区，为了避免死循环要拷贝一份
+        ArrayList<DelayedTrickCard> tricks = new ArrayList<>(judgeArea);
+        // 后发先至，从后使用的开始依次判定
+        Collections.reverse(tricks);
+        for (DelayedTrickCard trick : tricks) {
+            // 先询问无懈
+            CardUse use = new CardUse(trick, this, null);  // 这里source其实没意义，但不能不传
+            CardEffect effect = new CardEffect(use, this);
+            if (!trick.checkCanceled(effect)) {
+                trick.doDelayedEffect(this);  // 执行延时锦囊的延时效果
+            }
+            judgeArea.remove(trick);
+            trick.doAfterDelayedEffect(this);  // 延时效果之后的处理，默认进弃牌堆
+        }
     }
 
     /**
@@ -103,6 +126,17 @@ public abstract class Player {
     private void doEndPhase() {
     }
 
+    public void skipPhase(String phase) {
+        xFields.put("SkipPhase_" + phase, null);
+    }
+
+    public boolean isPhaseSkipped(String phase) {
+        boolean skipped = xFields.containsKey("SkipPhase_" + phase);
+        xFields.remove("SkipPhase_" + phase);
+        if (skipped) log.warn("{} 跳过了出牌阶段", this);
+        return skipped;
+    }
+
     /* =============== end 阶段 ================ */
 
     /* =============== begin 功能执行 ================ */
@@ -124,10 +158,10 @@ public abstract class Player {
 //                    String.format("弃牌不是自己的牌，player:%s, card:%s", this, card));
 //        }
         handCards.remove(card);
-        engine.table.discardPile.add(card);
+        engine.moveToDiscard(card);
     }
     protected void doDiscard(List<Card> cards) {
-        engine.table.discardPile.addAll(cards);
+        engine.moveToDiscard(cards);
     }
 
     /**
@@ -144,55 +178,11 @@ public abstract class Player {
         card.doResponse(this, targets);
     }
 
-    /** 获取其他玩家 TODO 当前回合角色顺序 */
+    /** 获取其他玩家，按当前回合角色顺序 */
     public List<Player> getOtherPlayers() {
-        List<Player> players = new ArrayList<>(engine.players);
+        List<Player> players = new ArrayList<>(engine.getAllPlayers());
         players.remove(this);
         return players;
-    }
-
-    /** 玩家视角的打印桌面 */
-    protected void printTable() {
-        log.warn(engine.table.printForPlayer());
-        log.warn(getDetail());
-        for (Player player : engine.players) {
-            if (player == this) continue;
-            log.warn(player.getDetailForOthers());
-        }
-    }
-
-    @Override
-    public String toString() {
-        return name;  // TODO 将名+位置？
-    }
-
-    public String getDetail() {
-        return "Player " + id + '(' + name +
-                ") HP " + hp + '/' + maxHp +
-                ", 手牌: " + Card.cardsToString(handCards);
-    }
-
-    public String getDetailForOthers() {
-        return "Player " + id + '(' + name +
-                ") HP " + hp + '/' + maxHp +
-                ", 手牌: " + handCards.size();
-    }
-
-    public static String playersToString(List<Player> players) {
-        return playersToString(players, false);
-    }
-
-    public static String playersToString(List<Player> players, boolean withNumber) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < players.size(); i++) {
-            Player player = players.get(i);
-            if (withNumber) {
-                sb.append(i + 1).append(": ");
-            }
-            sb.append(player);
-            if (i < players.size() - 1) sb.append(", ");
-        }
-        return sb.toString();
     }
 
     public void doDamage(Player target, int damageCount) {
@@ -205,6 +195,19 @@ public abstract class Player {
     public void doRecover(int count) {
         hp = Math.min(maxHp, hp + count);
         log.info("{} 回复了 {}点体力，目前体力为：{}/{}", this.name, count, hp, maxHp);
+    }
+
+    /**
+     * 进行一次判定，返回判定结果（判定牌、是否成功）
+     */
+    public Judgement doJudge(String nameZh, Function<Card, Boolean> judgeFunc) {
+        Card card = engine.getCardFromDrawPile();
+        // 改判要插在这里
+        engine.moveToDiscard(card);
+        Boolean success = judgeFunc.apply(card);
+        String successStr = (success == null) ? "完成" : (success ? "成功" : "失败");
+        log.warn("{} 的 {} 判定 {}，结果为 {}", this, nameZh, successStr, card);
+        return new Judgement(card, success);
     }
 
     /**  濒死，请求救援 */
@@ -383,28 +386,34 @@ public abstract class Player {
 
     /**
      * 要求角色使用一张无懈可击
-     * @param useToOne 无懈的目标卡牌
+     * @param effect 无懈的目标卡牌
      * @return 是否使用
      */
-    public boolean askForNullification(CardUseToOne useToOne) {
+    public boolean askForNullification(CardEffect effect) {
         List<Card> nullis = handCards.stream().filter(card -> card instanceof Nullification).toList();
         if (nullis.isEmpty()) return false;  // 没有无懈，用不了
         // 用户提示语
-        Card card = useToOne.getCard();
-        String target = card instanceof Nullification ?  // 无懈的目标是牌的使用，其他牌的目标是角色
-                ((Nullification) card).targetUse.toString():
-                useToOne.target.toString();
-        String prompt = String.format("%s 使用了 %s, 目标是 %s, 是否使用无懈可击？0放弃：",
-                useToOne.getSource(), card, target);
+        Card card = effect.getCard();
+        String prompt;
+        if (card instanceof DelayedTrickCard) {
+            prompt = String.format("%s 判定区的 %s 即将生效, 是否使用无懈可击？0放弃：",
+                    effect.target, card);
+        } else {
+            String target = card instanceof Nullification ?  // 无懈的目标是牌的使用，其他牌的目标是角色
+                    ((Nullification) card).targetEffect.toString():
+                    effect.target.toString();
+            prompt = String.format("%s 使用了 %s, 目标是 %s, 是否使用无懈可击？0放弃：",
+                    effect.getSource(), card, target);
+        }
 
         Nullification nulli = null;  // 使用的无懈卡牌
-        try (Fields.TmpField tf = xFields.tmpField("askForNulli_CardUseToOne", useToOne)) {
+        try (Fields.TmpField tf = xFields.tmpField("askForNulli_CardEffect", effect)) {
             nulli = (Nullification) chooseCard(nullis, false, prompt, "askForNullification");
         }
         if (nulli != null) {
-            nulli.targetUse = useToOne;  // 标记这张无懈的目标牌
+            nulli.targetEffect = effect;  // 标记这张无懈的目标牌
             useCard(nulli, new ArrayList<>());
-            nulli.targetUse = null;
+            nulli.targetEffect = null;
             if (nulli.xFields.containsKey("Nullified")) {
                 nulli.xFields.remove("Nullified");
                 nulli = null;
@@ -412,4 +421,56 @@ public abstract class Player {
         }
         return nulli != null;
     }
+
+    /* =============== end 要求玩家操作的方法 ================ */
+
+    /* =============== begin 工具方法 ================ */
+
+    /** 玩家视角的打印桌面 */
+    protected void printTable() {
+        log.warn(engine.table.printForPlayer());
+        log.warn(getDetail());
+        for (Player player : engine.players) {
+            if (player == this) continue;
+            log.warn(player.getDetailForOthers());
+        }
+    }
+
+    @Override
+    public String toString() {
+        return name;  // TODO 将名+位置？
+    }
+
+    public String getDetail() {
+        return "Player " + id + '(' + name +
+                ") HP " + hp + '/' + maxHp +
+                ", 判定区: " + Card.cardsToString(judgeArea) +
+                ", 手牌: " + Card.cardsToString(handCards);
+    }
+
+    public String getDetailForOthers() {
+        return "Player " + id + '(' + name +
+                ") HP " + hp + '/' + maxHp +
+                ", 判定区: " + Card.cardsToString(judgeArea) +
+                ", 手牌: " + handCards.size();
+    }
+
+    public static String playersToString(List<Player> players) {
+        return playersToString(players, false);
+    }
+
+    public static String playersToString(List<Player> players, boolean withNumber) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < players.size(); i++) {
+            Player player = players.get(i);
+            if (withNumber) {
+                sb.append(i + 1).append(": ");
+            }
+            sb.append(player);
+            if (i < players.size() - 1) sb.append(", ");
+        }
+        return sb.toString();
+    }
+
+    /* =============== end 工具方法 ================ */
 }

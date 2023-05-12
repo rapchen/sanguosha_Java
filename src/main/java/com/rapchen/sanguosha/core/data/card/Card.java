@@ -61,6 +61,13 @@ public abstract class Card {
         public String toString() {
             return token;
         }
+
+        public boolean gt(Point o) {
+            return compareTo(o) > 0;
+        }
+        public boolean ge(Point o) {
+            return compareTo(o) >= 0;
+        }
     }
 
     enum Type {
@@ -111,10 +118,12 @@ public abstract class Card {
     protected int id;  // 在牌堆里的唯一ID，从1开始。虚拟卡<0
     protected String name;  // 牌名。不考虑扩展包的情况下也可以用instanceof判断
     protected String nameZh;  // 中文牌名，用于显示。
+
     public boolean virtual = false;  // 是否虚拟卡
     public List<Card> subCards;  // 子卡，通常用于虚拟卡
-    public Fields xFields;  // 额外字段，用于临时存储一些数据
+    public boolean throwAfterUse = true;  // 使用完毕后是否进入弃牌堆。默认进入
     public int benefit = -100;  // 对于目标来说的有益程度。越大越有益，0为无关，负数有害
+    public Fields xFields;  // 额外字段，用于临时存储一些数据
 
     /**
      * 创建真实卡牌，ID自增
@@ -182,7 +191,7 @@ public abstract class Card {
     }
 
     /**
-     * 使用牌，执行牌的效果
+     * 使用牌，执行牌的效果。模板方法
      *
      * @param source  使用者
      * @param targets 目标
@@ -191,16 +200,18 @@ public abstract class Card {
         doUseLog(source, targets);
         // 弃牌 TODO 不在手牌？虚拟牌？
         source.handCards.remove(this);
-        source.engine.table.discardPile.add(this);
+        if (throwAfterUse) {
+            source.engine.moveToDiscard(this);
+        }
         // 执行效果
         CardUse use = new CardUse(this, source, targets);
         doUseToAll(use);
         for (Player target : targets) {
-            CardUseToOne useToOne = new CardUseToOne(use, target);
+            CardEffect effect = new CardEffect(use, target);
             use.currentTarget = target;
             // 对每个目标生效前，询问无懈
-            if (!checkCanceled(useToOne)) {
-                doUseToOne(source, target);  // TODO 改use
+            if (!checkCanceled(effect)) {
+                doEffect(source, target);  // TODO 改use
             }
         }
         doAfterUse(source, targets);
@@ -213,21 +224,21 @@ public abstract class Card {
     }
 
     /**
-     * 对所有人使用的效果。如果对每个人效果都一样，那可以直接实现doUseToOne。
+     * 对所有人使用的效果。如果对每个人效果都一样，那可以直接重写doEffect。
      */
     public void doUseToAll(CardUse use) {}
 
     /**
      * 判断是否需要取消对单个目标使用的效果。如询问无懈可击
      */
-    public boolean checkCanceled(CardUseToOne useToOne) {
+    public boolean checkCanceled(CardEffect effect) {
         return false;  // 默认不取消
     }
 
     /**
-     * 对单个目标使用的效果。如果对每个人效果都一样，那可以直接实现这个，否则用doUseToAll。
+     * 对单个目标使用的效果。如果对每个人效果都一样，那可以直接重写这个，否则用doUseToAll。
      */
-    public void doUseToOne(Player source, Player target) {}
+    public void doEffect(Player source, Player target) {}
 
     /** 牌使用完的后处理（如五谷牌进弃牌堆） */
     public void doAfterUse(Player source, List<Player> targets) {}
@@ -241,7 +252,7 @@ public abstract class Card {
         log.info("{} 打出了 {}", source, this);
         // 弃牌 TODO 不在手牌？虚拟牌？
         source.handCards.remove(this);
-        source.engine.table.discardPile.add(this);
+        source.engine.moveToDiscard(this);
     }
 
     @Override
@@ -249,11 +260,11 @@ public abstract class Card {
         return nameZh + "[" + suit + point + "]" + id;
     }
 
-    public static String cardsToString(List<Card> cards) {
+    public static String cardsToString(List<? extends Card> cards) {
         return cardsToString(cards, false);
     }
 
-    public static String cardsToString(List<Card> cards, boolean withNumber) {
+    public static String cardsToString(List<? extends Card> cards, boolean withNumber) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < cards.size(); i++) {
             Card card = cards.get(i);

@@ -2,7 +2,7 @@ package com.rapchen.sanguosha.core.player;
 
 import com.rapchen.sanguosha.core.Engine;
 import com.rapchen.sanguosha.core.data.card.Card;
-import com.rapchen.sanguosha.core.data.card.CardUseToOne;
+import com.rapchen.sanguosha.core.data.card.CardEffect;
 import com.rapchen.sanguosha.core.data.card.trick.Nullification;
 
 import java.util.List;
@@ -38,9 +38,9 @@ public class AIPlayer extends Player {
                 Player target = (Player) xFields.getOrDefault("askForPeach_Target", null);
                 return target == this ? cards.get(0) : null;
             } case "askForNullification" -> {  // 要求无懈：如果对我有坏处（或者对别人有好处），就用无懈
-                CardUseToOne use = (CardUseToOne) xFields.getOrDefault("askForNulli_CardUseToOne", null);
-                if (use == null) return null;
-                if (calcBenefit(use) < 0)
+                CardEffect effect = (CardEffect) xFields.getOrDefault("askForNulli_CardEffect", null);
+                if (effect == null) return null;
+                if (calcBenefit(effect) < 0)
                     return cards.get(0);
                 return null;
             } case "askForCardFromPlayer" -> {  // 要求一角色处的一张牌：目前默认是坏事，别人的总是选，自己的尽量不选
@@ -58,15 +58,15 @@ public class AIPlayer extends Player {
     /**
      * 判断一张卡牌的使用是否对我有益。越大越有益，0为无关，负数有害
      */
-    private int calcBenefit(CardUseToOne useToOne) {
-        Card card = useToOne.getCard();
+    private int calcBenefit(CardEffect effect) {
+        Card card = effect.getCard();
         if (card instanceof Nullification nulli) {  // 如果是无懈，则与无懈的目标相反
-            if (nulli.targetUse == null) return 0;
-            else return -calcBenefit(nulli.targetUse);
+            if (nulli.targetEffect == null) return 0;
+            else return -calcBenefit(nulli.targetEffect);
         }
         // 如果有目标，看目标是谁，如果是对面，则与牌原本的有益性相反
-        if (useToOne.target == null) return 0;
-        else return useToOne.getCard().benefit * (useToOne.target == this ? 1 : -1);
+        if (effect.target == null) return 0;
+        else return effect.getCard().benefit * (effect.target == this ? 1 : -1);
     }
 
     @Override

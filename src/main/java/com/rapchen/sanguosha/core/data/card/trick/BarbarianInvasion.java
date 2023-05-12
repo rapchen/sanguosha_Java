@@ -16,7 +16,7 @@ public class BarbarianInvasion extends ImmediateTrickCard {
     }
 
     @Override
-    public void doUseToOne(Player source, Player target) {
+    public void doEffect(Player source, Player target) {
         if (!target.askForSlash()) {
             source.doDamage(target, 1);
         }

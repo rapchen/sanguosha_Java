@@ -1,7 +1,7 @@
 package com.rapchen.sanguosha.core.data.card.trick;
 
 import com.rapchen.sanguosha.core.data.card.CardUse;
-import com.rapchen.sanguosha.core.data.card.CardUseToOne;
+import com.rapchen.sanguosha.core.data.card.CardEffect;
 import com.rapchen.sanguosha.core.player.Player;
 
 /**
@@ -11,7 +11,7 @@ import com.rapchen.sanguosha.core.player.Player;
  */
 public class Nullification extends ImmediateTrickCard {
 
-    public CardUseToOne targetUse = null;  // 这张无懈的目标牌
+    public CardEffect targetEffect = null;  // 这张无懈的目标卡牌效果
 
     public Nullification(Suit suit, Point point) {
         super(suit, point);
@@ -27,9 +27,9 @@ public class Nullification extends ImmediateTrickCard {
     @Override
     public void doUseToAll(CardUse use) {
         // 给无懈可击询问无懈。如果被无懈，则上一个Nullified标记
-        Player target = targetUse == null ? null : targetUse.getSource();
-        CardUseToOne useToOne = new CardUseToOne(use, target);
-        if (checkCanceled(useToOne)) {
+        Player target = targetEffect == null ? null : targetEffect.getSource();
+        CardEffect effect = new CardEffect(use, target);
+        if (checkCanceled(effect)) {
             xFields.put("Nullified", null);
         }
     }

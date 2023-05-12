@@ -15,7 +15,7 @@ public class BorrowingKnife extends ImmediateTrickCard {
     }
 
     @Override
-    public void doUseToOne(Player source, Player target) {
+    public void doEffect(Player source, Player target) {
         return;
     }
 

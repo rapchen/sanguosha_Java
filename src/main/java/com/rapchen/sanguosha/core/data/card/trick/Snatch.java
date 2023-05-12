@@ -24,7 +24,7 @@ public class Snatch extends ImmediateTrickCard {
     }
 
     @Override
-    public void doUseToOne(Player source, Player target) {
+    public void doEffect(Player source, Player target) {
         Card card = source.askForCardFromPlayer(target, true, "请选择要获取的牌：", "Snatch");
         if (card == null) return;
         target.handCards.remove(card);  // TODO 可以加一个失去牌的逻辑，从各种地方都遍历一下移除
