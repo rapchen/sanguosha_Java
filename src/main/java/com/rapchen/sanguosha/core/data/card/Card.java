@@ -116,7 +116,7 @@ public abstract class Card {
     public Point point;
     public SubType subType;
     protected int id;  // 在牌堆里的唯一ID，从1开始。虚拟卡<0
-    protected String name;  // 牌名。不考虑扩展包的情况下也可以用instanceof判断
+    protected String name;  // 牌名。对于基本牌和锦囊牌，牌名即对象的类名；对于装备牌，同类的可能不同名（如赤兔和大宛）
     protected String nameZh;  // 中文牌名，用于显示。
 
     public boolean virtual = false;  // 是否虚拟卡

@@ -1,6 +1,7 @@
 package com.rapchen.sanguosha.core.data.card.trick;
 
 import com.rapchen.sanguosha.core.data.Judgement;
+import com.rapchen.sanguosha.core.player.Phase;
 import com.rapchen.sanguosha.core.player.Player;
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,7 +27,7 @@ public class Indulgence extends DelayedTrickCard {
     public void doDelayedEffect(Player target) {
         Judgement judge = target.doJudge(nameZh, card -> card.suit != Suit.HEART);
         if (judge.success) {
-            target.skipPhase("Play");
+            target.skipPhase(Phase.PHASE_PLAY);
         }
     }
 }

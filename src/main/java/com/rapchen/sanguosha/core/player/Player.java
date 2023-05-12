@@ -32,6 +32,7 @@ public abstract class Player {
     public List<Card> handCards;  // 手牌
 //    public Map<Card.SubType, EquipCard> equips;  // 装备，每种类型一个
     public List<DelayedTrickCard> judgeArea;  // 判定区的延时类锦囊列表，按照使用顺序排列
+    public Phase phase = Phase.PHASE_OFF_TURN;  // 当前阶段
     public int slashTimes = 1;
     public Fields xFields;  // 额外字段，用于临时存储一些数据
 
@@ -54,16 +55,16 @@ public abstract class Player {
         log.warn("---------------------- 回合开始 ----------------------");
         engine.currentPlayer = this;  // 切换当前回合角色
         // TODO 回合开始时机
-        // TODO 要能获取用户当前阶段
         doPreparePhase();
         doJudgePhase();
         doDrawPhase();
-        if (!isPhaseSkipped("Play")) {
+        if (!isPhaseSkipped(Phase.PHASE_PLAY)) {
             doPlayPhase();
         }
         doDiscardPhase();
         doEndPhase();
         // TODO 回合结束时机
+        phase = Phase.PHASE_OFF_TURN;
     }
 
     /* =============== begin 阶段 ================ */
@@ -72,12 +73,14 @@ public abstract class Player {
      * 准备阶段。 TODO 各个阶段的开始结束共同逻辑可以用AOP，考虑整合SpringAOP
      */
     private void doPreparePhase() {
+        phase = Phase.PHASE_PREPARE;
     }
 
     /**
      * 判定阶段
      */
     private void doJudgePhase() {
+        phase = Phase.PHASE_JUDGE;
         // 闪电判定之后有可能回到原角色判定区，为了避免死循环要拷贝一份
         ArrayList<DelayedTrickCard> tricks = new ArrayList<>(judgeArea);
         // 后发先至，从后使用的开始依次判定
@@ -98,6 +101,7 @@ public abstract class Player {
      * 摸牌阶段
      */
     private void doDrawPhase() {
+        phase = Phase.PHASE_DRAW;
         this.drawCards(2);
     }
 
@@ -105,6 +109,7 @@ public abstract class Player {
      * 出牌阶段
      */
     private void doPlayPhase() {
+        phase = Phase.PHASE_PLAY;
         slashTimes = 1;
         while (true) {
             if (!askForPlayCard()) break;
@@ -115,6 +120,7 @@ public abstract class Player {
      * 弃牌阶段
      */
     private void doDiscardPhase() {
+        phase = Phase.PHASE_DISCARD;
         if (handCards.size() > hp) {
             askForDiscard(handCards.size() - hp);
         }
@@ -124,16 +130,17 @@ public abstract class Player {
      * 结束阶段
      */
     private void doEndPhase() {
+        phase = Phase.PHASE_END;
     }
 
-    public void skipPhase(String phase) {
-        xFields.put("SkipPhase_" + phase, null);
+    public void skipPhase(Phase phase) {
+        xFields.put("SkipPhase_" + phase.name, null);
     }
 
-    public boolean isPhaseSkipped(String phase) {
-        boolean skipped = xFields.containsKey("SkipPhase_" + phase);
-        xFields.remove("SkipPhase_" + phase);
-        if (skipped) log.warn("{} 跳过了出牌阶段", this);
+    public boolean isPhaseSkipped(Phase phase) {
+        boolean skipped = xFields.containsKey("SkipPhase_" + phase.name);
+        xFields.remove("SkipPhase_" + phase.name);
+        if (skipped) log.warn("{} 跳过了 {}", this, phase);
         return skipped;
     }
 

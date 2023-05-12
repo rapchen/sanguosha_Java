@@ -1,5 +1,6 @@
 package com.rapchen.sanguosha.core.data.card.basic;
 
+import com.rapchen.sanguosha.core.player.Phase;
 import com.rapchen.sanguosha.core.player.Player;
 
 /**
@@ -18,7 +19,7 @@ public class Peach extends BasicCard {
     @Override
     public boolean canUseTo(Player source, Player target) {
         // 对自己用；或者对濒死角色用
-        return (target == source && target.hp < target.maxHp)
+        return (target == source && target.hp < target.maxHp && target.phase == Phase.PHASE_PLAY)
                 || target.hp <= 0;
     }
 
