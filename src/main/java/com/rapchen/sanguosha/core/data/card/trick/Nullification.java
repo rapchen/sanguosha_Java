@@ -29,7 +29,7 @@ public class Nullification extends ImmediateTrickCard {
         // 给无懈可击询问无懈。如果被无懈，则上一个Nullified标记
         Player target = targetEffect == null ? null : targetEffect.getSource();
         CardEffect effect = new CardEffect(use, target);
-        if (checkCanceled(effect)) {
+        if (askForNullification(effect)) {
             xFields.put("Nullified", null);
         }
     }

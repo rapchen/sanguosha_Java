@@ -4,6 +4,8 @@ import com.rapchen.sanguosha.core.Engine;
 import com.rapchen.sanguosha.core.data.card.basic.Dodge;
 import com.rapchen.sanguosha.core.data.card.basic.Peach;
 import com.rapchen.sanguosha.core.data.card.basic.Slash;
+import com.rapchen.sanguosha.core.data.card.equip.DefensiveHorse;
+import com.rapchen.sanguosha.core.data.card.equip.OffensiveHorse;
 import com.rapchen.sanguosha.core.data.card.trick.*;
 
 import static com.rapchen.sanguosha.core.data.card.Card.Point.*;
@@ -129,5 +131,13 @@ public class StandardCards extends Package {
         addCard(new Indulgence(HEART, POINT_6));
 
         addCard(new Lightning(SPADE, POINT_A));
+
+        // 装备
+        addCard(new DefensiveHorse(SPADE, POINT_5, "Jueying", "绝影"));
+        addCard(new DefensiveHorse(CLUB, POINT_5, "Dilu", "的卢"));
+        addCard(new DefensiveHorse(HEART, POINT_K, "Zhuahuangfeidian", "爪黄飞电"));
+        addCard(new OffensiveHorse(HEART, POINT_5, "Chitu", "赤兔"));
+        addCard(new OffensiveHorse(SPADE, POINT_K, "Dayuan", "大宛"));
+        addCard(new OffensiveHorse(DIAMOND, POINT_K, "Zixing", "紫骍"));
     }
 }

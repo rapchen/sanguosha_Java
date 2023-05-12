@@ -187,7 +187,7 @@ public class Engine {
     public void printTable() {
         log.info(table.print());
         for (Player player : players) {
-            log.info(player.getDetail());
+            log.info(player.getDetail(true));
         }
     }
 }

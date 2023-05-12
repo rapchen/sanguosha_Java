@@ -2,7 +2,6 @@ package com.rapchen.sanguosha.core.data.card.trick;
 
 import com.rapchen.sanguosha.core.data.card.Card;
 import com.rapchen.sanguosha.core.data.card.CardEffect;
-import com.rapchen.sanguosha.core.player.Player;
 
 /**
  * 非延时类锦囊
@@ -17,12 +16,8 @@ public abstract class ImmediateTrickCard extends TrickCard {
 
     @Override
     public boolean checkCanceled(CardEffect effect) {
-        // 询问无懈可击 TODO 应该是同时询问。以及现在如果第一个人用的无懈被无懈了，还会问第二个人
-        for (Player player : effect.getSource().engine.getAllPlayers()) {
-            if (player.askForNullification(effect)) {
-                return true;
-            }
-        }
-        return false;
+        // 非延时类锦囊，生效前直接询问无懈可击
+        return askForNullification(effect);
     }
+
 }

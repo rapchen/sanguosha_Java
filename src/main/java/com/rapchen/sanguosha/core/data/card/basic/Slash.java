@@ -24,7 +24,8 @@ public class Slash extends BasicCard {
 
     @Override
     public boolean canUseTo(Player source, Player target) {
-        return super.canUseTo(source, target);  // TODO 算攻击范围
+        return super.canUseTo(source, target)
+                && source.getDistance(target) <= 1;  // TODO 算武器攻击范围
     }
 
     @Override

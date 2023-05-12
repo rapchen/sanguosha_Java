@@ -22,22 +22,12 @@ public class Table {
     }
 
     public String print() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("摸牌堆: ");
-        for (Card card : drawPile) {
-            sb.append(card).append(", ");
-        }
-        sb.append("\n弃牌堆: ");
-        for (Card card : discardPile) {
-            sb.append(card).append(", ");
-        }
-        return sb.toString();
+        return "摸牌堆: " + Card.cardsToString(drawPile) +
+                "\n弃牌堆: " + Card.cardsToString(discardPile);
     }
 
     public String printForPlayer() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("摸牌堆: ").append(drawPile.size());
-        sb.append(", 弃牌堆: ").append(discardPile.size());
-        return sb.toString();
+        return "摸牌堆: " + drawPile.size() +
+                ", 弃牌堆: " + Card.cardsToString(discardPile);
     }
 }

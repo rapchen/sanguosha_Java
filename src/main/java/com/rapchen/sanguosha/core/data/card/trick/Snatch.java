@@ -19,8 +19,9 @@ public class Snatch extends ImmediateTrickCard {
 
     @Override
     public boolean canUseTo(Player source, Player target) {
-        // TODO 顺手距离是1
-        return target != source && target.handCards.size() > 0;
+        // 顺手距离是1，且对方要有牌 TODO 有牌！
+        return target != source && target.handCards.size() > 0
+                && source.getDistance(target) <= 1;
     }
 
     @Override

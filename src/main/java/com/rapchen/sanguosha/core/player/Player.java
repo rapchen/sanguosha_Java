@@ -7,11 +7,13 @@ import com.rapchen.sanguosha.core.data.card.*;
 import com.rapchen.sanguosha.core.data.card.basic.*;
 import com.rapchen.sanguosha.core.data.card.trick.DelayedTrickCard;
 import com.rapchen.sanguosha.core.data.card.trick.Nullification;
+import com.rapchen.sanguosha.exception.BadPlayerException;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 /**
@@ -30,7 +32,7 @@ public abstract class Player {
     public int hp;
     public int maxHp;
     public List<Card> handCards;  // 手牌
-//    public Map<Card.SubType, EquipCard> equips;  // 装备，每种类型一个
+    public EquipArea equips;  // 装备区
     public List<DelayedTrickCard> judgeArea;  // 判定区的延时类锦囊列表，按照使用顺序排列
     public Phase phase = Phase.PHASE_OFF_TURN;  // 当前阶段
     public int slashTimes = 1;
@@ -41,6 +43,7 @@ public abstract class Player {
         this.id = id;
         this.name = name;
         this.handCards = new ArrayList<>();
+        this.equips = new EquipArea(this);
         this.judgeArea = new ArrayList<>();
         // TODO 武将
         this.hp = 4;
@@ -89,7 +92,7 @@ public abstract class Player {
             // 先询问无懈
             CardUse use = new CardUse(trick, this, null);  // 这里source其实没意义，但不能不传
             CardEffect effect = new CardEffect(use, this);
-            if (!trick.checkCanceled(effect)) {
+            if (!trick.askForNullification(effect)) {
                 trick.doDelayedEffect(this);  // 执行延时锦囊的延时效果
             }
             judgeArea.remove(trick);
@@ -147,7 +150,7 @@ public abstract class Player {
     /* =============== end 阶段 ================ */
 
     /* =============== begin 功能执行 ================ */
-
+    // Card 相关
     public void drawCards(int count) {
         List<Card> cards = engine.getCardsFromDrawPile(count);
         handCards.addAll(cards);
@@ -185,11 +188,27 @@ public abstract class Player {
         card.doResponse(this, targets);
     }
 
+    // Player 相关
     /** 获取其他玩家，按当前回合角色顺序 */
     public List<Player> getOtherPlayers() {
         List<Player> players = new ArrayList<>(engine.getAllPlayers());
         players.remove(this);
         return players;
+    }
+
+    /** 计算距离 */
+    public int getDistance(Player target) {
+        if (target == this) return 0;  // 到自己的距离永远是0
+        int index = this.getOtherPlayers().indexOf(target);
+        if (index == -1) {  // 找不到target
+            throw new BadPlayerException("没有找到目标：" + target);
+        }
+        // 取左右距离中较小值
+        int distance = Math.min(index + 1, this.getOtherPlayers().size() - index);
+        // 距离修正 TODO 放到技能里面
+        if (this.equips.has(Card.SubType.EQUIP_HORSE_OFF)) distance -= 1;
+        if (target.equips.has(Card.SubType.EQUIP_HORSE_DEF)) distance += 1;
+        return Math.max(distance, 1);  // 距离至少为1
     }
 
     public void doDamage(Player target, int damageCount) {
@@ -436,10 +455,10 @@ public abstract class Player {
     /** 玩家视角的打印桌面 */
     protected void printTable() {
         log.warn(engine.table.printForPlayer());
-        log.warn(getDetail());
+        log.warn(getDetail(true));
         for (Player player : engine.players) {
             if (player == this) continue;
-            log.warn(player.getDetailForOthers());
+            log.warn(player.getDetail(false));
         }
     }
 
@@ -448,18 +467,16 @@ public abstract class Player {
         return name;  // TODO 将名+位置？
     }
 
-    public String getDetail() {
-        return "Player " + id + '(' + name +
-                ") HP " + hp + '/' + maxHp +
-                ", 判定区: " + Card.cardsToString(judgeArea) +
-                ", 手牌: " + Card.cardsToString(handCards);
-    }
-
-    public String getDetailForOthers() {
-        return "Player " + id + '(' + name +
-                ") HP " + hp + '/' + maxHp +
-                ", 判定区: " + Card.cardsToString(judgeArea) +
-                ", 手牌: " + handCards.size();
+    /**
+     * 获取角色详细信息，用于打印
+     * @param self 是否是本人视角（其他人视角看不到手牌）
+     */
+    public String getDetail(boolean self) {
+        return name + "(P" + id +
+                ") " + hp + '/' + maxHp +
+                ", 判定: " + Card.cardsToString(judgeArea) +
+                ", 装备: " + equips +
+                ", 手牌: " + (self ? Card.cardsToString(handCards) : handCards.size());
     }
 
     public static String playersToString(List<Player> players) {

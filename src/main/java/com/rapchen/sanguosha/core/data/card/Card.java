@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -92,8 +94,8 @@ public abstract class Card {
         TRICK_IMMEDIATE(Type.TRICK, "非延时锦囊"),
         EQUIP_WEAPON(Type.EQUIPMENT, "武器"),
         EQUIP_ARMOR(Type.EQUIPMENT, "防具"),
-        EQUIP_HORSE_ATTACK(Type.EQUIPMENT, "进攻马"),
-        EQUIP_HORSE_DEFEND(Type.EQUIPMENT, "防御马"),
+        EQUIP_HORSE_DEF(Type.EQUIPMENT, "防御马"),
+        EQUIP_HORSE_OFF(Type.EQUIPMENT, "进攻马"),
         EQUIP_TREASURE(Type.EQUIPMENT, "宝物");
 
         public final Type type;
@@ -260,19 +262,21 @@ public abstract class Card {
         return nameZh + "[" + suit + point + "]" + id;
     }
 
-    public static String cardsToString(List<? extends Card> cards) {
+    public static String cardsToString(Collection<? extends Card> cards) {
         return cardsToString(cards, false);
     }
 
-    public static String cardsToString(List<? extends Card> cards, boolean withNumber) {
+    public static String cardsToString(Collection<? extends Card> cards, boolean withNumber) {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < cards.size(); i++) {
-            Card card = cards.get(i);
-            if (withNumber) {
-                sb.append(i + 1).append(": ");
+        int i = 1;
+        for (Iterator<? extends Card> iter = cards.iterator(); iter.hasNext(); ) {
+            Card card = iter.next();
+            if (withNumber) {  // 带上序号
+                sb.append(i).append(": ");
             }
             sb.append(card);
-            if (i < cards.size() - 1) sb.append(", ");
+            if (iter.hasNext()) sb.append(", ");  // 如果不是最后一个，带上逗号
+            i++;
         }
         return sb.toString();
     }

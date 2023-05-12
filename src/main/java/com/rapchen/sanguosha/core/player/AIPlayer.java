@@ -35,17 +35,17 @@ public class AIPlayer extends Player {
             case "askForDodge", "askForSlash" -> {  // 要求出杀闪：总是出
                 return cards.get(0);
             } case "askForPeach" -> {  // 求桃：只给自己
-                Player target = (Player) xFields.getOrDefault("askForPeach_Target", null);
+                Player target = (Player) xFields.get("askForPeach_Target");
                 return target == this ? cards.get(0) : null;
             } case "askForNullification" -> {  // 要求无懈：如果对我有坏处（或者对别人有好处），就用无懈
-                CardEffect effect = (CardEffect) xFields.getOrDefault("askForNulli_CardEffect", null);
+                CardEffect effect = (CardEffect) xFields.get("askForNulli_CardEffect");
                 if (effect == null) return null;
                 if (calcBenefit(effect) < 0)
                     return cards.get(0);
                 return null;
             } case "askForCardFromPlayer" -> {  // 要求一角色处的一张牌：目前默认是坏事，别人的总是选，自己的尽量不选
-                String reason1 = (String) xFields.getOrDefault("askForCardFromPlayer_Reason", "");
-                Player target = (Player) xFields.getOrDefault("askForCardFromPlayer_Target", null);
+                String reason1 = (String) xFields.get("askForCardFromPlayer_Reason");
+                Player target = (Player) xFields.get("askForCardFromPlayer_Target");
                 if (target == this) return forced ? cards.get(0) : null;
                 else return cards.get(0);
             } default -> {  // 默认逻辑：必须选就选一张，否则放弃
