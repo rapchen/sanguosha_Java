@@ -1,5 +1,6 @@
 package com.rapchen.sanguosha.core.data.card.trick;
 
+import com.rapchen.sanguosha.core.Engine;
 import com.rapchen.sanguosha.core.data.card.Card;
 import com.rapchen.sanguosha.core.data.card.CardUse;
 import com.rapchen.sanguosha.core.player.Player;
@@ -31,7 +32,7 @@ public class GrainHarvest extends ImmediateTrickCard {
 
     @Override
     public void doUseToAll(CardUse use) {
-        choiceCards = use.source.engine.getCardsFromDrawPile(use.targets.size());
+        choiceCards = Engine.eg.getCardsFromDrawPile(use.targets.size());
         log.info("{} 翻开了五谷牌：{}", use.source.name, Card.cardsToString(choiceCards));
     }
 
@@ -45,9 +46,9 @@ public class GrainHarvest extends ImmediateTrickCard {
     }
 
     @Override
-    public void doAfterUse(Player source, List<Player> targets) {
+    public void doAfterUse(CardUse use) {
         if (!choiceCards.isEmpty()) {
-            source.engine.moveToDiscard(choiceCards);
+            Engine.eg.moveToDiscard(choiceCards);
             log.info("{}张五谷牌被置入弃牌堆：{}", choiceCards.size(), Card.cardsToString(choiceCards));
         }
     }

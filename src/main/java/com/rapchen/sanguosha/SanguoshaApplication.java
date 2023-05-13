@@ -9,7 +9,7 @@ public class SanguoshaApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(SanguoshaApplication.class, args);
-        Engine engine = new Engine();
+        Engine engine = Engine.eg;
         engine.gameStart();
     }
 

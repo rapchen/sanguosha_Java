@@ -30,6 +30,8 @@ public class Engine {
 
     public Random random;
 
+    public static final Engine eg = new Engine();  // 单例
+
     public void gameStart() {
         // 准备工作
         random = new Random();

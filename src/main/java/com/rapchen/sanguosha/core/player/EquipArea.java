@@ -4,8 +4,7 @@ import com.rapchen.sanguosha.core.data.card.Card;
 import com.rapchen.sanguosha.core.data.card.equip.EquipCard;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 装备区
@@ -39,9 +38,31 @@ public class EquipArea {
         equips.put(equip.subType, equip);
     }
 
+    /**
+     * 移除装备
+     * @return 是否有这张装备
+     */
+    public boolean remove(Card card) {
+        if (!(card instanceof EquipCard)) return false;
+        if (equips.get(card.subType) == card) {
+            equips.remove(card.subType);
+            return true;
+        }
+        return false;
+    }
+
     /** 判断是否有某个子类的装备 */
     public boolean has(Card.SubType subType) {
         return equips.containsKey(subType);
+    }
+
+    /** 返回所有装备的列表 */
+    public List<EquipCard> getAll() {
+        return new ArrayList<>(equips.values());
+    }
+
+    public int size() {
+        return equips.size();
     }
 
     @Override

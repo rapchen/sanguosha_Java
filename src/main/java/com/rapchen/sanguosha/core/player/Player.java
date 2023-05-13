@@ -13,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 
 /**
@@ -125,7 +124,7 @@ public abstract class Player {
     private void doDiscardPhase() {
         phase = Phase.PHASE_DISCARD;
         if (handCards.size() > hp) {
-            askForDiscard(handCards.size() - hp);
+            askForDiscard(handCards.size() - hp, "h");
         }
     }
 
@@ -159,17 +158,35 @@ public abstract class Player {
     }
 
     /**
-     * 弃牌。目前只是弃自己的牌
-     * @param card 牌
+     * 从角色处移除一张牌
+     * @return 是否成功移除。找不到牌就返回false
      */
-    protected void doDiscard(Card card) {
-//        if (!handCards.contains(card)) {
-//            throw new CardPlaceException(
-//                    String.format("弃牌不是自己的牌，player:%s, card:%s", this, card));
-//        }
-        handCards.remove(card);
-        engine.moveToDiscard(card);
+    public boolean doRemoveCard(Card card) {
+        if (card.isVirtual()) {  // 对于虚拟牌，移除所有的子卡。移除至少一张视为成功
+            int removedCnt = doRemoveCards(card.subCards);
+            return removedCnt > 0;
+        }
+        if (handCards.remove(card)) return true;
+        if (equips.remove(card)) return true;
+        if (judgeArea.remove(card)) return true;
+        return false;
     }
+
+    /**
+     * 从角色处移除多张牌
+     * @return 成功移除牌的数量
+     */
+    public int doRemoveCards(List<Card> cards) {
+        int count = 0;
+        for (Card card : cards) {
+            if (doRemoveCard(card)) count++;
+        }
+        return count;
+    }
+
+    /**
+     * 弃牌。目前只有将牌加入弃牌堆的逻辑。从原位移除的部分在doRemoveCard
+     */
     protected void doDiscard(List<Card> cards) {
         engine.moveToDiscard(cards);
     }
@@ -186,6 +203,18 @@ public abstract class Player {
      */
     protected void responseCard(Card card, List<Player> targets) {
         card.doResponse(this, targets);
+    }
+
+    /**
+     * 获取角色处牌的数量
+     * @param pattern 区域。含h为手牌，e为装备区，j为判定区。如hej为计算所有区域
+     */
+    public int getCardCount(String pattern) {
+        int count = 0;
+        if (pattern.contains("h")) count += handCards.size();
+        if (pattern.contains("e")) count += equips.size();
+        if (pattern.contains("j")) count += judgeArea.size();
+        return count;
     }
 
     // Player 相关
@@ -278,54 +307,64 @@ public abstract class Player {
     /**
      * 弃自己的牌
      */
-    public boolean askForDiscard(int count) {
-        return askForDiscard(count, this, true);
+    public boolean askForDiscard(int count, String pattern) {
+        return askForDiscard(count, this, true, pattern);
     }
     /**
      * 要求弃牌
      * @param count  弃牌数量
      * @param target 弃牌目标
      * @param forced 是否必须选择
+     * @param patten 区域。hej
      */
-    public boolean askForDiscard(int count, Player target, boolean forced) {
+    public boolean askForDiscard(int count, Player target, boolean forced, String patten) {
         List<Card> discards = new ArrayList<>();
         for (int i = 0; i < count; i++) {
-            Card card = askForCardFromPlayer(target, forced, "请弃置一张牌：", "askForDiscard");
+            Card card = askForCardFromPlayer(target, forced, patten, "请弃置一张牌：", "askForDiscard");
             if (card == null) continue;
             discards.add(card);
-            target.handCards.remove(card);  // TODO 这里弃牌时机应该是一起发生
+            target.doRemoveCard(card);  // 从角色处移除卡牌，避免重复选择（这里不触发失去牌的时机）
         }
-        doDiscard(discards);
+        doDiscard(discards);  // 弃牌、TODO 失去牌时机应该是在这里一起发生，不是一张张
         log.info("{} 弃了 {} {}张牌：{}", this.name, target.name, discards.size(), Card.cardsToString(discards));
         return true;
     }
 
     protected Card chooseDiscard(Player target) {
-        return chooseDiscard(target, target.handCards);
+        return chooseDiscard(target, target.handCards); // TODO
     }
     protected abstract Card chooseDiscard(Player target, List<Card> cards);
 
     /**
      * 要求角色从目标角色的牌中选一张牌
-     *
-     * @param target 目标角色
-     * @param forced 是否必须选择
-     * @param prompt 给用户的提示语
-     * @param reason 选牌原因，通常给AI做判断用
+     * @param target  目标角色
+     * @param forced  是否必须选择
+     * @param pattern 区域。含h为手牌，e为装备区，j为判定区。
+     * @param prompt  给用户的提示语
+     * @param reason  选牌原因，通常给AI做判断用
      * @return 选择的牌。如果选择了虚拟牌，会自动随机其中的子卡。如果不选或无牌可选，就返回null。
      */
-    public Card askForCardFromPlayer(Player target, boolean forced, String prompt, String reason) {
+    public Card askForCardFromPlayer(Player target, boolean forced, String pattern, String prompt, String reason) {
         // 准备选项
         List<Card> choices = new ArrayList<>();
-        if (target == this) {  // 选自己的牌
-            choices.addAll(handCards); // TODO 弃装备牌
-        } else {  // 选他人牌
-            if (target.handCards.size() > 0) {  // 所有手牌作为一个选项，随机选一张
-                Card hCards = new FakeCard( target.handCards.size() + "张手牌");
-                hCards.addSubCards(target.handCards);
-                choices.add(hCards);
+        if (pattern.contains("h")) {  // 手牌
+            if (target == this) {  // 选自己的牌
+                choices.addAll(handCards);
+            } else {  // 选他人牌
+                if (target.handCards.size() > 0) {  // 所有手牌作为一个选项，随机选一张
+                    Card hCards = new FakeCard( target.handCards.size() + "张手牌");
+                    hCards.addSubCards(target.handCards);
+                    choices.add(hCards);
+                }
             }
         }
+        if (pattern.contains("e")) {  // 装备
+            choices.addAll(target.equips.getAll());
+        }
+        if (pattern.contains("j")) {  // 判定区
+            choices.addAll(target.judgeArea);
+        }
+
         if (!choices.isEmpty()) {
             Card card;
             try (Fields.TmpField tf = xFields.tmpField("askForCardFromPlayer_Reason", reason);
@@ -341,9 +380,6 @@ public abstract class Player {
         }
         return null;  // 无牌可选
     }
-//    public Card askForCardFromPlayer(Player target, String reason) {
-//        return askForCardFromPlayer(target, "请选择一张牌：", true, reason);
-//    }
 
     /**
      * 要求用户选一张牌

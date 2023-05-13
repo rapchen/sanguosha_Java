@@ -200,8 +200,8 @@ public abstract class Card {
      */
     public void doUse(Player source, List<Player> targets) {
         doUseLog(source, targets);
-        // 弃牌 TODO 不在手牌？虚拟牌？
-        source.handCards.remove(this);
+        // 弃牌
+        source.doRemoveCard(this);
         if (throwAfterUse) {
             source.engine.moveToDiscard(this);
         }
@@ -213,10 +213,10 @@ public abstract class Card {
             use.currentTarget = target;
             // 对每个目标生效前，询问无懈
             if (!checkCanceled(effect)) {
-                doEffect(source, target);  // TODO 改use
+                doEffect(source, target);
             }
         }
-        doAfterUse(source, targets);
+        doAfterUse(use);
     }
 
     private void doUseLog(Player source, List<Player> targets) {
@@ -243,7 +243,7 @@ public abstract class Card {
     public void doEffect(Player source, Player target) {}
 
     /** 牌使用完的后处理（如五谷牌进弃牌堆） */
-    public void doAfterUse(Player source, List<Player> targets) {}
+    public void doAfterUse(CardUse use) {}
 
     /**
      * 打出牌

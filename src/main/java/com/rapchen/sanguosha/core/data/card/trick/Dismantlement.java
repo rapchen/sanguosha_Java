@@ -17,12 +17,12 @@ public class Dismantlement extends ImmediateTrickCard {
 
     @Override
     public boolean canUseTo(Player source, Player target) {
-        return target != source && target.handCards.size() > 0;  // TODO 装备牌
+        return target != source && target.getCardCount("hej") > 0;
     }
 
     @Override
     public void doEffect(Player source, Player target) {
-        source.askForDiscard(1, target, true);
+        source.askForDiscard(1, target, true, "hej");
     }
 
 }
