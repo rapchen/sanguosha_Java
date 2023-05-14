@@ -4,8 +4,7 @@ import com.rapchen.sanguosha.core.Engine;
 import com.rapchen.sanguosha.core.data.card.basic.Dodge;
 import com.rapchen.sanguosha.core.data.card.basic.Peach;
 import com.rapchen.sanguosha.core.data.card.basic.Slash;
-import com.rapchen.sanguosha.core.data.card.equip.DefensiveHorse;
-import com.rapchen.sanguosha.core.data.card.equip.OffensiveHorse;
+import com.rapchen.sanguosha.core.data.card.equip.*;
 import com.rapchen.sanguosha.core.data.card.trick.*;
 
 import static com.rapchen.sanguosha.core.data.card.Card.Point.*;
@@ -139,5 +138,19 @@ public class StandardCards extends Package {
         addCard(new OffensiveHorse(HEART, POINT_5, "Chitu", "赤兔"));
         addCard(new OffensiveHorse(SPADE, POINT_K, "Dayuan", "大宛"));
         addCard(new OffensiveHorse(DIAMOND, POINT_K, "Zixing", "紫骍"));
+
+        addCard(new ZhugeCrossbow(DIAMOND, POINT_A));
+        addCard(new ZhugeCrossbow(CLUB, POINT_A));
+        addCard(new QinggangSword(SPADE, POINT_6));
+        addCard(new DoubleSword(SPADE, POINT_2));
+        addCard(new CrescentBlade(SPADE, POINT_5));
+        addCard(new SnakeSpear(SPADE, POINT_Q));
+        addCard(new StoneBreakerAxe(DIAMOND, POINT_5));
+        addCard(new DecoratedHalberd(DIAMOND, POINT_Q));
+        addCard(new KylinBow(HEART, POINT_5));
+
+        addCard(new EightDiagram(SPADE, POINT_2));
+        addCard(new EightDiagram(CLUB, POINT_2));
+
     }
 }

@@ -5,6 +5,7 @@ import com.rapchen.sanguosha.core.common.Fields;
 import com.rapchen.sanguosha.core.data.Judgement;
 import com.rapchen.sanguosha.core.data.card.*;
 import com.rapchen.sanguosha.core.data.card.basic.*;
+import com.rapchen.sanguosha.core.data.card.equip.Weapon;
 import com.rapchen.sanguosha.core.data.card.trick.DelayedTrickCard;
 import com.rapchen.sanguosha.core.data.card.trick.Nullification;
 import com.rapchen.sanguosha.exception.BadPlayerException;
@@ -223,6 +224,13 @@ public abstract class Player {
         List<Player> players = new ArrayList<>(engine.getAllPlayers());
         players.remove(this);
         return players;
+    }
+
+    /** 获取攻击范围 */
+    public int getRange() {
+        Weapon weapon = equips.getWeapon();
+        if (weapon != null) return weapon.range;
+        return 1;  // 默认1
     }
 
     /** 计算距离 */

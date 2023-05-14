@@ -2,6 +2,7 @@ package com.rapchen.sanguosha.core.player;
 
 import com.rapchen.sanguosha.core.data.card.Card;
 import com.rapchen.sanguosha.core.data.card.equip.EquipCard;
+import com.rapchen.sanguosha.core.data.card.equip.Weapon;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
@@ -54,6 +55,14 @@ public class EquipArea {
     /** 判断是否有某个子类的装备 */
     public boolean has(Card.SubType subType) {
         return equips.containsKey(subType);
+    }
+
+    /** 获取某个子类的装备。没有返回null */
+    public EquipCard get(Card.SubType subType) {
+        return equips.get(subType);
+    }
+    public Weapon getWeapon() {
+        return (Weapon) equips.get(Card.SubType.EQUIP_WEAPON);
     }
 
     /** 返回所有装备的列表 */
