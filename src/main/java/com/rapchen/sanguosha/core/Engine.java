@@ -5,14 +5,12 @@ import com.rapchen.sanguosha.core.data.UserTableVO;
 import com.rapchen.sanguosha.core.data.card.Card;
 import com.rapchen.sanguosha.core.pack.StandardCards;
 import com.rapchen.sanguosha.core.player.*;
+import com.rapchen.sanguosha.core.skill.*;
 import com.rapchen.sanguosha.exception.GameOverException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 /**
  * 单例Engine，实际控制游戏流程
@@ -27,6 +25,7 @@ public class Engine {
     public List<Player> players;
     public List<Player> playersWithDead;  // 包括死亡武将在内的
     public Player currentPlayer;  // 当前回合角色
+    public SkillManager skills;  // 技能管理器
 
     public Random random;
 
@@ -43,6 +42,8 @@ public class Engine {
         players.add(new AIPlayer(this, 1,"AI"));
         playersWithDead = new ArrayList<>(players);
         // TODO 选将
+        skills = new SkillManager();
+        players.get(0).addSkill(BiYue.class);
         // players.get(1).chooseGeneral();
         // 初始化牌堆
         initPile();
@@ -71,6 +72,8 @@ public class Engine {
             player.doTurn();
         }
     }
+
+    // 牌、牌堆相关
 
     private void initPile() {
         Card.nextCardId = 1;  // 重置Card的自增ID
@@ -122,6 +125,8 @@ public class Engine {
         table.discardPile.addAll(cards);
     }
 
+    // 角色相关
+
     /** 获取所有玩家，从当前回合角色开始 */
     public List<Player> getAllPlayers() {
         List<Player> result = new ArrayList<>();
@@ -136,7 +141,7 @@ public class Engine {
     }
 
     /**
-     * 造成伤害
+     * 造成伤害。source可以是null
      */
     public void doDamage(Player source, Player target, int damageCount) {
         target.hp -= damageCount;
@@ -162,6 +167,14 @@ public class Engine {
                 checkGameOver();
             }
         }
+    }
+
+    /**
+     * 触发一个事件
+     * @param event 事件
+     */
+    public void invoke(Event event) {
+        skills.invoke(event);
     }
 
     /**

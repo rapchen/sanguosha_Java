@@ -8,9 +8,13 @@ import com.rapchen.sanguosha.core.data.card.basic.*;
 import com.rapchen.sanguosha.core.data.card.equip.Weapon;
 import com.rapchen.sanguosha.core.data.card.trick.DelayedTrickCard;
 import com.rapchen.sanguosha.core.data.card.trick.Nullification;
+import com.rapchen.sanguosha.core.skill.Event;
+import com.rapchen.sanguosha.core.skill.Skill;
+import com.rapchen.sanguosha.core.skill.Timing;
 import com.rapchen.sanguosha.exception.BadPlayerException;
 import lombok.extern.slf4j.Slf4j;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -134,6 +138,8 @@ public abstract class Player {
      */
     private void doEndPhase() {
         phase = Phase.PHASE_END;
+        engine.invoke(new Event(Timing.PHASE_BEGIN, this)
+                .withField("Phase", Phase.PHASE_END));
     }
 
     public void skipPhase(Phase phase) {
@@ -280,6 +286,19 @@ public abstract class Player {
             while (hp <= 0) {
                 if (!player.askForPeach(this)) break;
             }
+        }
+    }
+
+    /** 添加技能 */
+    public void addSkill(Class<? extends Skill> skillClass) {
+        try {
+            Skill skill = skillClass.getConstructor().newInstance();
+            skill.owner = this;
+            engine.skills.addSkill(skill);
+        } catch (NoSuchMethodException | InvocationTargetException |
+                 InstantiationException | IllegalAccessException e) {
+            log.error("获取技能 {} 失败！ {}", skillClass, e.toString());
+            e.printStackTrace();
         }
     }
 

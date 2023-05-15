@@ -27,5 +27,9 @@ public class Fields extends HashMap<String, Object> {
         }
     }
 
-
+    /** 添加字段，支持链式编程 */
+    public Fields with(String key, Object value) {
+        put(key, value);
+        return this;
+    }
 }
