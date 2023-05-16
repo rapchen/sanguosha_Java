@@ -1,7 +1,10 @@
 package com.rapchen.sanguosha.core.data.card.basic;
 
+import com.rapchen.sanguosha.core.Engine;
 import com.rapchen.sanguosha.core.data.card.CardUse;
 import com.rapchen.sanguosha.core.player.Player;
+import com.rapchen.sanguosha.core.skill.Event;
+import com.rapchen.sanguosha.core.skill.Timing;
 
 /**
  * 杀
@@ -35,8 +38,13 @@ public class Slash extends BasicCard {
 
     @Override
     public void doEffect(Player source, Player target) {
-        if (!target.askForDodge(true)) {
+        boolean dodged = target.askForDodge(true);
+        if (dodged) {  // 触发杀被闪避事件
+            Engine.eg.invoke(new Event(Timing.SLASH_DODGED, source));
+        }
+        if (!dodged || source.xFields.containsKey("Slash_Undodged")) {
             source.doDamage(target, 1);
+            source.xFields.remove("Slash_Undodged");  // 贯石斧标记
         }
     }
 }

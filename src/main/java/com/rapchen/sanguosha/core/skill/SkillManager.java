@@ -1,9 +1,6 @@
 package com.rapchen.sanguosha.core.skill;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 技能管理器
@@ -11,17 +8,25 @@ import java.util.Map;
  * @time 2023/5/15 22:05
  */
 public class SkillManager {
-    public List<Skill> skills;  // 所有技能列表，暂时没用
+    public Set<Skill> skills;  // 所有技能列表，暂时没用
     public Map<Timing, List<TriggerSkill>> triggerSkills;  // 时机-触发技Map
 
     public SkillManager() {
-        this.triggerSkills = new HashMap<>();
+        skills = new HashSet<>();
+        triggerSkills = new HashMap<>();
     }
 
-    public void addSkill(Skill skill) {
+    public void add(Skill skill) {
         skills.add(skill);
         if (skill instanceof TriggerSkill tSkill) {
             addTriggerSkill(tSkill);
+        }
+    }
+
+    public void remove(Skill skill) {
+        skills.remove(skill);
+        if (skill instanceof TriggerSkill tSkill) {
+            removeTriggerSkill(tSkill);
         }
     }
 
@@ -34,6 +39,15 @@ public class SkillManager {
                 triggerSkills.put(timing, new ArrayList<>());
             }
             triggerSkills.get(timing).add(skill);
+        }
+    }
+
+    private void removeTriggerSkill(TriggerSkill skill) {
+        for (Timing timing : skill.timings) {
+            List<TriggerSkill> tSkills = triggerSkills.get(timing);
+            if (tSkills != null) {
+                tSkills.remove(skill);
+            }
         }
     }
 

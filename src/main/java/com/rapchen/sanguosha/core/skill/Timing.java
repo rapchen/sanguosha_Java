@@ -6,7 +6,12 @@ package com.rapchen.sanguosha.core.skill;
  * @time 2023/5/14 12:42
  */
 public enum Timing {
+    // 游戏相关
     GAME_START,
 
+    // 阶段相关
     PHASE_BEGIN,
+
+    // 杀相关
+    SLASH_DODGED,
 }

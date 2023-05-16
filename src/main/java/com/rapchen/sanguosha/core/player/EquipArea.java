@@ -32,7 +32,7 @@ public class EquipArea {
     public void useEquip(EquipCard equip) {
         EquipCard oldEquip = equips.get(equip.subType);
         if (oldEquip != null) {
-            equips.remove(equip.subType);
+            player.doRemoveCard(oldEquip);  // 为了正确处理卡牌的失去
             player.engine.moveToDiscard(oldEquip);
             log.warn("{} 装备区的 {} 被置入弃牌堆", player, oldEquip);
         }

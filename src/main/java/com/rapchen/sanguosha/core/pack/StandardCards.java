@@ -145,7 +145,7 @@ public class StandardCards extends Package {
         addCard(new DoubleSword(SPADE, POINT_2));
         addCard(new CrescentBlade(SPADE, POINT_5));
         addCard(new SnakeSpear(SPADE, POINT_Q));
-        addCard(new StoneBreakerAxe(DIAMOND, POINT_5));
+        addCard(new StoneAxe(DIAMOND, POINT_5));
         addCard(new DecoratedHalberd(DIAMOND, POINT_Q));
         addCard(new KylinBow(HEART, POINT_5));
 

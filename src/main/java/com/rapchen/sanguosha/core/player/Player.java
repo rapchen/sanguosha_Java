@@ -5,6 +5,7 @@ import com.rapchen.sanguosha.core.common.Fields;
 import com.rapchen.sanguosha.core.data.Judgement;
 import com.rapchen.sanguosha.core.data.card.*;
 import com.rapchen.sanguosha.core.data.card.basic.*;
+import com.rapchen.sanguosha.core.data.card.equip.EquipCard;
 import com.rapchen.sanguosha.core.data.card.equip.Weapon;
 import com.rapchen.sanguosha.core.data.card.trick.DelayedTrickCard;
 import com.rapchen.sanguosha.core.data.card.trick.Nullification;
@@ -174,7 +175,10 @@ public abstract class Player {
             return removedCnt > 0;
         }
         if (handCards.remove(card)) return true;
-        if (equips.remove(card)) return true;
+        if (equips.remove(card)) {
+            ((EquipCard)card).onRemove();
+            return true;
+        }
         if (judgeArea.remove(card)) return true;
         return false;
     }
@@ -294,7 +298,7 @@ public abstract class Player {
         try {
             Skill skill = skillClass.getConstructor().newInstance();
             skill.owner = this;
-            engine.skills.addSkill(skill);
+            engine.skills.add(skill);
         } catch (NoSuchMethodException | InvocationTargetException |
                  InstantiationException | IllegalAccessException e) {
             log.error("获取技能 {} 失败！ {}", skillClass, e.toString());
@@ -335,22 +339,29 @@ public abstract class Player {
      * 弃自己的牌
      */
     public boolean askForDiscard(int count, String pattern) {
-        return askForDiscard(count, this, true, pattern);
+        return askForDiscard(count, this, true, pattern, null);
     }
     /**
      * 要求弃牌
+     *
      * @param count  弃牌数量
      * @param target 弃牌目标
      * @param forced 是否必须选择
      * @param patten 区域。hej
+     * @param prompt 提示语。默认为"请弃置{count}张牌："
+     * @return 是否弃牌
      */
-    public boolean askForDiscard(int count, Player target, boolean forced, String patten) {
+    public boolean askForDiscard(int count, Player target, boolean forced, String patten, String prompt) {
         List<Card> discards = new ArrayList<>();
         for (int i = 0; i < count; i++) {
-            Card card = askForCardFromPlayer(target, forced, patten, "请弃置一张牌：", "askForDiscard");
+            Card card = askForCardFromPlayer(target, forced, patten,
+                    prompt == null ? String.format("请弃置%d张牌：", count) : prompt, "askForDiscard");
             if (card == null) continue;
             discards.add(card);
             target.doRemoveCard(card);  // 从角色处移除卡牌，避免重复选择（这里不触发失去牌的时机）
+        }
+        if (discards.size() < count) {
+            return false;  // 弃牌张数不够，放弃弃牌了
         }
         doDiscard(discards);  // 弃牌、TODO 失去牌时机应该是在这里一起发生，不是一张张
         log.info("{} 弃了 {} {}张牌：{}", this.name, target.name, discards.size(), Card.cardsToString(discards));
