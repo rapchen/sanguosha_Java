@@ -29,7 +29,7 @@ public class AIPlayer extends Player {
     }
 
     @Override
-    public Card chooseCard(List<Card> cards, boolean forced, String prompt, String reason) {
+    public <T extends Card> T chooseCard(List<T> cards, boolean forced, String prompt, String reason) {
         if (cards.isEmpty()) return null;
         switch (reason) {
             case "askForDodge", "askForSlash" -> {  // 要求出杀闪：总是出

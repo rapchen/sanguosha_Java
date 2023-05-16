@@ -25,6 +25,9 @@ public abstract class Skill {
     public void doLog() {
         log.warn("{} 发动了 {}", owner, nameZh);
     }
+    public void doLog(String suffix) {
+        log.warn("{} 发动了 {}, {}", owner, nameZh, suffix);
+    }
 
     @Override
     public String toString() {

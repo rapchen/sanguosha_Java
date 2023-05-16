@@ -14,4 +14,8 @@ public enum Timing {
 
     // 杀相关
     SLASH_DODGED,
+
+    // 伤害相关
+    DAMAGE_DOING,  // 造成伤害时
+    DAMAGE_DONE,  // 造成伤害后
 }

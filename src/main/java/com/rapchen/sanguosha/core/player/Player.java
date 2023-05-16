@@ -205,7 +205,7 @@ public abstract class Player {
     /**
      * 使用牌
      */
-    protected void useCard(Card card, List<Player> targets) {
+    public void useCard(Card card, List<Player> targets) {
         card.doUse(this, targets);
     }
 
@@ -315,7 +315,7 @@ public abstract class Player {
      * @return 是否出牌。false时出牌结束
      */
     public boolean askForPlayCard() {
-        // 先找出可以使用的牌 TODO 后面用canUse
+        // 先找出可以使用的牌
         List<Card> cards = handCards.stream().filter(card -> card.canUseInPlayPhase(this)).toList();
         Card card = choosePlayCard(cards);
         if (card != null) {
@@ -427,7 +427,7 @@ public abstract class Player {
      * @param reason 选牌原因，通常给AI做判断用
      * @return 选择的牌。如果不选，就返回null。
      */
-    public abstract Card chooseCard(List<Card> cards, boolean forced, String prompt, String reason);
+    public abstract <T extends Card> T chooseCard(List<T> cards, boolean forced, String prompt, String reason);
 
 
     /**

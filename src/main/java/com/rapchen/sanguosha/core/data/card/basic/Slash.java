@@ -40,7 +40,7 @@ public class Slash extends BasicCard {
     public void doEffect(Player source, Player target) {
         boolean dodged = target.askForDodge(true);
         if (dodged) {  // 触发杀被闪避事件
-            Engine.eg.invoke(new Event(Timing.SLASH_DODGED, source));
+            Engine.eg.invoke(new Event(Timing.SLASH_DODGED, source).withField("Target", target));
         }
         if (!dodged || source.xFields.containsKey("Slash_Undodged")) {
             source.doDamage(target, 1);

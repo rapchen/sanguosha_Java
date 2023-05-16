@@ -1,5 +1,6 @@
 package com.rapchen.sanguosha.core;
 
+import com.rapchen.sanguosha.core.data.Damage;
 import com.rapchen.sanguosha.core.data.Table;
 import com.rapchen.sanguosha.core.data.UserTableVO;
 import com.rapchen.sanguosha.core.data.card.Card;
@@ -144,6 +145,10 @@ public class Engine {
      * 造成伤害。source可以是null
      */
     public void doDamage(Player source, Player target, int damageCount) {
+        Damage damage = new Damage(source, target, damageCount);
+        if (source != null) {  // 造成伤害时
+            invoke(new Event(Timing.DAMAGE_DOING, source).withField("Damage", damage));
+        }
         target.hp -= damageCount;
         if (source == null) {
             log.info("{} 受到了 {} 点伤害，无伤害来源", target, damageCount);
@@ -151,6 +156,9 @@ public class Engine {
             log.info("{} 对 {} 造成了 {} 点伤害", source, target, damageCount);
         }
         checkDeath(target);
+        if (source != null) {  // 造成伤害后
+            invoke(new Event(Timing.DAMAGE_DONE, source).withField("Damage", damage));
+        }
     }
 
     /**

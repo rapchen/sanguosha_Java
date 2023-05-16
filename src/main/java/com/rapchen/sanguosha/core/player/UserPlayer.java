@@ -40,7 +40,7 @@ public class UserPlayer extends Player {
      * @return 选择的牌。如果不选，就返回null。
      */
     @Override
-    public Card chooseCard(List<Card> cards, boolean forced, String prompt, String reason) {
+    public <T extends Card> T chooseCard(List<T> cards, boolean forced, String prompt, String reason) {
         while (true) {
             log.warn(prompt);  // TODO 目前打给用户的都用WARN，后台的用INFO。之后可以打到不同的输出
             log.warn(Card.cardsToString(cards, true));
