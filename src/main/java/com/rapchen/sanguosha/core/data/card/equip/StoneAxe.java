@@ -24,7 +24,7 @@ public class StoneAxe extends Weapon {
         public void onTrigger(Event event) {
             // TODO 不能弃贯石斧
             if (owner.getCardCount("he") < 2) return;
-            if (owner.askForDiscard(2, owner, false, "he", "是否弃置2张牌使用贯石斧？")) {
+            if (owner.askForDiscard(2, owner, false, "he", "是否弃置2张牌使用贯石斧？", name)) {
                 doLog();
                 owner.xFields.put("Slash_Undodged", true);  // 打上标记，仍造成伤害
             }

@@ -30,7 +30,7 @@ public class Nullification extends ImmediateTrickCard {
         Player target = targetEffect == null ? null : targetEffect.getSource();
         CardEffect effect = new CardEffect(use, target);
         if (askForNullification(effect)) {
-            xFields.put("Nullified", null);
+            xFields.put("Nullified", true);
         }
     }
 }

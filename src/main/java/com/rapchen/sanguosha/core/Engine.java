@@ -147,7 +147,7 @@ public class Engine {
     public void doDamage(Player source, Player target, int damageCount) {
         Damage damage = new Damage(source, target, damageCount);
         if (source != null) {  // 造成伤害时
-            invoke(new Event(Timing.DAMAGE_DOING, source).withField("Damage", damage));
+            trigger(new Event(Timing.DAMAGE_DOING, source).withField("Damage", damage));
         }
         target.hp -= damageCount;
         if (source == null) {
@@ -157,7 +157,7 @@ public class Engine {
         }
         checkDeath(target);
         if (source != null) {  // 造成伤害后
-            invoke(new Event(Timing.DAMAGE_DONE, source).withField("Damage", damage));
+            trigger(new Event(Timing.DAMAGE_DONE, source).withField("Damage", damage));
         }
     }
 
@@ -181,8 +181,8 @@ public class Engine {
      * 触发一个事件
      * @param event 事件
      */
-    public void invoke(Event event) {
-        skills.invoke(event);
+    public void trigger(Event event) {
+        skills.trigger(event);
     }
 
     /**

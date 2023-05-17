@@ -28,6 +28,7 @@ public abstract class Package {
 
     public void addCard(Card card) {
         engine.table.drawPile.add(card);
-
+        card.id = Card.nextCardId;
+        Card.nextCardId++;  // 目前Package管理真实卡牌的唯一ID
     }
 }

@@ -53,6 +53,35 @@ public class UserPlayer extends Player {
     }
 
     /**
+     * 要求用户做一个选择
+     * @param choices 选项的列表
+     * @param forced  是否必须选择
+     * @param prompt  给用户的提示语
+     * @param reason  选择原因，通常给AI做判断用
+     * @return 选择的选项序号。如果不选，就返回null。
+     */
+    @Override
+    protected int chooseChoice(List<String> choices, boolean forced, String prompt, String reason) {
+        while (true) {
+            log.warn(prompt);
+            int size = choices.size();  // 打印选项列表
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < size; i++) {
+                sb.append(i + 1).append(": ").append(choices.get(i));
+                if (i < size - 1 || !forced) sb.append(", ");
+            }
+            if (!forced) sb.append("0: 取消");
+            log.warn(sb.toString());
+
+            int chosen = chooseNumber(choices.size(), forced);
+            if (chosen >= 0) {
+                return chosen;
+            }
+            log.warn("请重新选择：");  // 返回<0的结果就重新询问
+        }
+    }
+
+    /**
      * 要求用户选一个数 [1,max]。
      * 用户输入[1,max]时直接返回，输入0时如果可跳过则返回0，否则返回-1。
      * 输入-1可以调出查看界面，目前只是打印牌桌。-2是debug。-3~-6是作弊。注意，这些结果都会返回-1。

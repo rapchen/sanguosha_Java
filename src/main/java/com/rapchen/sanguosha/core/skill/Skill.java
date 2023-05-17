@@ -29,6 +29,14 @@ public abstract class Skill {
         log.warn("{} 发动了 {}, {}", owner, nameZh, suffix);
     }
 
+    /**
+     * 向某个角色询问是否使用本技能
+     */
+    public boolean askForUse(Player player) {
+        int choice = player.askForChoice(null, false, String.format("是否发动 %s ?", nameZh), name);
+        return choice == 1;
+    }
+
     @Override
     public String toString() {
         return nameZh;

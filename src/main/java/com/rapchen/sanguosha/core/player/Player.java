@@ -130,7 +130,7 @@ public abstract class Player {
     private void doDiscardPhase() {
         phase = Phase.PHASE_DISCARD;
         if (handCards.size() > hp) {
-            askForDiscard(handCards.size() - hp, "h");
+            askForDiscard(handCards.size() - hp, "h", "DiscardPhase");
         }
     }
 
@@ -139,17 +139,16 @@ public abstract class Player {
      */
     private void doEndPhase() {
         phase = Phase.PHASE_END;
-        engine.invoke(new Event(Timing.PHASE_BEGIN, this)
+        engine.trigger(new Event(Timing.PHASE_BEGIN, this)
                 .withField("Phase", Phase.PHASE_END));
     }
 
     public void skipPhase(Phase phase) {
-        xFields.put("SkipPhase_" + phase.name, null);
+        xFields.put("SkipPhase_" + phase.name, true);
     }
 
     public boolean isPhaseSkipped(Phase phase) {
-        boolean skipped = xFields.containsKey("SkipPhase_" + phase.name);
-        xFields.remove("SkipPhase_" + phase.name);
+        boolean skipped = xFields.remove("SkipPhase_" + phase.name) == Boolean.TRUE;
         if (skipped) log.warn("{} 跳过了 {}", this, phase);
         return skipped;
     }
@@ -338,8 +337,8 @@ public abstract class Player {
     /**
      * 弃自己的牌
      */
-    public boolean askForDiscard(int count, String pattern) {
-        return askForDiscard(count, this, true, pattern, null);
+    public boolean askForDiscard(int count, String pattern, String reason) {
+        return askForDiscard(count, this, true, pattern, null, reason);
     }
     /**
      * 要求弃牌
@@ -349,13 +348,14 @@ public abstract class Player {
      * @param forced 是否必须选择
      * @param patten 区域。hej
      * @param prompt 提示语。默认为"请弃置{count}张牌："
+     * @param reason 选牌原因，通常给AI做判断用
      * @return 是否弃牌
      */
-    public boolean askForDiscard(int count, Player target, boolean forced, String patten, String prompt) {
+    public boolean askForDiscard(int count, Player target, boolean forced, String patten, String prompt, String reason) {
         List<Card> discards = new ArrayList<>();
         for (int i = 0; i < count; i++) {
             Card card = askForCardFromPlayer(target, forced, patten,
-                    prompt == null ? String.format("请弃置%d张牌：", count) : prompt, "askForDiscard");
+                    prompt == null ? String.format("请弃置%d张牌：", count) : prompt, reason);
             if (card == null) continue;
             discards.add(card);
             target.doRemoveCard(card);  // 从角色处移除卡牌，避免重复选择（这里不触发失去牌的时机）
@@ -429,6 +429,18 @@ public abstract class Player {
      */
     public abstract <T extends Card> T chooseCard(List<T> cards, boolean forced, String prompt, String reason);
 
+    /**
+     * 要求用户进行选择（默认为选是否）。
+     * @param forced 是否必须选择，非必选的话可以用0跳过
+     */
+    public int askForChoice(List<String> choices, boolean forced, String prompt, String reason) {
+        if (choices == null) {
+            choices = List.of("是");
+        }
+        return chooseChoice(choices, forced, prompt, reason);
+    }
+
+    protected abstract int chooseChoice(List<String> choices, boolean forced, String prompt, String reason);
 
     /**
      * 要求用户选一个数 [1,max]。 -1可以调出查看界面，目前只是打印牌桌
@@ -443,8 +455,12 @@ public abstract class Player {
      */
     public boolean askForDodge(boolean isUse) {
         List<Card> dodges = handCards.stream().filter(card -> card instanceof Dodge).toList();
-        Card card = chooseCard(dodges, false,
-                isUse ? "请使用一张闪，0放弃：" : "请打出一张闪，0放弃：", "askForDodge");
+        engine.trigger(new Event(Timing.CARD_ASKED, this).withField("CardType", Dodge.class));
+        Card card = (Card) xFields.remove("CardProvided");  // 尝试获取技能提供的闪 TODO 一个技能提供卡后是否要打断该事件
+        if (card == null) {
+            card = chooseCard(dodges, false,
+                    isUse ? "请使用一张闪，0放弃：" : "请打出一张闪，0放弃：", "askForDodge");
+        }
         if (card != null) {
             if (isUse) {
                 useCard(card, new ArrayList<>());
@@ -514,9 +530,8 @@ public abstract class Player {
             nulli.targetEffect = effect;  // 标记这张无懈的目标牌
             useCard(nulli, new ArrayList<>());
             nulli.targetEffect = null;
-            if (nulli.xFields.containsKey("Nullified")) {
-                nulli.xFields.remove("Nullified");
-                nulli = null;
+            if (nulli.xFields.remove("Nullified") == Boolean.TRUE) {
+                nulli = null;  // 如果这张无懈被无懈了，就视为没有
             }
         }
         return nulli != null;

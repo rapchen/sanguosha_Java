@@ -48,6 +48,8 @@ public class AIPlayer extends Player {
                 Player target = (Player) xFields.get("askForCardFromPlayer_Target");
                 if (target == this) return forced ? cards.get(0) : null;
                 else return cards.get(0);
+            } case "KylinBowSkill" -> {  // 麒麟弓：弃
+                return cards.get(0);
             } default -> {  // 默认逻辑：必须选就选一张，否则放弃
                 return forced ? cards.get(0) : null;
             }
@@ -67,6 +69,20 @@ public class AIPlayer extends Player {
         // 如果有目标，看目标是谁，如果是对面，则与牌原本的有益性相反
         if (effect.target == null) return 0;
         else return effect.getCard().benefit * (effect.target == this ? 1 : -1);
+    }
+
+    @Override
+    protected int chooseChoice(List<String> choices, boolean forced, String prompt, String reason) {
+        if (choices.isEmpty()) return 1;
+        switch (reason) {
+            case "DoubleSwordSkill" -> {  // 雌雄，总是发动
+                return 1;
+            } case "EightDiagramSkill" -> {  // 八卦，总是发动
+                return 1;
+            } default -> {  // 默认逻辑：必须选就选1，否则放弃
+                return forced ? 1 : 0;
+            }
+        }
     }
 
     @Override

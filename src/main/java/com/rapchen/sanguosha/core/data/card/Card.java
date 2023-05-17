@@ -1,7 +1,10 @@
 package com.rapchen.sanguosha.core.data.card;
 
+import com.rapchen.sanguosha.core.Engine;
 import com.rapchen.sanguosha.core.common.Fields;
 import com.rapchen.sanguosha.core.player.Player;
+import com.rapchen.sanguosha.core.skill.Event;
+import com.rapchen.sanguosha.core.skill.Timing;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -117,22 +120,22 @@ public abstract class Card {
     public Suit suit;
     public Point point;
     public SubType subType;
-    protected int id;  // 在牌堆里的唯一ID，从1开始。虚拟卡<0
+    public int id = -1;  // 在牌堆里的唯一ID，从1开始。虚拟卡<0
     protected String name;  // 牌名。对于基本牌和锦囊牌，牌名即对象的类名；对于装备牌，同类的可能不同名（如赤兔和大宛）
     protected String nameZh;  // 中文牌名，用于显示。
 
     public boolean virtual = false;  // 是否虚拟卡
-    public List<Card> subCards;  // 子卡，通常用于虚拟卡
+    public List<Card> subCards = new ArrayList<>();  // 子卡，通常用于虚拟卡
     public boolean throwAfterUse = true;  // 使用完毕后是否进入弃牌堆。默认进入
     public int benefit = -100;  // 对于目标来说的有益程度。越大越有益，0为无关，负数有害
-    public Fields xFields;  // 额外字段，用于临时存储一些数据
+    public Fields xFields = new Fields();  // 额外字段，用于临时存储一些数据
 
     /**
-     * 创建真实卡牌，ID自增
+     * 创建卡牌。ID自增由Package做
      */
     public Card(Suit suit, Point point) {
-        this(suit, point, nextCardId);
-        nextCardId++;
+        this.suit = suit;
+        this.point = point;
     }
 
     /**
@@ -142,7 +145,6 @@ public abstract class Card {
         this.suit = suit;
         this.point = point;
         this.id = id;
-        this.xFields = new Fields();
     }
 
     public void addSubCards(List<Card> cards) {
@@ -152,6 +154,16 @@ public abstract class Card {
     public void addSubCard(Card card) {
         if (subCards == null) subCards = new ArrayList<>();
         subCards.add(card);
+    }
+
+    public Color getColor() {
+        return suit.color;
+    }
+    public boolean isRed() {
+        return suit.color == Color.RED;
+    }
+    public boolean isBlack() {
+        return suit.color == Color.BLACK;
     }
 
     /* =============== end 通用功能执行 ================ */
@@ -207,6 +219,7 @@ public abstract class Card {
         }
         // 执行效果
         CardUse use = new CardUse(this, source, targets);
+        Engine.eg.trigger(new Event(Timing.TARGET_CHOSEN, source).withField("CardUse", use));  // 指定目标后
         doUseToAll(use);
         for (Player target : targets) {
             CardEffect effect = new CardEffect(use, target);
@@ -220,8 +233,8 @@ public abstract class Card {
     }
 
     private void doUseLog(Player source, List<Player> targets) {
-        log.info("{} {} 使用了 {}", source,
-                targets.isEmpty() ? "" : ("对 " + Player.playersToString(targets)),
+        log.info("{}{} 使用了 {}", source,
+                targets.isEmpty() ? "" : (" 对 " + Player.playersToString(targets)),
                 this);
     }
 

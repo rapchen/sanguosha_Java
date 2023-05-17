@@ -55,7 +55,7 @@ public class SkillManager {
      * 触发一个事件
      * @param event 事件
      */
-    public void invoke(Event event) {
+    public void trigger(Event event) {
         List<TriggerSkill> skills = triggerSkills.get(event.timing);
         if (skills == null) return;
         for (TriggerSkill skill : skills) {
