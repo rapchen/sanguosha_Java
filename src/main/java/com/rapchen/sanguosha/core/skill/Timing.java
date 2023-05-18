@@ -14,7 +14,9 @@ public enum Timing {
 
     // 卡牌使用相关。player为使用者
     CARD_ASKED,  // 被要求打出（或使用闪）一张牌时
-    TARGET_CHOSEN,  // 牌指定目标后。
+    TARGET_CHOSEN,  // 牌指定目标后。修改目标应该在这之前
+    CARD_USED,  // 卡牌使用结束。卡牌的响应也已经结束
+
     // 杀相关
     SLASH_DODGED,  // 杀被闪避时。
 

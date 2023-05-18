@@ -1,5 +1,6 @@
 package com.rapchen.sanguosha.core.player;
 
+import com.rapchen.sanguosha.core.common.Fields;
 import com.rapchen.sanguosha.core.data.card.Card;
 import com.rapchen.sanguosha.core.data.card.equip.EquipCard;
 import com.rapchen.sanguosha.core.data.card.equip.Weapon;
@@ -72,6 +73,12 @@ public class EquipArea {
 
     public int size() {
         return equips.size();
+    }
+
+    /** 防具是否有效 */
+    public boolean isArmorValid() {
+        Fields subFields = (Fields) player.xFields.get("ArmorInvalid");
+        return subFields == null || subFields.isEmpty();
     }
 
     @Override

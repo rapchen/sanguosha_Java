@@ -40,5 +40,10 @@ public class EightDiagram extends Armor {
                 }
             }
         }
+
+        @Override
+        public boolean canTrigger(Event event) {
+            return super.canTrigger(event) && owner.equips.isArmorValid();
+        }
     }
 }

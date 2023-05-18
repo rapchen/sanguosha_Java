@@ -32,4 +32,27 @@ public class Fields extends HashMap<String, Object> {
         put(key, value);
         return this;
     }
+
+    /** 插入二级字段 */
+    public void put(String key, String subKey, Object value) {
+        if (!containsKey(key)) {
+            put(key, new Fields());
+        }
+        Fields subFields = (Fields) get(key);
+        subFields.put(subKey, value);
+    }
+
+    /** 获取二级字段 */
+    public Object get(String key, String subKey) {
+        Fields subFields = (Fields) get(key);
+        if (subFields == null) return null;
+        return subFields.get(subKey);
+    }
+
+    /** 删除二级字段 */
+    public Object remove(String key, String subKey) {
+        Fields subFields = (Fields) get(key);
+        if (subFields == null) return null;
+        return subFields.remove(subKey);
+    }
 }
