@@ -186,6 +186,15 @@ public class Engine {
     }
 
     /**
+     * 触发一个修正（如攻击范围修改、距离修改）。以事件形式发送，返回修改后的值
+     * @param event 事件
+     * @param value 修改前的值
+     */
+    public int triggerModify(Event event, int value) {
+        return skills.triggerModify(event, value);
+    }
+
+    /**
      * 判断游戏是否结束 TODO 多人局
      */
     private void checkGameOver() {

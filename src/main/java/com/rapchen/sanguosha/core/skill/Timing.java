@@ -23,4 +23,7 @@ public enum Timing {
     // 伤害相关。player为伤害制造者
     DAMAGE_DOING,  // 造成伤害时
     DAMAGE_DONE,  // 造成伤害后
+
+    // =============== 以下MD开头为修正时机 ===============
+    MD_SLASH_LIMIT,  // 修正回合内杀的次数限制
 }

@@ -40,7 +40,7 @@ public abstract class Player {
     public EquipArea equips;  // 装备区
     public List<DelayedTrickCard> judgeArea;  // 判定区的延时类锦囊列表，按照使用顺序排列
     public Phase phase = Phase.PHASE_OFF_TURN;  // 当前阶段
-    public int slashTimes = 1;
+    public int slashTimes = 0;  // 当前出牌阶段已使用的杀的数量
     public Fields xFields;  // 额外字段，用于临时存储一些数据
 
     public Player(Engine engine, int id, String name) {
@@ -118,7 +118,7 @@ public abstract class Player {
      */
     private void doPlayPhase() {
         phase = Phase.PHASE_PLAY;
-        slashTimes = 1;
+        slashTimes = 0;  // 重置杀使用数
         while (true) {
             if (!askForPlayCard()) break;
         }
@@ -240,6 +240,13 @@ public abstract class Player {
         Weapon weapon = equips.getWeapon();
         if (weapon != null) return weapon.range;
         return 1;  // 默认1
+    }
+
+    /** 获取杀的次数限制 */
+    public int getSlashLimit() {
+        int limit = 1;
+        limit = engine.triggerModify(new Event(Timing.MD_SLASH_LIMIT, this), limit);
+        return limit;  // 默认1
     }
 
     /** 计算距离 */

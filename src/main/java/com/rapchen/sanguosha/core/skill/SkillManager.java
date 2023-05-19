@@ -64,4 +64,20 @@ public class SkillManager {
             }
         }
     }
+
+    /**
+     * 触发一个修正（如攻击范围修改、距离修改）。以事件形式发送，返回修改后的值
+     * @param event 事件
+     * @param value 修改前的值
+     */
+    public int triggerModify(Event event, int value) {
+        List<TriggerSkill> skills = triggerSkills.get(event.timing);
+        if (skills == null) return value;
+        for (TriggerSkill skill : skills) {
+            if (skill.canTrigger(event)) {
+                value = skill.onModify(event, value);
+            }
+        }
+        return value;
+    }
 }

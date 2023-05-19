@@ -9,4 +9,6 @@ public class SnakeSpear extends Weapon {
     public SnakeSpear(Suit suit, Point point) {
         super(suit, point, "SnakeSpear", "丈八蛇矛", 3);
     }
+
+    // TODO 你可以将两张手牌当【杀】使用或打出。
 }

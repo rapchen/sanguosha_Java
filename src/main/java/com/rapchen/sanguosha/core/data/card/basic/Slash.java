@@ -22,7 +22,7 @@ public class Slash extends BasicCard {
 
     @Override
     public boolean validInPlayPhase(Player player) {
-        return player.slashTimes > 0;
+        return player.slashTimes < player.getSlashLimit();
     }
 
     @Override
@@ -33,7 +33,7 @@ public class Slash extends BasicCard {
 
     @Override
     public void doUseToAll(CardUse use) {
-        use.source.slashTimes--;
+        use.source.slashTimes++;
     }
 
     @Override
