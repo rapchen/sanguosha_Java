@@ -8,6 +8,7 @@ import com.rapchen.sanguosha.core.skill.Timing;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -265,10 +266,14 @@ public abstract class Card {
      */
     public void doResponse(Player source, List<Player> targets) {
         log.info("{} 打出了 {}", source, this);
-        // 弃牌 TODO 不在手牌？虚拟牌？
-        source.handCards.remove(this);
+        // 弃牌
+        source.doRemoveCard(this);
         source.engine.moveToDiscard(this);
     }
+
+    /* =============== end 子类需要实现的具体功能 ================ */
+
+    /* =============== begin 工具方法 ================ */
 
     @Override
     public String toString() {
@@ -293,4 +298,33 @@ public abstract class Card {
         }
         return sb.toString();
     }
+
+    /**
+     * 创造一个无花色点数的临时虚拟牌
+     * @param clazz 牌的类型
+     */
+    public static <T extends Card> T createTmpCard(Class<T> clazz) {
+        try {
+            T card = clazz.getConstructor(Suit.class, Point.class).newInstance(Suit.SUIT_NO, Point.POINT_NO);
+            card.virtual = true;
+            return card;
+        } catch (NoSuchMethodException | InstantiationException |
+                 IllegalAccessException | InvocationTargetException e) {
+            log.info("创建虚拟牌 {} 失败： {}", clazz.getName(), e.toString());
+            return null;
+        }
+    }
+
+    /**
+     * 判断一名角色是否可以在出牌阶段使用某种牌
+     * @param clazz 牌的类型
+     * @param source 角色
+     */
+    public static boolean validInPlayPhase(Class<? extends Card> clazz, Player source) {
+        Card card = createTmpCard(clazz);
+        if (card == null) return false;
+        return card.validInPlayPhase(source);
+    }
+
+    /* =============== end 工具方法 ================ */
 }
