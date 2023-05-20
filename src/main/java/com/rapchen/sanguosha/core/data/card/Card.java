@@ -116,6 +116,17 @@ public abstract class Card {
         }
     }
 
+    public enum Place {
+        DRAW,  // 摸牌堆
+        DISCARD,  // 弃牌堆
+        HAND,  // 手牌
+        EQUIP,  // 装备区
+        JUDGE,  // 判定区
+        JUDGE_CARD,  // 判定牌（临时）
+        HANDLE,  // 处理区（临时）
+        EXTRA,  // 游戏外，角色的额外牌堆
+    }
+
     public static int nextCardId = 1;  // 自增ID，从1开始。保证实体卡牌的唯一性
 
     public Suit suit;
@@ -124,6 +135,8 @@ public abstract class Card {
     public int id = -1;  // 在牌堆里的唯一ID，从1开始。虚拟卡<0
     protected String name;  // 牌名。对于基本牌和锦囊牌，牌名即对象的类名；对于装备牌，同类的可能不同名（如赤兔和大宛）
     protected String nameZh;  // 中文牌名，用于显示。
+    public Place place;  // 卡牌位置。
+    public Player owner = null;  // 卡牌当前所属区域的角色（判定区和判定牌都算）。不属于某个角色则为null
 
     public boolean virtual = false;  // 是否虚拟卡
     public List<Card> subCards = new ArrayList<>();  // 子卡，通常用于虚拟卡
@@ -213,16 +226,14 @@ public abstract class Card {
      */
     public void doUse(Player source, List<Player> targets) {
         doUseLog(source, targets);
-        // 弃牌
-        source.doRemoveCard(this);
-        if (throwAfterUse) {
-            source.engine.moveToDiscard(this);
-        }
+        // 移动到处理区
+        Engine.eg.moveCard(this, Place.HANDLE, null, "Use");
+
         // 执行效果
         CardUse use = new CardUse(this, source, targets);
         Engine.eg.trigger(new Event(Timing.TARGET_CHOSEN, source).withField("CardUse", use));  // 指定目标后
-        doUseToAll(use);
-        for (Player target : targets) {
+        doUseToAll(use);  // 全体效果
+        for (Player target : targets) {  // 单个目标的效果
             CardEffect effect = new CardEffect(use, target);
             use.currentTarget = target;
             // 对每个目标生效前，询问无懈
@@ -230,7 +241,11 @@ public abstract class Card {
                 doEffect(source, target);
             }
         }
-        doAfterUse(use);
+        doAfterUse(use);  // 后处理
+        // 结算完毕，进入弃牌堆
+        if (throwAfterUse) {
+            source.engine.moveToDiscard(this);
+        }
     }
 
     private void doUseLog(Player source, List<Player> targets) {
@@ -267,8 +282,7 @@ public abstract class Card {
     public void doResponse(Player source, List<Player> targets) {
         log.info("{} 打出了 {}", source, this);
         // 弃牌
-        source.doRemoveCard(this);
-        source.engine.moveToDiscard(this);
+        Engine.eg.moveCard(this, Place.DISCARD, null, "Response");
     }
 
     /* =============== end 子类需要实现的具体功能 ================ */

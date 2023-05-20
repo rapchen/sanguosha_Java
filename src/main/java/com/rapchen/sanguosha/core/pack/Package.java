@@ -28,6 +28,8 @@ public abstract class Package {
 
     public void addCard(Card card) {
         engine.table.drawPile.add(card);
+        card.place = Card.Place.DRAW;  // 放到摸牌堆
+
         card.id = Card.nextCardId;
         Card.nextCardId++;  // 目前Package管理真实卡牌的唯一ID
     }

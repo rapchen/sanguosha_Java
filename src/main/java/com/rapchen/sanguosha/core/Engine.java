@@ -4,6 +4,8 @@ import com.rapchen.sanguosha.core.data.Damage;
 import com.rapchen.sanguosha.core.data.Table;
 import com.rapchen.sanguosha.core.data.UserTableVO;
 import com.rapchen.sanguosha.core.data.card.Card;
+import com.rapchen.sanguosha.core.data.card.equip.EquipCard;
+import com.rapchen.sanguosha.core.data.card.trick.DelayedTrickCard;
 import com.rapchen.sanguosha.core.pack.StandardCards;
 import com.rapchen.sanguosha.core.player.*;
 import com.rapchen.sanguosha.core.skill.*;
@@ -96,6 +98,9 @@ public class Engine {
             Collections.shuffle(cards);
             table.drawPile.addAll(cards);
             table.discardPile.clear();
+            for (Card card : cards) {
+                card.place = Card.Place.DRAW;
+            }
         }
         if (table.drawPile.isEmpty()) {
             throw new GameOverException("平局");
@@ -120,10 +125,71 @@ public class Engine {
      * 将牌放入弃牌堆（不管移除，只管添加到弃牌堆）
      */
     public void moveToDiscard(Card card) {
-        table.discardPile.add(card);
+        moveCard(card, Card.Place.DISCARD, null, "");
     }
     public void moveToDiscard(List<Card> cards) {
-        table.discardPile.addAll(cards);
+        moveCards(cards, Card.Place.DISCARD, null, "");
+    }
+
+    /**
+     * 移动牌
+     * @param card 移动的牌
+     * @param targetPlace 目标位置
+     * @param target 目标角色。如果无角色（如弃牌堆）则为null
+     * @param reason 移动原因
+     */
+    public void moveCard(Card card, Card.Place targetPlace, Player target, String reason) {
+        moveCards(Collections.singletonList(card), targetPlace, target, reason);
+    }
+    /**
+     * 移动牌
+     * @param cards 移动的牌
+     * @param targetPlace 目标位置
+     * @param target 目标角色。如果无角色（如弃牌堆）则为null
+     * @param reason 移动原因
+     */
+    public void moveCards(List<Card> cards, Card.Place targetPlace, Player target, String reason) {
+        // 移除牌逻辑
+        for (Card card : cards) {
+            switch (card.place) {
+                case HAND, EQUIP, JUDGE -> {
+                    card.owner.doRemoveCard(card);  // TODO 后面可以按位置拆，但是失去时机可以放一起
+                } case DRAW -> {
+                    table.drawPile.remove(card);
+                } case DISCARD -> {
+                    table.discardPile.remove(card);
+                }
+                // TODO 移除牌的逻辑
+            }
+            card.place = targetPlace;  // 变更卡牌位置
+        }
+        // 添加牌逻辑
+        switch (targetPlace) {
+            case DRAW -> {  // 加入摸牌堆。目前默认是放到牌堆顶
+                for (int i = cards.size() - 1; i >= 0; i--) {
+                    Card card = cards.get(i);
+                    table.drawPile.addFirst(card);
+                }
+            } case DISCARD -> {
+                table.discardPile.addAll(cards);
+            } case HAND -> {
+                target.handCards.addAll(cards);
+            } case EQUIP -> {
+                for (Card card : cards) {
+                    target.equips.putEquip((EquipCard) card);
+                }
+            } case JUDGE -> {
+                for (Card card : cards) {
+                    target.judgeArea.add((DelayedTrickCard) card);
+                }
+            }
+            // TODO 添加牌的逻辑
+        }
+        // 变更卡牌位置对应角色
+        for (Card card : cards) {
+            card.place = targetPlace;
+            card.owner = target;
+        }
     }
 
     // 角色相关

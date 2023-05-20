@@ -159,7 +159,7 @@ public abstract class Player {
     // Card 相关
     public void drawCards(int count) {
         List<Card> cards = engine.getCardsFromDrawPile(count);
-        handCards.addAll(cards);
+        engine.moveCards(cards, Card.Place.HAND, this, "drawCards");
         log.info("{} 摸了{}张牌：{}", this.name, cards.size(), Card.cardsToString(cards));
         // TODO 获得牌事件：只触发一次就行
     }
@@ -281,6 +281,7 @@ public abstract class Player {
      */
     public Judgement doJudge(String nameZh, Function<Card, Boolean> judgeFunc) {
         Card card = engine.getCardFromDrawPile();
+        card.place = Card.Place.JUDGE_CARD;
         // 改判要插在这里
         engine.moveToDiscard(card);
         Boolean success = judgeFunc.apply(card);
@@ -370,7 +371,7 @@ public abstract class Player {
         if (discards.size() < count) {
             return false;  // 弃牌张数不够，放弃弃牌了
         }
-        doDiscard(discards);  // 弃牌、TODO 失去牌时机应该是在这里一起发生，不是一张张
+        doDiscard(discards);  // 执行弃牌：一起移动到弃牌堆
         log.info("{} 弃了 {} {}张牌：{}", this.name, target.name, discards.size(), Card.cardsToString(discards));
         return true;
     }

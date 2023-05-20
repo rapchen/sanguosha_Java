@@ -1,5 +1,6 @@
 package com.rapchen.sanguosha.core.data.card.trick;
 
+import com.rapchen.sanguosha.core.Engine;
 import com.rapchen.sanguosha.core.data.card.CardEffect;
 import com.rapchen.sanguosha.core.player.Player;
 
@@ -27,7 +28,7 @@ public abstract class DelayedTrickCard extends TrickCard {
     @Override
     public void doEffect(Player source, Player target) {
         // 延时类锦囊统一处理逻辑：添加到判定区最后
-        target.judgeArea.add(this);
+        Engine.eg.moveCard(this, Place.JUDGE, target, "useDelayedTrickCard");
     }
 
     /**

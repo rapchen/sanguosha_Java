@@ -1,5 +1,6 @@
 package com.rapchen.sanguosha.core.player;
 
+import com.rapchen.sanguosha.core.Engine;
 import com.rapchen.sanguosha.core.common.Fields;
 import com.rapchen.sanguosha.core.data.card.Card;
 import com.rapchen.sanguosha.core.data.card.equip.EquipCard;
@@ -28,20 +29,19 @@ public class EquipArea {
     }
 
     /**
-     * 使用装备的逻辑。原来对应装备区的装备置入弃牌堆，新的置入对应装备区
+     * 放置装备的底层逻辑。原来对应装备区的装备置入弃牌堆，新的置入对应装备区
      */
-    public void useEquip(EquipCard equip) {
+    public void putEquip(EquipCard equip) {
         EquipCard oldEquip = equips.get(equip.subType);
         if (oldEquip != null) {
-            player.doRemoveCard(oldEquip);  // 为了正确处理卡牌的失去
-            player.engine.moveToDiscard(oldEquip);
+            Engine.eg.moveCard(oldEquip, Card.Place.DISCARD, null, "oldEquip");
             log.warn("{} 装备区的 {} 被置入弃牌堆", player, oldEquip);
         }
         equips.put(equip.subType, equip);
     }
 
     /**
-     * 移除装备
+     * 移除装备的底层逻辑
      * @return 是否有这张装备
      */
     public boolean remove(Card card) {

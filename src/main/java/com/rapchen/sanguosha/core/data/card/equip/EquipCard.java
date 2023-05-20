@@ -29,7 +29,7 @@ public abstract class EquipCard extends Card {
     @Override
     public void doEffect(Player source, Player target) {
         // 装备统一处理：原来对应装备区的装备置入弃牌堆，新的置入对应装备区
-        target.equips.useEquip(this);
+        Engine.eg.moveCard(this, Place.EQUIP, target, "useEquip");
         if (skill != null) {
             skill.owner = target;  // 武器技能拥有者为武器拥有者
             source.engine.skills.add(skill);
@@ -41,6 +41,7 @@ public abstract class EquipCard extends Card {
      */
     public void onRemove() {
         if (skill != null) {
+            skill.owner = null;
             Engine.eg.skills.remove(skill);
         }
     }

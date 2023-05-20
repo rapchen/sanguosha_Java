@@ -1,5 +1,6 @@
 package com.rapchen.sanguosha.core.data.card.trick;
 
+import com.rapchen.sanguosha.core.Engine;
 import com.rapchen.sanguosha.core.data.card.Card;
 import com.rapchen.sanguosha.core.player.Player;
 import lombok.extern.slf4j.Slf4j;
@@ -28,8 +29,7 @@ public class Snatch extends ImmediateTrickCard {
     public void doEffect(Player source, Player target) {
         Card card = source.askForCardFromPlayer(target, true, "hej", "请选择要获取的牌：", "Snatch");
         if (card == null) return;
-        target.doRemoveCard(card);
-        source.handCards.add(card);  // TODO 获得牌的时机
+        Engine.eg.moveCard(card, Place.HAND, source, name);
         log.info("{} 从 {} 处获得了 {}张牌：{}", source.name, target.name, 1, card);
     }
 

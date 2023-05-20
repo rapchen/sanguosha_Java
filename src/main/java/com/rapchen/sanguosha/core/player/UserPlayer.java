@@ -123,6 +123,8 @@ public class UserPlayer extends Player {
             table.drawPile.remove(card);
             table.discardPile.remove(card);
             player.handCards.add(card);
+            card.place = Card.Place.HAND;
+            card.owner = player;
         }
     }
 

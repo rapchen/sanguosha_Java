@@ -33,6 +33,7 @@ public class GrainHarvest extends ImmediateTrickCard {
     @Override
     public void doUseToAll(CardUse use) {
         choiceCards = Engine.eg.getCardsFromDrawPile(use.targets.size());
+        Engine.eg.moveCards(choiceCards, Place.HANDLE, null, name);
         log.info("{} 翻开了五谷牌：{}", use.source.name, Card.cardsToString(choiceCards));
     }
 
@@ -41,7 +42,7 @@ public class GrainHarvest extends ImmediateTrickCard {
         if (choiceCards == null || choiceCards.isEmpty()) return;
         Card card = target.chooseCard(choiceCards, true, "请选择一张五谷牌：", "GrainHarvest");
         choiceCards.remove(card);
-        target.handCards.add(card);
+        Engine.eg.moveCard(card, Place.HAND, target, name);
         log.info("{} 获得了五谷牌：{}", target.name, card);
     }
 
