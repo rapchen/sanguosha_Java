@@ -149,8 +149,14 @@ public class Engine {
      * @param reason 移动原因
      */
     public void moveCards(List<Card> cards, Card.Place targetPlace, Player target, String reason) {
-        // 移除牌逻辑
+        // 处理虚拟牌：虚拟牌的所有子卡都一起移动
+        List<Card> realCards = new ArrayList<>();
         for (Card card : cards) {
+            if (card.virtual) realCards.addAll(card.subCards);
+            else realCards.add(card);
+        }
+        // 移除牌逻辑
+        for (Card card : realCards) {
             switch (card.place) {
                 case HAND, EQUIP, JUDGE -> {
                     card.owner.doRemoveCard(card);  // TODO 后面可以按位置拆，但是失去时机可以放一起
@@ -166,27 +172,27 @@ public class Engine {
         // 添加牌逻辑
         switch (targetPlace) {
             case DRAW -> {  // 加入摸牌堆。目前默认是放到牌堆顶
-                for (int i = cards.size() - 1; i >= 0; i--) {
-                    Card card = cards.get(i);
+                for (int i = realCards.size() - 1; i >= 0; i--) {
+                    Card card = realCards.get(i);
                     table.drawPile.addFirst(card);
                 }
             } case DISCARD -> {
-                table.discardPile.addAll(cards);
+                table.discardPile.addAll(realCards);
             } case HAND -> {
-                target.handCards.addAll(cards);
+                target.handCards.addAll(realCards);
             } case EQUIP -> {
-                for (Card card : cards) {
+                for (Card card : realCards) {
                     target.equips.putEquip((EquipCard) card);
                 }
             } case JUDGE -> {
-                for (Card card : cards) {
+                for (Card card : realCards) {
                     target.judgeArea.add((DelayedTrickCard) card);
                 }
             }
             // TODO 添加牌的逻辑
         }
         // 变更卡牌位置对应角色
-        for (Card card : cards) {
+        for (Card card : realCards) {
             card.place = targetPlace;
             card.owner = target;
         }

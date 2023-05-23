@@ -41,8 +41,8 @@ public abstract class EquipCard extends Card {
      */
     public void onRemove() {
         if (skill != null) {
-            skill.owner = null;
             Engine.eg.skills.remove(skill);
+            skill.owner = null;
         }
     }
 }

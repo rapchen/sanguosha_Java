@@ -4,6 +4,7 @@ import com.rapchen.sanguosha.core.Engine;
 import com.rapchen.sanguosha.core.common.Fields;
 import com.rapchen.sanguosha.core.player.Player;
 import com.rapchen.sanguosha.core.skill.Event;
+import com.rapchen.sanguosha.core.skill.Skill;
 import com.rapchen.sanguosha.core.skill.Timing;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -52,7 +53,7 @@ public abstract class Card {
     }
 
     public enum Point {
-        POINT_NO("0"), POINT_A("A"), POINT_2("2"), POINT_3("3"), POINT_4("4"),
+        POINT_NO(""), POINT_A("A"), POINT_2("2"), POINT_3("3"), POINT_4("4"),
         POINT_5("5"), POINT_6("6"), POINT_7("7"), POINT_8("8"), POINT_9("9"),
         POINT_10("10"), POINT_J("J"), POINT_Q("Q"), POINT_K("K");
         public final String token;
@@ -140,6 +141,7 @@ public abstract class Card {
 
     public boolean virtual = false;  // 是否虚拟卡
     public List<Card> subCards = new ArrayList<>();  // 子卡，通常用于虚拟卡
+    public Skill skill = null;  // 生成卡牌的技能。通常是转化技
     public boolean throwAfterUse = true;  // 使用完毕后是否进入弃牌堆。默认进入
     public int benefit = -100;  // 对于目标来说的有益程度。越大越有益，0为无关，负数有害
     public Fields xFields = new Fields();  // 额外字段，用于临时存储一些数据
@@ -291,7 +293,7 @@ public abstract class Card {
 
     @Override
     public String toString() {
-        return nameZh + "[" + suit + point + "]" + id;
+        return nameZh + "[" + suit + point + "]" + (id > 0 ? id : "");
     }
 
     public static String cardsToString(Collection<? extends Card> cards) {
@@ -326,6 +328,40 @@ public abstract class Card {
                  IllegalAccessException | InvocationTargetException e) {
             log.info("创建虚拟牌 {} 失败： {}", clazz.getName(), e.toString());
             return null;
+        }
+    }
+
+    /**
+     * 根据子卡列表创造一个对应花色点数的虚拟牌
+     * @param clazz 牌的类型
+     * @param subCards 子卡
+     */
+    public static <T extends Card> T createVirtualCard(Class<T> clazz, List<Card> subCards) {
+        T tmpCard = createTmpCard(clazz);
+        if (tmpCard == null) return null;
+        tmpCard.addSubCards(subCards);
+        tmpCard.refreshSuitPoint();
+        return tmpCard;
+    }
+
+    /**
+     * 根据子卡重新确定虚拟卡的花色和点数
+     */
+    public void refreshSuitPoint() {
+        if (subCards == null || subCards.size() == 0) {
+            suit = Suit.SUIT_NO;
+            point = Point.POINT_NO;
+        } else if (subCards.size() == 1) {
+            suit = subCards.get(0).suit;
+            point = subCards.get(0).point;
+        } else {
+            point = Point.POINT_NO;
+            boolean isRed = true, isBlack = true;
+            for (Card subCard : subCards) {
+                if (!subCard.isRed()) isRed = false;
+                if (!subCard.isBlack()) isBlack = false;
+            }
+            suit = isRed ? Suit.SUIT_NO_RED : (isBlack ? Suit.SUIT_NO_BLACK : Suit.SUIT_NO);
         }
     }
 

@@ -23,4 +23,8 @@ public class FakeCard extends Card {
         subCards = new ArrayList<>();
     }
 
+    @Override
+    public String toString() {
+        return nameZh;
+    }
 }

@@ -10,6 +10,7 @@ import com.rapchen.sanguosha.core.data.card.equip.Weapon;
 import com.rapchen.sanguosha.core.data.card.trick.DelayedTrickCard;
 import com.rapchen.sanguosha.core.data.card.trick.Nullification;
 import com.rapchen.sanguosha.core.skill.Event;
+import com.rapchen.sanguosha.core.skill.TransformSkill;
 import com.rapchen.sanguosha.core.skill.Skill;
 import com.rapchen.sanguosha.core.skill.Timing;
 import com.rapchen.sanguosha.exception.BadPlayerException;
@@ -60,7 +61,7 @@ public abstract class Player {
      * 进行一个回合
      */
     public void doTurn() {
-        log.warn("---------------------- 回合开始 ----------------------");
+        log.warn("---------------------- {} 回合开始 ----------------------", this);
         engine.currentPlayer = this;  // 切换当前回合角色
         // TODO 回合开始时机
         doPreparePhase();
@@ -227,6 +228,33 @@ public abstract class Player {
         return count;
     }
 
+    /**
+     * 获取角色处牌的列表
+     * @param target 目标角色。当前角色与目标角色不同时，手牌不可见（作为一张虚拟牌出现）
+     * @param pattern 区域。含h为手牌，e为装备区，j为判定区。如hej为计算所有区域
+     */
+    public List<Card> getCards(Player target, String pattern) {
+        List<Card> cards = new ArrayList<>();
+        if (pattern.contains("h")) {  // 手牌
+            if (target == this) {  // 自己手牌
+                cards.addAll(handCards);
+            } else {  // 他人手牌，不可见
+                if (target.handCards.size() > 0) {  // 所有手牌作为一个选项，随机选一张
+                    Card hCards = new FakeCard( target.handCards.size() + "张手牌");
+                    hCards.addSubCards(target.handCards);
+                    cards.add(hCards);
+                }
+            }
+        }
+        if (pattern.contains("e")) {  // 装备
+            cards.addAll(target.equips.getAll());
+        }
+        if (pattern.contains("j")) {  // 判定区
+            cards.addAll(target.judgeArea);
+        }
+        return cards;
+    }
+
     // Player 相关
     /** 获取其他玩家，按当前回合角色顺序 */
     public List<Player> getOtherPlayers() {
@@ -322,14 +350,27 @@ public abstract class Player {
      * @return 是否出牌。false时出牌结束
      */
     public boolean askForPlayCard() {
-        // 先找出可以使用的牌
-        List<Card> cards = handCards.stream().filter(card -> card.canUseInPlayPhase(this)).toList();
+        // 1. 先找出可以使用的牌
+        List<Card> cards = new ArrayList<>(handCards.stream()
+                .filter(card -> card.canUseInPlayPhase(this)).toList());
+        // 可用的转化技
+        CardAsk ask = new CardAsk(CardAsk.Scene.PLAY, this);
+        cards.addAll(engine.skills.getTransformedCards(ask));
+
+        // 2. 选牌
         Card card = choosePlayCard(cards);
-        if (card != null) {
-            List<Player> targets = chooseTargets(card);
-            useCard(card, targets);
+        if (card == null) return false;
+        // 选择转化技之后的处理逻辑
+        if (card.isVirtual() && card.skill instanceof TransformSkill skill) {
+            card = skill.askForTransform(ask);
         }
-        return card != null;
+
+        // 3. 选择目标
+        List<Player> targets = chooseTargets(card);
+
+        // 4. 使用
+        useCard(card, targets);
+        return true;
     }
 
     protected abstract Card choosePlayCard(List<Card> cards);
@@ -392,24 +433,7 @@ public abstract class Player {
      */
     public Card askForCardFromPlayer(Player target, boolean forced, String pattern, String prompt, String reason) {
         // 准备选项
-        List<Card> choices = new ArrayList<>();
-        if (pattern.contains("h")) {  // 手牌
-            if (target == this) {  // 选自己的牌
-                choices.addAll(handCards);
-            } else {  // 选他人牌
-                if (target.handCards.size() > 0) {  // 所有手牌作为一个选项，随机选一张
-                    Card hCards = new FakeCard( target.handCards.size() + "张手牌");
-                    hCards.addSubCards(target.handCards);
-                    choices.add(hCards);
-                }
-            }
-        }
-        if (pattern.contains("e")) {  // 装备
-            choices.addAll(target.equips.getAll());
-        }
-        if (pattern.contains("j")) {  // 判定区
-            choices.addAll(target.judgeArea);
-        }
+        List<Card> choices = getCards(target, pattern);
 
         if (!choices.isEmpty()) {
             Card card;
@@ -426,6 +450,7 @@ public abstract class Player {
         }
         return null;  // 无牌可选
     }
+
 
     /**
      * 要求用户选一张牌
@@ -484,8 +509,9 @@ public abstract class Player {
      * @return 是否打出
      */
     public boolean askForSlash() {
-        List<Card> slashes = handCards.stream().filter(card -> card instanceof Slash).toList();
-        Card card = chooseCard(slashes, false, "请打出一张杀，0放弃：", "askForSlash");
+        CardAsk ask = new CardAsk(Slash.class, CardAsk.Scene.RESPONSE, this,
+                "askForSlash", "请打出一张杀，0放弃：");
+        Card card = askForCard(ask);
         if (card != null) responseCard(card, new ArrayList<>());
         return card != null;
     }
@@ -543,6 +569,22 @@ public abstract class Player {
             }
         }
         return nulli != null;
+    }
+
+    /**
+     * 要求角色使用/打出一张牌。这里处理可用牌、技能列表等逻辑，实际选牌交给chooseCard TODO
+     * @return 使用/打出的牌
+     */
+    public Card askForCard(CardAsk ask) {
+        List<Card> cards = new ArrayList<>(handCards.stream().filter(ask::matches).toList());
+        cards.addAll(engine.skills.getTransformedCards(ask));
+        Card card = chooseCard(cards, false, ask.prompt, ask.reason);
+        if (card == null) return null;
+        // 选择转化技之后的处理逻辑
+        if (card.isVirtual() && card.skill instanceof TransformSkill skill) {
+            card = skill.askForTransform(ask);
+        }
+        return card;
     }
 
     /* =============== end 要求玩家操作的方法 ================ */
