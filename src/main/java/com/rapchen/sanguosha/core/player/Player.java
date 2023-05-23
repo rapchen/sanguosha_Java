@@ -9,6 +9,7 @@ import com.rapchen.sanguosha.core.data.card.equip.EquipCard;
 import com.rapchen.sanguosha.core.data.card.equip.Weapon;
 import com.rapchen.sanguosha.core.data.card.trick.DelayedTrickCard;
 import com.rapchen.sanguosha.core.data.card.trick.Nullification;
+import com.rapchen.sanguosha.core.data.general.General;
 import com.rapchen.sanguosha.core.skill.Event;
 import com.rapchen.sanguosha.core.skill.TransformSkill;
 import com.rapchen.sanguosha.core.skill.Skill;
@@ -37,9 +38,14 @@ public abstract class Player {
     public boolean alive = true;
     public int hp;
     public int maxHp;
+    public General.Gender gender = General.Gender.GENDER_NO;
+    public General general;  // 武将
+    public List<Skill> skills = new ArrayList<>();  // 技能
+
     public List<Card> handCards;  // 手牌
     public EquipArea equips;  // 装备区
     public List<DelayedTrickCard> judgeArea;  // 判定区的延时类锦囊列表，按照使用顺序排列
+
     public Phase phase = Phase.PHASE_OFF_TURN;  // 当前阶段
     public int slashTimes = 0;  // 当前出牌阶段已使用的杀的数量
     public Fields xFields;  // 额外字段，用于临时存储一些数据
@@ -51,9 +57,6 @@ public abstract class Player {
         this.handCards = new ArrayList<>();
         this.equips = new EquipArea(this);
         this.judgeArea = new ArrayList<>();
-        // TODO 武将
-        this.hp = 4;
-        this.maxHp = 4;
         this.xFields = new Fields();
     }
 
@@ -324,6 +327,24 @@ public abstract class Player {
         for (Player player : engine.getAllPlayers()) {
             while (hp <= 0) {
                 if (!player.askForPeach(this)) break;
+            }
+        }
+    }
+
+    // General、Skill相关
+    /**
+     * 设置武将
+     */
+    public void setGeneral(General general) {
+        this.general = general;
+        gender = general.gender;
+        maxHp = general.maxHp;
+        hp = maxHp;
+        for (Class<? extends Skill> skillClass : general.skills) {
+            Skill skill = Skill.createSkill(skillClass);
+            if (skill != null) {
+                skill.owner = this;
+                engine.skills.add(skill);
             }
         }
     }
@@ -603,7 +624,7 @@ public abstract class Player {
 
     @Override
     public String toString() {
-        return name;  // TODO 将名+位置？
+        return general + "(" + name + ")";
     }
 
     /**

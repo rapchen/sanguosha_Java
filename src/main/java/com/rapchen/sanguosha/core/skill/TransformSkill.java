@@ -2,6 +2,7 @@ package com.rapchen.sanguosha.core.skill;
 
 import com.rapchen.sanguosha.core.data.card.Card;
 import com.rapchen.sanguosha.core.data.card.CardAsk;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.List;
  * @author Chen Runwen
  * @time 2023/5/14 12:14
  */
+@Slf4j
 public abstract class TransformSkill extends Skill {
 
     public int maxCardCount = 1;  // 最大可选牌数。
@@ -72,6 +74,8 @@ public abstract class TransformSkill extends Skill {
         // 创建转化后的卡牌
         Card servedAs = serveAs();
         servedAs.setSkill(this);
+        log.warn("{} 发动了 {}, 将 {} 当作 {}",
+                owner, this, Card.cardsToString(chosenCards), servedAs);
         return servedAs;
     }
 }

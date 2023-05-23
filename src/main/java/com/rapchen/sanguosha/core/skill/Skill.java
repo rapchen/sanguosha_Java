@@ -3,6 +3,8 @@ package com.rapchen.sanguosha.core.skill;
 import com.rapchen.sanguosha.core.player.Player;
 import lombok.extern.slf4j.Slf4j;
 
+import java.lang.reflect.InvocationTargetException;
+
 /**
  * 技能抽象类
  * @author Chen Runwen
@@ -41,4 +43,20 @@ public abstract class Skill {
     public String toString() {
         return nameZh;
     }
+
+
+    /**
+     * 创造一个技能的实例
+     * @param clazz 技能的类型
+     */
+    public static <T extends Skill> T createSkill(Class<T> clazz) {
+        try {
+            return clazz.getConstructor().newInstance();
+        } catch (NoSuchMethodException | InstantiationException |
+                 IllegalAccessException | InvocationTargetException e) {
+            log.info("创建技能 {} 失败： {}", clazz.getName(), e.toString());
+            return null;
+        }
+    }
+
 }

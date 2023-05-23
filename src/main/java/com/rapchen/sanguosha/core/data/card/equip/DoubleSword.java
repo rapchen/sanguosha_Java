@@ -29,7 +29,7 @@ public class DoubleSword extends Weapon {
             final CardUse use = (CardUse) event.xField.get("CardUse");
             if (!(use.card instanceof Slash)) return;
             for (Player target : use.targets) {
-                // TODO 判断性别
+                if (owner.gender == target.gender) continue;
                 if (askForUse(owner)) {
                     boolean discard = target.askForDiscard(1, target, false, "h",
                             String.format("%s 发动了 %s, 请弃置一张手牌，否则对方摸一张牌", owner, this), name);

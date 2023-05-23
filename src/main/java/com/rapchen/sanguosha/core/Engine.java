@@ -6,6 +6,8 @@ import com.rapchen.sanguosha.core.data.UserTableVO;
 import com.rapchen.sanguosha.core.data.card.Card;
 import com.rapchen.sanguosha.core.data.card.equip.EquipCard;
 import com.rapchen.sanguosha.core.data.card.trick.DelayedTrickCard;
+import com.rapchen.sanguosha.core.data.general.standard.BaiBan;
+import com.rapchen.sanguosha.core.data.general.standard.DiaoChan;
 import com.rapchen.sanguosha.core.pack.StandardCards;
 import com.rapchen.sanguosha.core.player.*;
 import com.rapchen.sanguosha.core.skill.*;
@@ -37,7 +39,6 @@ public class Engine {
     public void gameStart() {
         // 准备工作
         random = new Random();
-        // 创建table
         table = new Table();
         // 初始化角色 TODO 多人局
         players = new ArrayList<>();
@@ -46,8 +47,9 @@ public class Engine {
         playersWithDead = new ArrayList<>(players);
         // TODO 选将
         skills = new SkillManager();
-        players.get(0).addSkill(BiYue.class);
-        // players.get(1).chooseGeneral();
+        players.get(0).setGeneral(new DiaoChan());
+        players.get(1).setGeneral(new BaiBan());
+        // players.get(0).chooseGeneral();
         // 初始化牌堆
         initPile();
         // 游戏开始
@@ -61,6 +63,7 @@ public class Engine {
                 doOneRound();
             }
         } catch (GameOverException e) {
+            // 游戏结束
             log.warn(e.getMessage());
             log.warn("========================================================");
             gameStart();

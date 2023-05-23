@@ -28,6 +28,9 @@ public class SkillManager {
      */
     public void add(Skill skill) {
         skills.add(skill);
+        if (skill.owner != null) {
+            skill.owner.skills.add(skill);
+        }
         if (skill instanceof TriggerSkill tSkill) {
             addTriggerSkill(tSkill);
         } else if (skill instanceof TransformSkill tSkill) {
@@ -43,6 +46,9 @@ public class SkillManager {
      */
     public void remove(Skill skill) {
         skills.remove(skill);
+        if (skill.owner != null) {
+            skill.owner.skills.remove(skill);
+        }
         if (skill instanceof TriggerSkill tSkill) {
             removeTriggerSkill(tSkill);
         } else if (skill instanceof TransformSkill tSkill) {
