@@ -16,8 +16,8 @@ import static com.rapchen.sanguosha.core.data.card.Card.Suit.*;
  * @time 2023/5/5 17:32
  */
 public class StandardCards extends Package {
-    public StandardCards(Engine engine) {
-        super(engine);
+    public StandardCards() {
+        super();
         name = "standardCards";
         nameZh = "标准包";
         isCardPack = true;

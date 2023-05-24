@@ -9,7 +9,7 @@ import com.rapchen.sanguosha.core.data.card.equip.EquipCard;
 import com.rapchen.sanguosha.core.data.card.equip.Weapon;
 import com.rapchen.sanguosha.core.data.card.trick.DelayedTrickCard;
 import com.rapchen.sanguosha.core.data.card.trick.Nullification;
-import com.rapchen.sanguosha.core.data.general.General;
+import com.rapchen.sanguosha.core.general.General;
 import com.rapchen.sanguosha.core.skill.Event;
 import com.rapchen.sanguosha.core.skill.TransformSkill;
 import com.rapchen.sanguosha.core.skill.Skill;
@@ -347,6 +347,7 @@ public abstract class Player {
                 engine.skills.add(skill);
             }
         }
+        log.warn("{} 选择了武将 {}", this, general);
     }
 
     /** 添加技能 */
@@ -384,6 +385,7 @@ public abstract class Player {
         // 选择转化技之后的处理逻辑
         if (card.isVirtual() && card.skill instanceof TransformSkill skill) {
             card = skill.askForTransform(ask);
+            if (card == null) return false;
         }
 
         // 3. 选择目标
@@ -482,6 +484,16 @@ public abstract class Player {
      * @return 选择的牌。如果不选，就返回null。
      */
     public abstract <T extends Card> T chooseCard(List<T> cards, boolean forced, String prompt, String reason);
+
+    /**
+     * 要求用户选一个武将
+     * @param generals 可选武将的列表
+     * @param forced 是否必须选择
+     * @param prompt 给用户的提示语
+     * @param reason 选择原因，通常给AI做判断用
+     * @return 选择的武将。如果不选，就返回null。
+     */
+    public abstract <T extends General> T chooseGeneral(List<T> generals, boolean forced, String prompt, String reason);
 
     /**
      * 要求用户进行选择（默认为选是否）。
@@ -599,7 +611,7 @@ public abstract class Player {
     public Card askForCard(CardAsk ask) {
         List<Card> cards = new ArrayList<>(handCards.stream().filter(ask::matches).toList());
         cards.addAll(engine.skills.getTransformedCards(ask));
-        Card card = chooseCard(cards, false, ask.prompt, ask.reason);
+        Card card = chooseCard(cards, ask.forced, ask.prompt, ask.reason);
         if (card == null) return null;
         // 选择转化技之后的处理逻辑
         if (card.isVirtual() && card.skill instanceof TransformSkill skill) {

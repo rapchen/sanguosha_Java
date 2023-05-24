@@ -26,6 +26,8 @@ public class CardAsk {
 
     public Player player;  // 被要求的角色
 
+    public boolean forced = false;  // 是否强制使用
+
     public String reason;  // 原因
 
     public String prompt;  // 提示词

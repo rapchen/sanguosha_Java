@@ -6,8 +6,8 @@ import com.rapchen.sanguosha.core.data.UserTableVO;
 import com.rapchen.sanguosha.core.data.card.Card;
 import com.rapchen.sanguosha.core.data.card.equip.EquipCard;
 import com.rapchen.sanguosha.core.data.card.trick.DelayedTrickCard;
-import com.rapchen.sanguosha.core.data.general.standard.BaiBan;
-import com.rapchen.sanguosha.core.data.general.standard.DiaoChan;
+import com.rapchen.sanguosha.core.general.GeneralManager;
+import com.rapchen.sanguosha.core.general.standard.BaiBan;
 import com.rapchen.sanguosha.core.pack.StandardCards;
 import com.rapchen.sanguosha.core.player.*;
 import com.rapchen.sanguosha.core.skill.*;
@@ -31,6 +31,7 @@ public class Engine {
     public List<Player> playersWithDead;  // 包括死亡武将在内的
     public Player currentPlayer;  // 当前回合角色
     public SkillManager skills;  // 技能管理器
+    public GeneralManager generals;  // 武将管理器
 
     public Random random;
 
@@ -45,13 +46,18 @@ public class Engine {
         players.add(new UserPlayer(this, 0, "user"));
         players.add(new AIPlayer(this, 1,"AI"));
         playersWithDead = new ArrayList<>(players);
-        // TODO 选将
+
+        // 选将
         skills = new SkillManager();
-        players.get(0).setGeneral(new DiaoChan());
+        generals = new GeneralManager();
+        generals.init();
+        generals.chooseGeneral(players.get(0));
+//        players.get(0).setGeneral(new DiaoChan());
         players.get(1).setGeneral(new BaiBan());
-        // players.get(0).chooseGeneral();
+
         // 初始化牌堆
         initPile();
+
         // 游戏开始
         // 初始手牌
         for (Player player : players) {
@@ -83,7 +89,7 @@ public class Engine {
 
     private void initPile() {
         Card.nextCardId = 1;  // 重置Card的自增ID
-        new StandardCards(this).init();
+        new StandardCards().init();
         // 洗牌
         List<Card> cards = new ArrayList<>(table.drawPile);
         Collections.shuffle(cards);

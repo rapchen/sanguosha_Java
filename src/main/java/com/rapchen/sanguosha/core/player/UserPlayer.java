@@ -1,8 +1,10 @@
 package com.rapchen.sanguosha.core.player;
 
 import com.rapchen.sanguosha.core.Engine;
+import com.rapchen.sanguosha.core.common.Utils;
 import com.rapchen.sanguosha.core.data.Table;
 import com.rapchen.sanguosha.core.data.card.Card;
+import com.rapchen.sanguosha.core.general.General;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -47,6 +49,22 @@ public class UserPlayer extends Player {
             int chosen = chooseNumber(cards.size(), forced);
             if (chosen >= 0) {
                 return chosen == 0 ? null : cards.get(chosen - 1);
+            }
+            log.warn("请重新选择：");  // 返回<0的结果就重新询问
+        }
+    }
+
+    /**
+     * 要求用户选一个武将
+     */
+    @Override
+    public <T extends General> T chooseGeneral(List<T> generals, boolean forced, String prompt, String reason) {
+        while (true) {
+            log.warn(prompt);
+            log.warn(Utils.objectsToString(generals, true));
+            int chosen = chooseNumber(generals.size(), forced);
+            if (chosen >= 0) {
+                return chosen == 0 ? null : generals.get(chosen - 1);
             }
             log.warn("请重新选择：");  // 返回<0的结果就重新询问
         }

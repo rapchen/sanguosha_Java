@@ -73,6 +73,7 @@ public abstract class TransformSkill extends Skill {
         }
         // 创建转化后的卡牌
         Card servedAs = serveAs();
+        if (servedAs == null) return null;
         servedAs.setSkill(this);
         log.warn("{} 发动了 {}, 将 {} 当作 {}",
                 owner, this, Card.cardsToString(chosenCards), servedAs);

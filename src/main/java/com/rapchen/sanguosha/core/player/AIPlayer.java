@@ -4,6 +4,7 @@ import com.rapchen.sanguosha.core.Engine;
 import com.rapchen.sanguosha.core.data.card.Card;
 import com.rapchen.sanguosha.core.data.card.CardEffect;
 import com.rapchen.sanguosha.core.data.card.trick.Nullification;
+import com.rapchen.sanguosha.core.general.General;
 
 import java.util.List;
 
@@ -55,6 +56,11 @@ public class AIPlayer extends Player {
             }
         }
         // return cards.get(0);
+    }
+
+    @Override
+    public <T extends General> T chooseGeneral(List<T> generals, boolean forced, String prompt, String reason) {
+        return generals.get(0);
     }
 
     /**

@@ -1,12 +1,14 @@
 package com.rapchen.sanguosha.core.data.card.equip;
 
 import com.rapchen.sanguosha.core.data.card.Card;
+import com.rapchen.sanguosha.core.data.card.CardAsk;
 import com.rapchen.sanguosha.core.data.card.basic.Slash;
 import com.rapchen.sanguosha.core.player.Player;
 import com.rapchen.sanguosha.core.skill.Event;
 import com.rapchen.sanguosha.core.skill.Timing;
 import com.rapchen.sanguosha.core.skill.TriggerSkill;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -30,8 +32,9 @@ public class CrescentBlade extends Weapon {
         @Override
         public void onTrigger(Event event) {
             final Player target = (Player) event.xField.get("Target");
-            List<Card> slashes = owner.handCards.stream().filter(card -> card instanceof Slash).toList();
-            Card card = owner.chooseCard(slashes, false, "你可以使用青龙偃月刀，对目标角色再使用一张杀：", "askForSlash");
+            CardAsk ask = new CardAsk(Slash.class, CardAsk.Scene.USE, owner,
+                    "askForSlash", "你可以使用青龙偃月刀，对目标角色再使用一张杀：");
+            Card card = owner.askForCard(ask);
             if (card != null) {
                 doLog();
                 owner.useCard(card, Collections.singletonList(target));

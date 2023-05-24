@@ -2,6 +2,7 @@ package com.rapchen.sanguosha.core.pack;
 
 import com.rapchen.sanguosha.core.Engine;
 import com.rapchen.sanguosha.core.data.card.Card;
+import com.rapchen.sanguosha.core.general.General;
 
 /**
  * 扩展包的抽象父类
@@ -10,15 +11,9 @@ import com.rapchen.sanguosha.core.data.card.Card;
  */
 public abstract class Package {
 
-    protected Engine engine;
-
     protected String name;  // 包名
     protected String nameZh;  // 中文包名，用于显示。
     boolean isCardPack = false;  // 卡牌包还是武将包
-
-    public Package(Engine engine) {
-        this.engine = engine;
-    }
 
     /**
      * 游戏开始时，进行初始化。对于卡牌包是加入牌堆；武将包是加入将池
@@ -27,10 +22,14 @@ public abstract class Package {
     }
 
     public void addCard(Card card) {
-        engine.table.drawPile.add(card);
+        Engine.eg.table.drawPile.add(card);
         card.place = Card.Place.DRAW;  // 放到摸牌堆
 
         card.id = Card.nextCardId;
         Card.nextCardId++;  // 目前Package管理真实卡牌的唯一ID
+    }
+
+    public void addGeneral(General general) {
+        Engine.eg.generals.generals.add(general);
     }
 }
