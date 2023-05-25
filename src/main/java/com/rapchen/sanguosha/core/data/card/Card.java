@@ -134,8 +134,8 @@ public abstract class Card {
     public Point point;
     public SubType subType;
     public int id = -1;  // 在牌堆里的唯一ID，从1开始。虚拟卡<0
-    protected String name;  // 牌名。对于基本牌和锦囊牌，牌名即对象的类名；对于装备牌，同类的可能不同名（如赤兔和大宛）
-    protected String nameZh;  // 中文牌名，用于显示。
+    public String name;  // 牌名。对于基本牌和锦囊牌，牌名即对象的类名；对于装备牌，同类的可能不同名（如赤兔和大宛）
+    public String nameZh;  // 中文牌名，用于显示。
     public Place place;  // 卡牌位置。
     public Player owner = null;  // 卡牌当前所属区域的角色（判定区和判定牌都算）。不属于某个角色则为null
 
@@ -206,18 +206,42 @@ public abstract class Card {
     public List<Player> getAvailableTargets(Player source) {
         List<Player> targets = new ArrayList<>();
         for (Player target : source.engine.getAllPlayers()) {
-            if (canUseTo(source, target)) targets.add(target);
+            if (canUseToDistance(source, target)) targets.add(target);
         }
         return targets;
     }
 
     /**
-     * 检测此牌是否可用。默认能对所有其他角色使用。
+     * 检测此牌是否可用。模板方法，在canUseTo的基础上检查距离。
+     * @param source 使用者
+     * @param target 目标
+     */
+    public boolean canUseToDistance(Player source, Player target) {
+        int distanceLimit = distanceLimit(source, target);
+        Event event = new Event(Timing.MD_DISTANCE_LIMIT, source)
+                .withField("Target", target)
+                .withField("Card", this);
+        distanceLimit = Engine.eg.triggerModify(event, distanceLimit);  // 触发距离限制的修正
+        return canUseTo(source, target) &&
+                source.getDistance(target) <= distanceLimit;
+    }
+
+    /**
+     * 检测此牌是否可用（忽略距离检查）。默认能对所有其他角色使用。
      * @param source 使用者
      * @param target 目标
      */
     public boolean canUseTo(Player source, Player target) {
         return target != source;
+    }
+
+    /**
+     * 此牌可用的最大距离限制。默认无限制。
+     * @param source 使用者
+     * @param target 目标
+     */
+    public int distanceLimit(Player source, Player target) {
+        return 10000;
     }
 
     /**
@@ -233,7 +257,10 @@ public abstract class Card {
 
         // 执行效果
         CardUse use = new CardUse(this, source, targets);
+        Engine.eg.trigger(new Event(Timing.CARD_USING, source).withField("CardUse", use));  // 卡牌使用时
+        // TODO 这里插入改变目标的时机
         Engine.eg.trigger(new Event(Timing.TARGET_CHOSEN, source).withField("CardUse", use));  // 指定目标后
+
         doUseToAll(use);  // 全体效果
         for (Player target : targets) {  // 单个目标的效果
             CardEffect effect = new CardEffect(use, target);
@@ -244,6 +271,7 @@ public abstract class Card {
             }
         }
         doAfterUse(use);  // 后处理
+
         // 结算完毕，进入弃牌堆
         if (throwAfterUse) {
             source.engine.moveToDiscard(this);

@@ -430,7 +430,7 @@ public abstract class Player {
         List<Card> discards = new ArrayList<>();
         for (int i = 0; i < count; i++) {
             Card card = askForCardFromPlayer(target, forced, patten,
-                    prompt == null ? String.format("请弃置%d张牌：", count) : prompt, reason);
+                    prompt == null ? String.format("请弃置 %s %d张牌：", target, count) : prompt, reason);
             if (card == null) continue;
             discards.add(card);
             target.doRemoveCard(card);  // 从角色处移除卡牌，避免重复选择（这里不触发失去牌的时机）

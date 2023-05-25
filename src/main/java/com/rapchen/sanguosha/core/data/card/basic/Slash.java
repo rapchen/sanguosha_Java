@@ -26,9 +26,8 @@ public class Slash extends BasicCard {
     }
 
     @Override
-    public boolean canUseTo(Player source, Player target) {
-        return super.canUseTo(source, target)
-                && source.getDistance(target) <= source.getRange();
+    public int distanceLimit(Player source, Player target) {
+        return source.getRange();
     }
 
     @Override

@@ -16,6 +16,7 @@ public abstract class Skill {
     public String nameZh;  // 中文技能名，用于显示。
     public Player owner;  // 技能拥有者
     public boolean compulsory = false;  // 是否是锁定技
+    public boolean useByDefault = false;  // 是否默认发动
 
     public Skill(String name, String nameZh) {
         this.name = name;
@@ -36,6 +37,7 @@ public abstract class Skill {
      * 向某个角色询问是否使用本技能
      */
     public boolean askForUse(Player player) {
+        if (useByDefault) return true;  // 默认发动
         int choice = player.askForChoice(null, false, String.format("是否发动 %s ?", nameZh), name);
         return choice == 1;
     }
