@@ -267,7 +267,7 @@ public abstract class Card {
             use.currentTarget = target;
             // 对每个目标生效前，询问无懈
             if (!checkCanceled(effect)) {
-                doEffect(source, target);
+                doEffect(effect);
             }
         }
         doAfterUse(use);  // 后处理
@@ -300,7 +300,7 @@ public abstract class Card {
     /**
      * 对单个目标使用的效果。如果对每个人效果都一样，那可以直接重写这个，否则用doUseToAll。
      */
-    public void doEffect(Player source, Player target) {}
+    public void doEffect(CardEffect effect) {}
 
     /** 牌使用完的后处理（如五谷牌进弃牌堆） */
     public void doAfterUse(CardUse use) {}

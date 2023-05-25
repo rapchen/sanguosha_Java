@@ -26,20 +26,20 @@ public abstract class DelayedTrickCard extends TrickCard {
     }
 
     @Override
-    public void doEffect(Player source, Player target) {
+    public void doEffect(CardEffect effect) {
         // 延时类锦囊统一处理逻辑：添加到判定区最后
-        Engine.eg.moveCard(this, Place.JUDGE, target, "useDelayedTrickCard");
+        Engine.eg.moveCard(this, Place.JUDGE, effect.target, "useDelayedTrickCard");
     }
 
     /**
      * 延时类锦囊的延时效果。在判定阶段触发，而非在使用时触发。这个效果会被无懈
      */
-    public void doDelayedEffect(Player target) {}
+    public void doDelayedEffect(CardEffect effect) {}
 
     /**
      * 延时类锦囊的后处理，默认是进弃牌堆，而闪电则是转移。这个效果不会被无懈
      */
     public void doAfterDelayedEffect(Player target) {
-        target.engine.moveToDiscard(this);
+        Engine.eg.moveToDiscard(this);
     }
 }

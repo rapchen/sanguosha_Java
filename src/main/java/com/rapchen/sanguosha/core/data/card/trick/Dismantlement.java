@@ -1,6 +1,7 @@
 package com.rapchen.sanguosha.core.data.card.trick;
 
 import com.rapchen.sanguosha.core.data.card.Card;
+import com.rapchen.sanguosha.core.data.card.CardEffect;
 import com.rapchen.sanguosha.core.player.Player;
 
 /**
@@ -21,7 +22,8 @@ public class Dismantlement extends ImmediateTrickCard {
     }
 
     @Override
-    public void doEffect(Player source, Player target) {
+    public void doEffect(CardEffect effect) {
+        Player source = effect.getSource(), target = effect.target;
         source.askForDiscard(1, target, true, "hej", null, name);
     }
 

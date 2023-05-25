@@ -2,6 +2,7 @@ package com.rapchen.sanguosha.core.player;
 
 import com.rapchen.sanguosha.core.Engine;
 import com.rapchen.sanguosha.core.common.Utils;
+import com.rapchen.sanguosha.core.data.Damage;
 import com.rapchen.sanguosha.core.data.Table;
 import com.rapchen.sanguosha.core.data.card.Card;
 import com.rapchen.sanguosha.core.general.General;
@@ -149,6 +150,6 @@ public class UserPlayer extends Player {
     /** 作弊伤害 */
     private void cheatDamage(Player source, Player target) {
         int damageCnt = chooseNumber(10000, false);
-        engine.doDamage(source, target, damageCnt);
+        engine.doDamage(new Damage(source, target, damageCnt, "cheatDamage"));
     }
 }

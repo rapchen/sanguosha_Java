@@ -1,6 +1,8 @@
 package com.rapchen.sanguosha.core.data.card.basic;
 
 import com.rapchen.sanguosha.core.Engine;
+import com.rapchen.sanguosha.core.data.Damage;
+import com.rapchen.sanguosha.core.data.card.CardEffect;
 import com.rapchen.sanguosha.core.data.card.CardUse;
 import com.rapchen.sanguosha.core.player.Player;
 import com.rapchen.sanguosha.core.skill.Event;
@@ -36,7 +38,8 @@ public class Slash extends BasicCard {
     }
 
     @Override
-    public void doEffect(Player source, Player target) {
+    public void doEffect(CardEffect effect) {
+        Player source = effect.getSource(), target = effect.target;
         boolean dodged = false;
         if (this.xFields.remove("CannotDodge", target.idStr()) != Boolean.TRUE) {  // 是否可闪避
             dodged = target.askForDodge(true);
@@ -48,7 +51,7 @@ public class Slash extends BasicCard {
             }
         }
         if (!dodged) {
-            source.doDamage(target, 1);
+            source.doDamage(new Damage(effect));
         }
     }
 }

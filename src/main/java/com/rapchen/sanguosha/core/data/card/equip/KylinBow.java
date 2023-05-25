@@ -1,6 +1,7 @@
 package com.rapchen.sanguosha.core.data.card.equip;
 
 import com.rapchen.sanguosha.core.data.Damage;
+import com.rapchen.sanguosha.core.data.card.basic.Slash;
 import com.rapchen.sanguosha.core.player.Player;
 import com.rapchen.sanguosha.core.skill.Event;
 import com.rapchen.sanguosha.core.skill.Timing;
@@ -28,9 +29,13 @@ public class KylinBow extends Weapon {
 
         @Override
         public void onTrigger(Event event) {
+            // 检验：杀造成的伤害
             final Damage damage = (Damage) event.xField.get("Damage");
+            if (damage.effect == null || !(damage.effect.getCard() instanceof Slash)) return;
             Player target = damage.target;
             if (target == null) return;
+
+            // 找马
             List<EquipCard> horses = new ArrayList<>();
             EquipCard horse = target.equips.get(SubType.EQUIP_HORSE_DEF);
             if (horse != null) horses.add(horse);

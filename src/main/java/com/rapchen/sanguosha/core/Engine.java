@@ -225,16 +225,16 @@ public class Engine {
     /**
      * 造成伤害。source可以是null
      */
-    public void doDamage(Player source, Player target, int damageCount) {
-        Damage damage = new Damage(source, target, damageCount);
+    public void doDamage(Damage damage) {
+        Player source = damage.source, target = damage.target;
         if (source != null) {  // 造成伤害时
             trigger(new Event(Timing.DAMAGE_DOING, source).withField("Damage", damage));
         }
-        target.hp -= damageCount;
+        target.hp -= damage.count;
         if (source == null) {
-            log.info("{} 受到了 {} 点伤害，无伤害来源", target, damageCount);
+            log.info("{} 受到了 {} 点伤害，无伤害来源", target, damage.count);
         } else {
-            log.info("{} 对 {} 造成了 {} 点伤害", source, target, damageCount);
+            log.info("{} 对 {} 造成了 {} 点伤害", source, target, damage.count);
         }
         checkDeath(target);
         if (source != null) {  // 造成伤害后

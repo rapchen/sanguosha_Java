@@ -1,5 +1,7 @@
 package com.rapchen.sanguosha.core.data.card.trick;
 
+import com.rapchen.sanguosha.core.data.Damage;
+import com.rapchen.sanguosha.core.data.card.CardEffect;
 import com.rapchen.sanguosha.core.player.Player;
 
 /**
@@ -15,9 +17,10 @@ public class ArchersAttack extends ImmediateTrickCard {
     }
 
     @Override
-    public void doEffect(Player source, Player target) {
+    public void doEffect(CardEffect effect) {
+        Player source = effect.getSource(), target = effect.target;
         if (!target.askForDodge(false)) {
-            source.doDamage(target, 1);
+            source.doDamage(new Damage(effect));
         }
     }
 

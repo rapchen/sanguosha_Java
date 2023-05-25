@@ -1,5 +1,6 @@
 package com.rapchen.sanguosha.core.data.card.basic;
 
+import com.rapchen.sanguosha.core.data.card.CardEffect;
 import com.rapchen.sanguosha.core.player.Phase;
 import com.rapchen.sanguosha.core.player.Player;
 
@@ -24,8 +25,8 @@ public class Peach extends BasicCard {
     }
 
     @Override
-    public void doEffect(Player source, Player target) {
-        target.doRecover(1);
+    public void doEffect(CardEffect effect) {
+        effect.target.doRecover(1);
     }
 
 }

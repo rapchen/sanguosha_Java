@@ -2,6 +2,7 @@ package com.rapchen.sanguosha.core.player;
 
 import com.rapchen.sanguosha.core.Engine;
 import com.rapchen.sanguosha.core.common.Fields;
+import com.rapchen.sanguosha.core.data.Damage;
 import com.rapchen.sanguosha.core.data.Judgement;
 import com.rapchen.sanguosha.core.data.card.*;
 import com.rapchen.sanguosha.core.data.card.basic.*;
@@ -99,10 +100,9 @@ public abstract class Player {
         Collections.reverse(tricks);
         for (DelayedTrickCard trick : tricks) {
             // 先询问无懈
-            CardUse use = new CardUse(trick, this, null);  // 这里source其实没意义，但不能不传
-            CardEffect effect = new CardEffect(use, this);
+            CardEffect effect = new CardEffect(trick, null, this);
             if (!trick.askForNullification(effect)) {
-                trick.doDelayedEffect(this);  // 执行延时锦囊的延时效果
+                trick.doDelayedEffect(effect);  // 执行延时锦囊的延时效果
             }
             judgeArea.remove(trick);
             trick.doAfterDelayedEffect(this);  // 延时效果之后的处理，默认进弃牌堆
@@ -296,8 +296,8 @@ public abstract class Player {
         return Math.max(distance, 1);
     }
 
-    public void doDamage(Player target, int damageCount) {
-        engine.doDamage(this, target, damageCount);
+    public void doDamage(Damage damage) {
+        engine.doDamage(damage);
     }
 
     /**

@@ -16,6 +16,11 @@ public class CardEffect {
         this.target = target;
     }
 
+    public CardEffect(Card card, Player source, Player target) {
+        // 虚拟的CardEffect，创造一个临时的CardUse
+        this(new CardUse(card, source, target), target);
+    }
+
     public Card getCard() {
         return use.card;
     }

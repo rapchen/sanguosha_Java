@@ -2,6 +2,7 @@ package com.rapchen.sanguosha.core.data.card.equip;
 
 import com.rapchen.sanguosha.core.Engine;
 import com.rapchen.sanguosha.core.data.card.Card;
+import com.rapchen.sanguosha.core.data.card.CardEffect;
 import com.rapchen.sanguosha.core.player.Player;
 import com.rapchen.sanguosha.core.skill.Skill;
 
@@ -27,12 +28,13 @@ public abstract class EquipCard extends Card {
     }
 
     @Override
-    public void doEffect(Player source, Player target) {
+    public void doEffect(CardEffect effect) {
         // 装备统一处理：原来对应装备区的装备置入弃牌堆，新的置入对应装备区
+        Player target = effect.target;
         Engine.eg.moveCard(this, Place.EQUIP, target, "useEquip");
         if (skill != null) {
             skill.owner = target;  // 武器技能拥有者为武器拥有者
-            source.engine.skills.add(skill);
+            Engine.eg.skills.add(skill);
         }
     }
 

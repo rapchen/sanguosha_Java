@@ -2,6 +2,7 @@ package com.rapchen.sanguosha.core.data.card;
 
 import com.rapchen.sanguosha.core.player.Player;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -19,6 +20,10 @@ public class CardUse {
         this.card = card;
         this.source = source;
         this.targets = targets;
+    }
+
+    public CardUse(Card card, Player source, Player target) {
+        this(card, source, Collections.singletonList(target));
     }
 
     @Override

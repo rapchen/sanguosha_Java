@@ -1,5 +1,7 @@
 package com.rapchen.sanguosha.core.data.card.trick;
 
+import com.rapchen.sanguosha.core.data.Damage;
+import com.rapchen.sanguosha.core.data.card.CardEffect;
 import com.rapchen.sanguosha.core.player.Player;
 
 /**
@@ -15,14 +17,15 @@ public class Duel extends ImmediateTrickCard {
     }
 
     @Override
-    public void doEffect(Player source, Player target) {
+    public void doEffect(CardEffect effect) {
+        Player source = effect.getSource(), target = effect.target;
         while (true) {
             if (!target.askForSlash()) {
-                source.doDamage(target, 1);
+                source.doDamage(new Damage(effect));
                 break;
             }
             if (!source.askForSlash()) {
-                target.doDamage(source, 1);
+                target.doDamage(new Damage(target, source, 1, effect));
                 break;
             }
         }

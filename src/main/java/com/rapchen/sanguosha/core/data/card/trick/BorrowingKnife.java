@@ -1,6 +1,6 @@
 package com.rapchen.sanguosha.core.data.card.trick;
 
-import com.rapchen.sanguosha.core.player.Player;
+import com.rapchen.sanguosha.core.data.card.CardEffect;
 
 /**
  * TODO 借刀杀人 （没有刀）
@@ -15,7 +15,7 @@ public class BorrowingKnife extends ImmediateTrickCard {
     }
 
     @Override
-    public void doEffect(Player source, Player target) {
+    public void doEffect(CardEffect effect) {
         return;
     }
 

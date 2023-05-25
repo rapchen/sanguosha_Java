@@ -1,6 +1,7 @@
 package com.rapchen.sanguosha.core.data.card.trick;
 
 import com.rapchen.sanguosha.core.data.card.Card;
+import com.rapchen.sanguosha.core.data.card.CardEffect;
 import com.rapchen.sanguosha.core.player.Player;
 
 /**
@@ -23,8 +24,8 @@ public class ExNihilo extends ImmediateTrickCard {
     }
 
     @Override
-    public void doEffect(Player source, Player target) {
-        target.drawCards(2);
+    public void doEffect(CardEffect effect) {
+        effect.target.drawCards(2);
     }
 
 }

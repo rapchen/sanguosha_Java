@@ -1,6 +1,8 @@
 package com.rapchen.sanguosha.core.data.card.trick;
 
+import com.rapchen.sanguosha.core.data.Damage;
 import com.rapchen.sanguosha.core.data.Judgement;
+import com.rapchen.sanguosha.core.data.card.CardEffect;
 import com.rapchen.sanguosha.core.player.Player;
 
 import java.util.List;
@@ -24,11 +26,12 @@ public class Lightning extends DelayedTrickCard {
     }
 
     @Override
-    public void doDelayedEffect(Player target) {
+    public void doDelayedEffect(CardEffect effect) {
+        Player target = effect.target;
         Judgement judge = target.doJudge(nameZh,
                 card -> card.suit == Suit.SPADE && card.point.ge(Point.POINT_2) && Point.POINT_9.ge(card.point));
         if (judge.success) {
-            target.engine.doDamage(null, target, 3);
+            target.engine.doDamage(new Damage(3, effect));
             xFields.put("Lightning_Discard", true);  // 生效后加一个标记，用于置入弃牌堆
         }
     }
@@ -41,7 +44,7 @@ public class Lightning extends DelayedTrickCard {
             List<Player> players = target.getOtherPlayers();
             players.add(target);
             for (Player player : players) {
-                if (super.canUseTo(null, player)) {  // TODO 应该改为是否合法目标
+                if (super.canUseTo(null, player)) {
                     player.judgeArea.add(this);
                     return;
                 }
