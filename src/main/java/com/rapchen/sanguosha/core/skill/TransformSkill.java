@@ -18,6 +18,7 @@ public abstract class TransformSkill extends Skill {
     public int maxCardCount = 1;  // 最大可选牌数。
 
     public List<Card> chosenCards = new ArrayList<>();  // 当前已选中的卡牌。每次使用技能都会初始化
+    public CardAsk ask = null;  // 当前卡牌要求场景
 
     public TransformSkill(String name, String nameZh) {
         super(name, nameZh);
@@ -26,10 +27,10 @@ public abstract class TransformSkill extends Skill {
     /**
      * 判断一张卡牌是否可以被选中，用作转化
      * @param card 将要选择的卡牌
-     * @return 是否可以选中
+     * @return 是否可以选中。默认都能选
      */
     public boolean cardFilter(Card card) {
-        return !chosenCards.contains(card);
+        return true;
     }
 
     /**
@@ -63,9 +64,11 @@ public abstract class TransformSkill extends Skill {
     public Card askForTransform(CardAsk ask) {
         // 选择转化掉的卡牌
         chosenCards.clear();
+        this.ask = ask;  // 设置当前请求，在选牌和转化时需要使用
         for (int i = 0; i < maxCardCount; i++) {
             List<Card> choices = owner.getCards(owner, "he").stream()
-                    .filter(this::cardFilter).filter(card -> !chosenCards.contains(card)).toList();
+                    .filter(card -> !chosenCards.contains(card))
+                    .filter(this::cardFilter).toList();
             String prompt = String.format("你正在发动 %s, 请选择第%d张牌, 0停止选择：", nameZh, i+1);
             Card chosen = owner.chooseCard(choices, false, prompt, name);
             if (chosen == null) break;  // 放弃选择了，直接跳出
@@ -73,6 +76,7 @@ public abstract class TransformSkill extends Skill {
         }
         // 创建转化后的卡牌
         Card servedAs = serveAs();
+        this.ask = null;
         if (servedAs == null) return null;
         servedAs.setSkill(this);
         log.warn("{} 发动了 {}, 将 {} 当作 {}",

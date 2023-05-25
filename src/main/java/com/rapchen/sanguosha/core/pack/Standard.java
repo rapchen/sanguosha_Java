@@ -1,10 +1,6 @@
 package com.rapchen.sanguosha.core.pack;
 
-import com.rapchen.sanguosha.core.Engine;
-import com.rapchen.sanguosha.core.general.standard.BaiBan;
-import com.rapchen.sanguosha.core.general.standard.DiaoChan;
-import com.rapchen.sanguosha.core.general.standard.GuanYu;
-import com.rapchen.sanguosha.core.general.standard.ZhangFei;
+import com.rapchen.sanguosha.core.general.standard.*;
 
 /**
  * 标准包（武将包）
@@ -23,6 +19,7 @@ public class Standard extends Package {
 //        addGeneral(new LiuBei());
         addGeneral(new GuanYu());
         addGeneral(new ZhangFei());
+        addGeneral(new ZhaoYun());
 
         addGeneral(new DiaoChan());
         addGeneral(new BaiBan());

@@ -2,9 +2,8 @@ package com.rapchen.sanguosha.core.data.card.equip;
 
 import com.rapchen.sanguosha.core.data.Judgement;
 import com.rapchen.sanguosha.core.data.card.Card;
-import com.rapchen.sanguosha.core.data.card.CardUse;
+import com.rapchen.sanguosha.core.data.card.CardAsk;
 import com.rapchen.sanguosha.core.data.card.basic.Dodge;
-import com.rapchen.sanguosha.core.player.Player;
 import com.rapchen.sanguosha.core.skill.Event;
 import com.rapchen.sanguosha.core.skill.Timing;
 import com.rapchen.sanguosha.core.skill.TriggerSkill;
@@ -28,8 +27,8 @@ public class EightDiagram extends Armor {
 
         @Override
         public void onTrigger(Event event) {
-            final Class<? extends Card> type = (Class<Card>) event.xField.get("CardType");
-            if (type == Dodge.class) {
+            final CardAsk ask = (CardAsk) event.xField.get("CardAsk");
+            if (ask.contains(Dodge.class)) {
                 if (askForUse(owner)) {
                     Judgement judge = owner.doJudge(nameZh, Card::isRed);
                     if (judge.success) {

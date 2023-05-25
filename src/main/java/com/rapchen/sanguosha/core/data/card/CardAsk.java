@@ -3,6 +3,7 @@ package com.rapchen.sanguosha.core.data.card;
 import com.rapchen.sanguosha.core.player.Player;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -20,7 +21,7 @@ public class CardAsk {
     }
 
     // 要求的卡牌类型
-    public Set< Class<? extends Card> > types;
+    public Set< Class<? extends Card> > types = new HashSet<>();
 
     public Scene scene;  // 场景：使用/打出/技能/出牌阶段
 

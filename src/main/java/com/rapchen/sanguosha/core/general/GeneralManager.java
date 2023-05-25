@@ -22,7 +22,8 @@ public class GeneralManager {
     }
 
     public void chooseGeneral(Player player) {
-        List<General> subList = generals.subList(0, 3);
+//        List<General> subList = generals.subList(0, 3);
+        List<General> subList = generals;  // 做武将测试，不卡数量
         General general = player.chooseGeneral(subList, true, "请选择你的武将：", "chooseGeneral");
         player.setGeneral(general);
     }

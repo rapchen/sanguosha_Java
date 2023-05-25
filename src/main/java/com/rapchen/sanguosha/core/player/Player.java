@@ -520,12 +520,14 @@ public abstract class Player {
      * @return 是否使用/打出
      */
     public boolean askForDodge(boolean isUse) {
-        List<Card> dodges = handCards.stream().filter(card -> card instanceof Dodge).toList();
-        engine.trigger(new Event(Timing.CARD_ASKED, this).withField("CardType", Dodge.class));
+        CardAsk ask = new CardAsk(Dodge.class,
+                isUse ? CardAsk.Scene.USE : CardAsk.Scene.RESPONSE,
+                this, "askForDodge",
+                isUse ? "请使用一张闪：" : "请打出一张闪：");
+        engine.trigger(new Event(Timing.CARD_ASKED, this).withField("CardAsk", ask));
         Card card = (Card) xFields.remove("CardProvided");  // 尝试获取技能提供的闪 TODO 一个技能提供卡后是否要打断该事件
         if (card == null) {
-            card = chooseCard(dodges, false,
-                    isUse ? "请使用一张闪，0放弃：" : "请打出一张闪，0放弃：", "askForDodge");
+            card = askForCard(ask);  // 要求角色提供闪
         }
         if (card != null) {
             if (isUse) {
