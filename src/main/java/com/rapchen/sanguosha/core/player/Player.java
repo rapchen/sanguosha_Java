@@ -290,9 +290,10 @@ public abstract class Player {
         // 取左右距离中较小值
         int distance = Math.min(index + 1, this.getOtherPlayers().size() - index);
         // 距离修正 TODO 放到技能里面
-        if (this.equips.has(Card.SubType.EQUIP_HORSE_OFF)) distance -= 1;
-        if (target.equips.has(Card.SubType.EQUIP_HORSE_DEF)) distance += 1;
-        return Math.max(distance, 1);  // 距离至少为1
+        distance = engine.triggerModify(
+                new Event(Timing.MD_DISTANCE, this).withField("Target", target), distance);
+        // 距离至少为1，这个逻辑优先于所有距离修正
+        return Math.max(distance, 1);
     }
 
     public void doDamage(Player target, int damageCount) {
@@ -644,6 +645,10 @@ public abstract class Player {
     @Override
     public String toString() {
         return general + "(" + name + ")";
+    }
+
+    public String idStr() {
+        return String.valueOf(id);
     }
 
     /**

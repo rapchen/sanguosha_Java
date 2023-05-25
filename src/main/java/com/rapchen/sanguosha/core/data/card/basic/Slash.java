@@ -38,12 +38,15 @@ public class Slash extends BasicCard {
 
     @Override
     public void doEffect(Player source, Player target) {
-        boolean dodged = target.askForDodge(true);
-        if (dodged) {  // 触发杀被闪避事件
-            Engine.eg.trigger(new Event(Timing.SLASH_DODGED, source).withField("Target", target));
-        }
-        if (source.xFields.remove("Slash_Undodged") == Boolean.TRUE) {  // 贯石斧等效果，闪避无效
-            dodged = false;
+        boolean dodged = false;
+        if (this.xFields.remove("CannotDodge", target.idStr()) != Boolean.TRUE) {  // 是否可闪避
+            dodged = target.askForDodge(true);
+            if (dodged) {  // 触发杀被闪避事件
+                Engine.eg.trigger(new Event(Timing.SLASH_DODGED, source).withField("Target", target));
+            }
+            if (source.xFields.remove("Slash_Undodged") == Boolean.TRUE) {  // 贯石斧等效果，闪避无效
+                dodged = false;
+            }
         }
         if (!dodged) {
             source.doDamage(target, 1);

@@ -248,6 +248,7 @@ public abstract class Card {
         if (throwAfterUse) {
             source.engine.moveToDiscard(this);
         }
+        Engine.eg.trigger(new Event(Timing.CARD_USED, source).withField("CardUse", use));  // 结算完毕
     }
 
     private void doUseLog(Player source, List<Player> targets) {

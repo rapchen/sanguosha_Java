@@ -20,6 +20,7 @@ public class Standard extends Package {
         addGeneral(new GuanYu());
         addGeneral(new ZhangFei());
         addGeneral(new ZhaoYun());
+        addGeneral(new MaChao());
 
         addGeneral(new DiaoChan());
         addGeneral(new BaiBan());

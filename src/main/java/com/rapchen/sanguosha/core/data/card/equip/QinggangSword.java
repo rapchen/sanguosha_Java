@@ -29,6 +29,7 @@ public class QinggangSword extends Weapon {
     private static class QinggangSwordSkill extends TriggerSkill {
         public QinggangSwordSkill() {
             super("QinggangSwordSkill", "青釭剑", new Timing[]{Timing.TARGET_CHOSEN, Timing.CARD_USED});
+            compulsory = true;
         }
 
         @Override
