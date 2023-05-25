@@ -372,28 +372,30 @@ public abstract class Player {
      * @return 是否出牌。false时出牌结束
      */
     public boolean askForPlayCard() {
-        // 1. 先找出可以使用的牌
-        List<Card> cards = new ArrayList<>(handCards.stream()
-                .filter(card -> card.canUseInPlayPhase(this)).toList());
-        // 可用的转化技
         CardAsk ask = new CardAsk(CardAsk.Scene.PLAY, this);
-        cards.addAll(engine.skills.getTransformedCards(ask));
+        while (true) {
+            // 1. 先找出可以使用的牌
+            List<Card> cards = new ArrayList<>(handCards.stream()
+                    .filter(card -> card.canUseInPlayPhase(this)).toList());
+            // 可用的转化技
+            cards.addAll(engine.skills.getTransformedCards(ask));
 
-        // 2. 选牌
-        Card card = choosePlayCard(cards);
-        if (card == null) return false;
-        // 选择转化技之后的处理逻辑
-        if (card.isVirtual() && card.skill instanceof TransformSkill skill) {
-            card = skill.askForTransform(ask);
-            if (card == null) return false;
+            // 2. 选牌
+            Card card = choosePlayCard(cards);
+            if (card == null) return false;  // 放弃选择，直接返回
+            // 选择转化技之后的处理逻辑
+            if (card.isVirtual() && card.skill instanceof TransformSkill skill) {
+                card = skill.askForTransform(ask);
+                if (card == null) continue;  // 转化失败，剔除该技能，重新选择
+            }
+
+            // 3. 选择目标
+            List<Player> targets = chooseTargets(card);
+
+            // 4. 使用
+            useCard(card, targets);
+            return true;
         }
-
-        // 3. 选择目标
-        List<Player> targets = chooseTargets(card);
-
-        // 4. 使用
-        useCard(card, targets);
-        return true;
     }
 
     protected abstract Card choosePlayCard(List<Card> cards);
@@ -611,15 +613,18 @@ public abstract class Player {
      * @return 使用/打出的牌
      */
     public Card askForCard(CardAsk ask) {
-        List<Card> cards = new ArrayList<>(handCards.stream().filter(ask::matches).toList());
-        cards.addAll(engine.skills.getTransformedCards(ask));
-        Card card = chooseCard(cards, ask.forced, ask.prompt, ask.reason);
-        if (card == null) return null;
-        // 选择转化技之后的处理逻辑
-        if (card.isVirtual() && card.skill instanceof TransformSkill skill) {
-            card = skill.askForTransform(ask);
+        while (true) {
+            List<Card> cards = new ArrayList<>(handCards.stream().filter(ask::matches).toList());
+            cards.addAll(engine.skills.getTransformedCards(ask));
+            Card card = chooseCard(cards, ask.forced, ask.prompt, ask.reason);
+            if (card == null) return null;
+            // 选择转化技之后的处理逻辑
+            if (card.isVirtual() && card.skill instanceof TransformSkill skill) {
+                card = skill.askForTransform(ask);
+                if (card == null) continue;  // 转化失败，剔除该技能，重新选择
+            }
+            return card;
         }
-        return card;
     }
 
     /* =============== end 要求玩家操作的方法 ================ */

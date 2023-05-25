@@ -1,6 +1,7 @@
 package com.rapchen.sanguosha.core.data.card;
 
 import com.rapchen.sanguosha.core.player.Player;
+import com.rapchen.sanguosha.core.skill.Skill;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -22,16 +23,13 @@ public class CardAsk {
 
     // 要求的卡牌类型
     public Set< Class<? extends Card> > types = new HashSet<>();
-
     public Scene scene;  // 场景：使用/打出/技能/出牌阶段
-
     public Player player;  // 被要求的角色
-
     public boolean forced = false;  // 是否强制使用
-
     public String reason;  // 原因
-
     public String prompt;  // 提示词
+
+    public Set<Skill> bannedSkills = new HashSet<>();  // 不可用的技能列表
 
     public CardAsk(Set<Class<? extends Card>> types, Scene scene, Player player, String reason, String prompt) {
         this.types = types;

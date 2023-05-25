@@ -77,7 +77,10 @@ public abstract class TransformSkill extends Skill {
         // 创建转化后的卡牌
         Card servedAs = serveAs();
         this.ask = null;
-        if (servedAs == null) return null;
+        if (servedAs == null) {
+            ask.bannedSkills.add(this);  // 转化失败，本次ask剔除该技能选项
+            return null;
+        }
         servedAs.setSkill(this);
         log.warn("{} 发动了 {}, 将 {} 当作 {}",
                 owner, this, Card.cardsToString(chosenCards), servedAs);

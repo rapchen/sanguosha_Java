@@ -120,6 +120,7 @@ public class SkillManager {
         if (saSkills == null) return new ArrayList<>();
         List<Card> res = new ArrayList<>();
         for (TransformSkill skill : saSkills) {
+            if (ask.bannedSkills.contains(skill)) continue;  // 已经尝试过的技能
             boolean usable = ask.scene == CardAsk.Scene.PLAY ?
                     skill.usableInPlayPhase() : skill.usableAtResponse(ask);
             if (usable) {
