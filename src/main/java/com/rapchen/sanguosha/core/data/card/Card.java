@@ -123,7 +123,7 @@ public abstract class Card {
         HAND,  // 手牌
         EQUIP,  // 装备区
         JUDGE,  // 判定区
-        JUDGE_CARD,  // 判定牌（临时）
+        JUDGE_CARD,  // 判定牌（临时，算是处理区的一种）
         HANDLE,  // 处理区（临时）
         EXTRA,  // 游戏外，角色的额外牌堆
     }
@@ -272,9 +272,9 @@ public abstract class Card {
         }
         doAfterUse(use);  // 后处理
 
-        // 结算完毕，进入弃牌堆
+        // 结算完毕，处理区的牌进入弃牌堆（已经被奸雄等技能获得的不动）
         if (throwAfterUse) {
-            source.engine.moveToDiscard(this);
+            source.engine.moveToDiscard(this, Place.HANDLE);
         }
         Engine.eg.trigger(new Event(Timing.CARD_USED, source).withField("CardUse", use));  // 结算完毕
     }

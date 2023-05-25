@@ -40,6 +40,6 @@ public abstract class DelayedTrickCard extends TrickCard {
      * 延时类锦囊的后处理，默认是进弃牌堆，而闪电则是转移。这个效果不会被无懈
      */
     public void doAfterDelayedEffect(Player target) {
-        Engine.eg.moveToDiscard(this);
+        Engine.eg.moveToDiscard(this, Place.JUDGE);
     }
 }

@@ -38,9 +38,11 @@ public class Lightning extends DelayedTrickCard {
 
     @Override
     public void doAfterDelayedEffect(Player target) {
-        if (xFields.containsKey("Lightning_Discard")) {  // 如果生效则置入弃牌堆
-            target.engine.moveToDiscard(this);
-        } else {  // 从下家开始依次遍历所有玩家，找到下一个合适的目标
+        if (xFields.remove("Lightning_Discard") == Boolean.TRUE) {
+            // 如果生效则从判定区置入弃牌堆。已经被奸雄等技能移动的就不弃了
+            target.engine.moveToDiscard(this, Place.JUDGE);
+        } else {
+            // 从下家开始依次遍历所有玩家，找到下一个合适的目标
             List<Player> players = target.getOtherPlayers();
             players.add(target);
             for (Player player : players) {

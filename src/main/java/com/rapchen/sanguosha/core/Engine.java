@@ -136,6 +136,9 @@ public class Engine {
     public void moveToDiscard(Card card) {
         moveCard(card, Card.Place.DISCARD, null, "");
     }
+    public void moveToDiscard(Card card, Card.Place sourcePlace) {
+        moveCard(card, Card.Place.DISCARD, null, sourcePlace, "");
+    }
     public void moveToDiscard(List<Card> cards) {
         moveCards(cards, Card.Place.DISCARD, null, "");
     }
@@ -150,19 +153,31 @@ public class Engine {
     public void moveCard(Card card, Card.Place targetPlace, Player target, String reason) {
         moveCards(Collections.singletonList(card), targetPlace, target, reason);
     }
+    public void moveCard(Card card, Card.Place targetPlace, Player target,
+                         Card.Place sourcePlace, String reason) {
+        moveCards(Collections.singletonList(card), targetPlace, target, sourcePlace, reason);
+    }
+    public void moveCards(List<Card> cards, Card.Place targetPlace, Player target, String reason) {
+        moveCards(cards, targetPlace, target, null, reason);
+    }
     /**
      * 移动牌
      * @param cards 移动的牌
      * @param targetPlace 目标位置
      * @param target 目标角色。如果无角色（如弃牌堆）则为null
+     * @param sourcePlace 原位置。只有这个位置的牌会被移动，为null则不限制，全部移动。
      * @param reason 移动原因
      */
-    public void moveCards(List<Card> cards, Card.Place targetPlace, Player target, String reason) {
+    public void moveCards(List<Card> cards, Card.Place targetPlace, Player target,
+                          Card.Place sourcePlace, String reason) {
         // 处理虚拟牌：虚拟牌的所有子卡都一起移动
         List<Card> realCards = new ArrayList<>();
         for (Card card : cards) {
             if (card.virtual) realCards.addAll(card.subCards);
             else realCards.add(card);
+        }
+        if (sourcePlace != null) {  // 过滤原位置不正确的牌
+            realCards = realCards.stream().filter(card -> card.place == sourcePlace).toList();
         }
         // 移除牌逻辑
         for (Card card : realCards) {
@@ -237,9 +252,11 @@ public class Engine {
             log.info("{} 对 {} 造成了 {} 点伤害", source, target, damage.count);
         }
         checkDeath(target);
-        if (source != null) {  // 造成伤害后
+        // 造成伤害后
+        if (source != null) {
             trigger(new Event(Timing.DAMAGE_DONE, source).withField("Damage", damage));
         }
+        trigger(new Event(Timing.DAMAGED_DONE, target).withField("Damage", damage));
     }
 
     /**

@@ -21,9 +21,10 @@ public enum Timing {
     // 杀相关
     SLASH_DODGED,  // 杀被闪避时。
 
-    // 伤害相关。player为伤害制造者
+    // 伤害相关。DAMAGE_时机player为伤害制造者；DAMAGED_时机player为受伤者。
     DAMAGE_DOING,  // 造成伤害时。 Damage
     DAMAGE_DONE,  // 造成伤害后。 Damage
+    DAMAGED_DONE,  // 受到伤害后。 Damage
 
     // =============== 以下MD开头为修正时机 ===============
     MD_SLASH_LIMIT,  // 修正回合内杀的次数限制

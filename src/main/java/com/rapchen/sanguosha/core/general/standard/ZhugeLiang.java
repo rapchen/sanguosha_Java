@@ -6,19 +6,20 @@ import com.rapchen.sanguosha.core.skill.Timing;
 import com.rapchen.sanguosha.core.skill.TriggerSkill;
 
 /**
- * 貂蝉 TODO 离间
+ * 诸葛亮
  * @author Chen Runwen
  * @time 2023/5/24 0:32
  */
-public class DiaoChan extends General {
-    public DiaoChan() {
-        super("DiaoChan", "貂蝉", Gender.FEMALE, Nation.QUN, 3);
-        skills.add(BiYue.class);
+public class ZhugeLiang extends General {
+    public ZhugeLiang() {
+        super("ZhugeLiang", "诸葛亮", Gender.MALE, Nation.SHU, 3);
+        skills.add(GuanXing.class);
     }
 
-    public static class BiYue extends TriggerSkill {
-        public BiYue() {
-            super("BiYue", "闭月", new Timing[]{Timing.PHASE_BEGIN});
+    // TODO 观星 空城
+    public static class GuanXing extends TriggerSkill {
+        public GuanXing() {
+            super("GuanXing", "观星", new Timing[]{Timing.PHASE_BEGIN});
             useByDefault = true;
         }
 
@@ -30,4 +31,5 @@ public class DiaoChan extends General {
             }
         }
     }
+
 }

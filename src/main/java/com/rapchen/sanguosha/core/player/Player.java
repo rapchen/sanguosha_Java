@@ -314,8 +314,8 @@ public abstract class Player {
     public Judgement doJudge(String nameZh, Function<Card, Boolean> judgeFunc) {
         Card card = engine.getCardFromDrawPile();
         card.place = Card.Place.JUDGE_CARD;
-        // 改判要插在这里
-        engine.moveToDiscard(card);
+        // 改判和获取判定牌要插在这里
+        engine.moveToDiscard(card, Card.Place.JUDGE_CARD);  // 仍在处理区的进入弃牌堆
         Boolean success = judgeFunc.apply(card);
         String successStr = (success == null) ? "完成" : (success ? "成功" : "失败");
         log.warn("{} 的 {} 判定 {}，结果为 {}", this, nameZh, successStr, card);
