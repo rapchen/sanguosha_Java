@@ -422,7 +422,7 @@ public abstract class Player {
      * @param target 弃牌目标
      * @param forced 是否必须选择
      * @param patten 区域。hej
-     * @param prompt 提示语。默认为"请弃置{count}张牌："
+     * @param prompt 提示语。默认为"请弃置{target}{count}张牌："
      * @param reason 选牌原因，通常给AI做判断用
      * @return 是否弃牌
      */
@@ -436,6 +436,8 @@ public abstract class Player {
             target.doRemoveCard(card);  // 从角色处移除卡牌，避免重复选择（这里不触发失去牌的时机）
         }
         if (discards.size() < count) {
+            // TODO 不弃了要还回去，不一定手牌
+            target.handCards.addAll(discards);
             return false;  // 弃牌张数不够，放弃弃牌了
         }
         doDiscard(discards);  // 执行弃牌：一起移动到弃牌堆
@@ -656,8 +658,8 @@ public abstract class Player {
      * @param self 是否是本人视角（其他人视角看不到手牌）
      */
     public String getDetail(boolean self) {
-        return name + "(P" + id +
-                ") " + hp + '/' + maxHp +
+        return general + "(" + name + ")"
+                + hp + '/' + maxHp +
                 ", 判定: " + Card.cardsToString(judgeArea) +
                 ", 装备: " + equips +
                 ", 手牌: " + (self ? Card.cardsToString(handCards) : handCards.size());

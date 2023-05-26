@@ -53,7 +53,7 @@ public class Engine {
         generals.init();
         generals.chooseGeneral(players.get(0));
 //        players.get(0).setGeneral(new DiaoChan());
-        players.get(1).setGeneral(new BaiBan());
+        players.get(1).setGeneral(players.get(0).general);
 
         // 初始化牌堆
         initPile();

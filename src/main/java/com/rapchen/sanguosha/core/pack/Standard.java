@@ -21,11 +21,29 @@ public class Standard extends Package {
         addGeneral(new ZhangFei());
         addGeneral(new ZhaoYun());
         addGeneral(new MaChao());
+//        addGeneral(new ZhugeLiang());
         addGeneral(new HuangYueying());
 
         addGeneral(new CaoCao());
+//        addGeneral(new SimaYi());
+//        addGeneral(new GuoJia());
+//        addGeneral(new ZhenJi());
+        addGeneral(new XiahouDun());
+//        addGeneral(new XuChu());
+//        addGeneral(new ZhangLiao());
+
+//        addGeneral(new SunQuan());
+//        addGeneral(new SunShangxiang());
+//        addGeneral(new ZhouYu());
+//        addGeneral(new LvMeng());
+//        addGeneral(new LuXun());
+//        addGeneral(new DaQiao());
+//        addGeneral(new GanNing());
+//        addGeneral(new HuangGai());
 
         addGeneral(new DiaoChan());
+//        addGeneral(new LvBu());
+//        addGeneral(new HuaTuo());
         addGeneral(new BaiBan());
     }
 }

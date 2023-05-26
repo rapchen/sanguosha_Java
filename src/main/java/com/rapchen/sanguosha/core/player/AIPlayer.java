@@ -47,8 +47,14 @@ public class AIPlayer extends Player {
             } case "askForCardFromPlayer" -> {  // 要求一角色处的一张牌：目前默认是坏事，别人的总是选，自己的尽量不选
                 String reason1 = (String) xFields.get("askForCardFromPlayer_Reason");
                 Player target = (Player) xFields.get("askForCardFromPlayer_Target");
-                if (target == this) return forced ? cards.get(0) : null;
-                else return cards.get(0);
+                switch (reason1) {
+                    case "GangLie" -> {  // 刚烈：弃
+                        return cards.get(0);
+                    } default -> {
+                        if (target == this) return forced ? cards.get(0) : null;
+                        else return cards.get(0);
+                    }
+                }
             } case "KylinBowSkill" -> {  // 麒麟弓：弃
                 return cards.get(0);
             } default -> {  // 默认逻辑：必须选就选一张，否则放弃
