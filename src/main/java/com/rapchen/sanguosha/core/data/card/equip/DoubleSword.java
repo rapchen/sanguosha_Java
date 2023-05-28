@@ -26,7 +26,7 @@ public class DoubleSword extends Weapon {
 
         @Override
         public void onTrigger(Event event) {
-            final CardUse use = (CardUse) event.xField.get("CardUse");
+            final CardUse use = (CardUse) event.xFields.get("CardUse");
             if (!(use.card instanceof Slash)) return;
             for (Player target : use.targets) {
                 if (owner.gender == target.gender) continue;

@@ -27,7 +27,7 @@ public class EightDiagram extends Armor {
 
         @Override
         public void onTrigger(Event event) {
-            final CardAsk ask = (CardAsk) event.xField.get("CardAsk");
+            final CardAsk ask = (CardAsk) event.xFields.get("CardAsk");
             if (ask.contains(Dodge.class)) {
                 if (askForUse(owner)) {
                     Judgement judge = owner.doJudge(nameZh, Card::isRed);

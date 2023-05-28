@@ -28,7 +28,7 @@ public class CaoCao extends General {
 
         @Override
         public void onTrigger(Event event) {
-            final Damage damage = (Damage) event.xField.get("Damage");
+            final Damage damage = (Damage) event.xFields.get("Damage");
             if (damage.effect == null || damage.effect.getCard() == null) return;
             Card card = damage.effect.getCard();
 

@@ -31,7 +31,7 @@ public class KylinBow extends Weapon {
         @Override
         public void onTrigger(Event event) {
             // 检验：杀造成的伤害
-            final Damage damage = (Damage) event.xField.get("Damage");
+            final Damage damage = (Damage) event.xFields.get("Damage");
             if (damage.effect == null || !(damage.effect.getCard() instanceof Slash)) return;
             Player target = damage.target;
             if (target == null) return;

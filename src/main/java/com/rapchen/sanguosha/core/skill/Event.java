@@ -11,17 +11,17 @@ import com.rapchen.sanguosha.core.player.Player;
 public class Event {
     public Timing timing;
     public Player player;
-    public Fields xField;
+    public Fields xFields;
 
     public Event(Timing timing, Player player) {
         this.timing = timing;
         this.player = player;
-        this.xField = new Fields();
+        this.xFields = new Fields();
     }
 
     /** 添加字段，支持链式编程 */
     public Event withField(String key, Object value) {
-        this.xField.put(key, value);
+        this.xFields.put(key, value);
         return this;
     }
 }

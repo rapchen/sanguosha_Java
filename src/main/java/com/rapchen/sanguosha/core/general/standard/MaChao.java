@@ -3,7 +3,6 @@ package com.rapchen.sanguosha.core.general.standard;
 import com.rapchen.sanguosha.core.data.Judgement;
 import com.rapchen.sanguosha.core.data.card.Card;
 import com.rapchen.sanguosha.core.data.card.CardUse;
-import com.rapchen.sanguosha.core.data.card.basic.Dodge;
 import com.rapchen.sanguosha.core.data.card.basic.Slash;
 import com.rapchen.sanguosha.core.general.General;
 import com.rapchen.sanguosha.core.player.Player;
@@ -44,7 +43,7 @@ public class MaChao extends General {
 
         @Override
         public void onTrigger(Event event) {
-            final CardUse use = (CardUse) event.xField.get("CardUse");
+            final CardUse use = (CardUse) event.xFields.get("CardUse");
             if (!(use.card instanceof Slash)) return;
             for (Player target : use.targets) {
                 if (askForUse(owner, target)) {

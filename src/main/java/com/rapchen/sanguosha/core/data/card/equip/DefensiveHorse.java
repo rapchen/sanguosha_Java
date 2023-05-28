@@ -26,7 +26,7 @@ public class DefensiveHorse extends EquipCard {
 
         @Override
         public int onModify(Event event, int value) {
-            Player target = (Player) event.xField.get("Target");
+            Player target = (Player) event.xFields.get("Target");
             if (target == owner) {
                 return value + 1;
             }

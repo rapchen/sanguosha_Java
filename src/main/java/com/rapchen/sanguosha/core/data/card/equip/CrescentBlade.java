@@ -29,7 +29,7 @@ public class CrescentBlade extends Weapon {
 
         @Override
         public void onTrigger(Event event) {
-            final Player target = (Player) event.xField.get("Target");
+            final Player target = (Player) event.xFields.get("Target");
             CardAsk ask = new CardAsk(Slash.class, CardAsk.Scene.USE, owner,
                     "askForSlash", "你可以使用青龙偃月刀，对目标角色再使用一张杀：");
             Card card = owner.askForCard(ask);

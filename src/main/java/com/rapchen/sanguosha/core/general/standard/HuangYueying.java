@@ -30,7 +30,7 @@ public class HuangYueying extends General {
 
         @Override
         public void onTrigger(Event event) {
-            final CardUse use = (CardUse) event.xField.get("CardUse");
+            final CardUse use = (CardUse) event.xFields.get("CardUse");
             if (!(use.card instanceof ImmediateTrickCard)) return;
             if (askForUse(owner)) {
                 doLog();
@@ -48,7 +48,7 @@ public class HuangYueying extends General {
 
         @Override
         public int onModify(Event event, int value) {
-            Card card = (Card) event.xField.get("Card");
+            Card card = (Card) event.xFields.get("Card");
             if (card instanceof TrickCard)
                 return 10000;
             return value;

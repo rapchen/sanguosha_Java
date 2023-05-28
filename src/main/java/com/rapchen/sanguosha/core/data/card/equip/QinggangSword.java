@@ -8,8 +8,6 @@ import com.rapchen.sanguosha.core.skill.Timing;
 import com.rapchen.sanguosha.core.skill.TriggerSkill;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.HashSet;
-
 /**
  * 青釭剑
  * @author Chen Runwen
@@ -35,7 +33,7 @@ public class QinggangSword extends Weapon {
         @Override
         public void onTrigger(Event event) {
             Timing timing = event.timing;
-            final CardUse use = (CardUse) event.xField.get("CardUse");
+            final CardUse use = (CardUse) event.xFields.get("CardUse");
             if (!(use.card instanceof Slash)) return;
 
             if (timing == Timing.TARGET_CHOSEN) {  // 指定目标时，上一个无视防具标记
