@@ -1,6 +1,7 @@
 package com.rapchen.sanguosha.core.general.standard;
 
 import com.rapchen.sanguosha.core.general.General;
+import com.rapchen.sanguosha.core.player.Phase;
 import com.rapchen.sanguosha.core.skill.Event;
 import com.rapchen.sanguosha.core.skill.Timing;
 import com.rapchen.sanguosha.core.skill.TriggerSkill;
@@ -24,6 +25,7 @@ public class DiaoChan extends General {
 
         @Override
         public void onTrigger(Event event) {
+            if (owner.phase != Phase.PHASE_END) return;
             if (askForUse(owner)) {
                 doLog();
                 owner.drawCards(1);

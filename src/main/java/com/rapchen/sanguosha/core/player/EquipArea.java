@@ -34,7 +34,7 @@ public class EquipArea {
     public void putEquip(EquipCard equip) {
         EquipCard oldEquip = equips.get(equip.subType);
         if (oldEquip != null) {
-            Engine.eg.moveCard(oldEquip, Card.Place.DISCARD, null, "oldEquip");
+            Engine.eg.moveToDiscard(oldEquip);
             log.warn("{} 装备区的 {} 被置入弃牌堆", player, oldEquip);
         }
         equips.put(equip.subType, equip);

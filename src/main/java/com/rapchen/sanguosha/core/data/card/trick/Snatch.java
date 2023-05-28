@@ -37,7 +37,7 @@ public class Snatch extends ImmediateTrickCard {
                 .forced().reason(name, "请选择要获取的牌：");
         Card card = choose.chooseOne();
         if (card == null) return;
-        Engine.eg.moveCard(card, Place.HAND, source, name);
+        source.obtain(card, name);
         log.info("{} 从 {} 处获得了 {}张牌：{}", source.name, target.name, 1, card);
     }
 

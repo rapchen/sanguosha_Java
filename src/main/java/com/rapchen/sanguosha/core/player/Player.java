@@ -87,6 +87,7 @@ public abstract class Player {
      */
     private void doPreparePhase() {
         phase = Phase.PHASE_PREPARE;
+        engine.trigger(new Event(Timing.PHASE_BEGIN, this).withField("Phase", phase));
     }
 
     /**
@@ -94,6 +95,8 @@ public abstract class Player {
      */
     private void doJudgePhase() {
         phase = Phase.PHASE_JUDGE;
+        engine.trigger(new Event(Timing.PHASE_BEGIN, this).withField("Phase", phase));
+
         // 闪电判定之后有可能回到原角色判定区，为了避免死循环要拷贝一份
         ArrayList<DelayedTrickCard> tricks = new ArrayList<>(judgeArea);
         // 后发先至，从后使用的开始依次判定
@@ -114,6 +117,8 @@ public abstract class Player {
      */
     private void doDrawPhase() {
         phase = Phase.PHASE_DRAW;
+        engine.trigger(new Event(Timing.PHASE_BEGIN, this).withField("Phase", phase));
+
         this.drawCards(2);
     }
 
@@ -122,6 +127,8 @@ public abstract class Player {
      */
     private void doPlayPhase() {
         phase = Phase.PHASE_PLAY;
+        engine.trigger(new Event(Timing.PHASE_BEGIN, this).withField("Phase", phase));
+
         slashTimes = 0;  // 重置杀使用数
         while (true) {
             if (!askForPlayCard()) break;
@@ -133,6 +140,8 @@ public abstract class Player {
      */
     private void doDiscardPhase() {
         phase = Phase.PHASE_DISCARD;
+        engine.trigger(new Event(Timing.PHASE_BEGIN, this).withField("Phase", phase));
+
         if (handCards.size() > hp) {
             int count = handCards.size() - hp;
             CardChoose choose = new CardChoose(this).fromSelf("h")
@@ -146,8 +155,7 @@ public abstract class Player {
      */
     private void doEndPhase() {
         phase = Phase.PHASE_END;
-        engine.trigger(new Event(Timing.PHASE_BEGIN, this)
-                .withField("Phase", Phase.PHASE_END));
+        engine.trigger(new Event(Timing.PHASE_BEGIN, this).withField("Phase", phase));
     }
 
     public void skipPhase(Phase phase) {
@@ -166,13 +174,13 @@ public abstract class Player {
     // Card 相关
     public void drawCards(int count) {
         List<Card> cards = engine.getCardsFromDrawPile(count);
-        engine.moveCards(cards, Card.Place.HAND, this, "drawCards");
+        obtain(cards, "drawCards");
         log.info("{} 摸了{}张牌：{}", this.name, cards.size(), Card.cardsToString(cards));
         // TODO 获得牌事件：只触发一次就行
     }
 
     /**
-     * 从角色处移除一张牌
+     * 从角色处移除一张牌（是基本方法，被move调用，只包含移除部分，不包含移动到部分）
      * @return 是否成功移除。找不到牌就返回false
      */
     public boolean doRemoveCard(Card card) {
@@ -206,6 +214,16 @@ public abstract class Player {
      */
     public void doDiscard(List<Card> cards) {
         engine.moveToDiscard(cards);
+    }
+
+    /**
+     * 获得牌到手牌
+     */
+    public void obtain(Card card, String reason) {
+        engine.moveCard(card, Card.Place.HAND, this, reason);
+    }
+    public void obtain(List<Card> cards, String reason) {
+        engine.moveCards(cards, Card.Place.HAND, this, reason);
     }
 
     /**

@@ -33,7 +33,7 @@ public class CaoCao extends General {
             Card card = damage.effect.getCard();
 
             if (askForUse(owner)) {
-                Engine.eg.moveCard(card, Card.Place.HAND, owner, name);
+                owner.obtain(card, name);
                 doLog(String.format("获得了 %s", card));
             }
         }

@@ -46,7 +46,7 @@ public class GrainHarvest extends ImmediateTrickCard {
         Card card = target.chooseCard(new CardChoose(target, choiceCards,
                 true, "GrainHarvest", "请选择一张五谷牌："));
         choiceCards.remove(card);
-        Engine.eg.moveCard(card, Place.HAND, target, name);
+        target.obtain(card, name);
         log.info("{} 获得了五谷牌：{}", target.name, card);
     }
 
