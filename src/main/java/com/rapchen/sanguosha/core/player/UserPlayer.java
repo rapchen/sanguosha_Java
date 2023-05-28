@@ -27,14 +27,8 @@ public class UserPlayer extends Player {
 
     @Override
     protected Card choosePlayCard(List<Card> cards) {
-        return chooseCard(new CardChoose<>(this, cards, false,
+        return chooseCard(new CardChoose(this, cards, false,
                 "choosePlayCard", "请使用一张牌，0结束："));
-    }
-
-    @Override
-    protected Card chooseDiscard(Player target, List<Card> cards) {
-        return chooseCard(new CardChoose<>(this, cards, true,
-                "chooseDiscard", "请弃置一张手牌："));
     }
 
     /**
@@ -43,8 +37,8 @@ public class UserPlayer extends Player {
      * @return 选择的牌。如果不选，就返回null。
      */
     @Override
-    public <T extends Card> T chooseCard(CardChoose<T> choose) {
-        List<T> cards = choose.cards;
+    public Card chooseCard(CardChoose choose) {
+        List<Card> cards = choose.candidates;
         while (true) {
             log.warn(choose.prompt);  // TODO 目前打给用户的都用WARN，后台的用INFO。之后可以打到不同的输出
             log.warn(Card.cardsToString(cards, true));
@@ -138,7 +132,7 @@ public class UserPlayer extends Player {
         Table table = engine.table;
         List<Card> cards = new ArrayList<>(table.drawPile);
         cards.addAll(table.discardPile);
-        Card card = chooseCard(new CardChoose<>(this, cards, false,
+        Card card = chooseCard(new CardChoose(this, cards, false,
                 "cheatGetCard", "选择你要的牌："));
         if (card != null) {
             table.drawPile.remove(card);

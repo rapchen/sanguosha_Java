@@ -2,6 +2,7 @@ package com.rapchen.sanguosha.core.data.card.trick;
 
 import com.rapchen.sanguosha.core.Engine;
 import com.rapchen.sanguosha.core.data.card.Card;
+import com.rapchen.sanguosha.core.data.card.CardChoose;
 import com.rapchen.sanguosha.core.data.card.CardEffect;
 import com.rapchen.sanguosha.core.player.Player;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +33,8 @@ public class Snatch extends ImmediateTrickCard {
     @Override
     public void doEffect(CardEffect effect) {
         Player source = effect.getSource(), target = effect.target;
-        Card card = source.askForCardFromPlayer(target, true, "hej", "请选择要获取的牌：", "Snatch");
+        CardChoose choose = CardChoose.fromPlayer(source, target, "hej", true, name, "请选择要获取的牌：");
+        Card card = choose.chooseOne();
         if (card == null) return;
         Engine.eg.moveCard(card, Place.HAND, source, name);
         log.info("{} 从 {} 处获得了 {}张牌：{}", source.name, target.name, 1, card);

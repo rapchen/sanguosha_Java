@@ -72,7 +72,7 @@ public abstract class TransformSkill extends Skill {
                     .filter(this::cardFilter).toList();
             String prompt = String.format("你正在发动 %s, 请选择第%d张牌, 0停止选择：", nameZh, i+1);
             Card chosen = owner.chooseCard(
-                    new CardChoose<>(owner, choices, false, name, prompt));
+                    new CardChoose(owner, choices, false, name, prompt));
             if (chosen == null) break;  // 放弃选择了，直接跳出
             chosenCards.add(chosen);
         }

@@ -43,7 +43,7 @@ public class GrainHarvest extends ImmediateTrickCard {
     public void doEffect(CardEffect effect) {
         Player target = effect.target;
         if (choiceCards == null || choiceCards.isEmpty()) return;
-        Card card = target.chooseCard(new CardChoose<>(target, choiceCards,
+        Card card = target.chooseCard(new CardChoose(target, choiceCards,
                 true, "GrainHarvest", "请选择一张五谷牌："));
         choiceCards.remove(card);
         Engine.eg.moveCard(card, Place.HAND, target, name);

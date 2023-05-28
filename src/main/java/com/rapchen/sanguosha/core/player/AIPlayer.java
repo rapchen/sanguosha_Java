@@ -25,15 +25,9 @@ public class AIPlayer extends Player {
     }
 
     @Override
-    protected Card chooseDiscard(Player target, List<Card> cards) {
-        if (cards.isEmpty()) return null;
-        return cards.get(0);
-    }
-
-    @Override
-    public <T extends Card> T chooseCard(CardChoose<T> choose) {
+    public Card chooseCard(CardChoose choose) {
         // TODO 现在所有AI逻辑都在这里，之后要拆到各个牌下面
-        List<T> cards = choose.cards;
+        List<Card> cards = choose.candidates;
         if (cards.isEmpty()) return null;
         switch (choose.reason) {
             case "askForDodge", "askForSlash" -> {  // 要求出杀闪：总是出
