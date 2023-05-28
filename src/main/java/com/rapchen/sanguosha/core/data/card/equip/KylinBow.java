@@ -1,5 +1,6 @@
 package com.rapchen.sanguosha.core.data.card.equip;
 
+import com.rapchen.sanguosha.core.Engine;
 import com.rapchen.sanguosha.core.data.Damage;
 import com.rapchen.sanguosha.core.data.card.Card;
 import com.rapchen.sanguosha.core.data.card.CardChoose;
@@ -46,11 +47,11 @@ public class KylinBow extends Weapon {
             if (horses.isEmpty()) return;
 
             Card card = owner.chooseCard(
-                    new CardChoose(owner, horses, false, name,
-                    String.format("是否使用麒麟弓，弃置 %s 的一匹马？", target)));
+                    new CardChoose(owner).in(horses)
+                            .reason(name, String.format("是否使用麒麟弓，弃置 %s 的一匹马？", target)));
             if (card != null) {
+                Engine.eg.moveToDiscard(card);
                 doLog(String.format("弃置了 %s 的 %s", target, card));
-                target.doRemoveCard(card);
             }
         }
     }

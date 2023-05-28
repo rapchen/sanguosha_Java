@@ -17,7 +17,7 @@ public class FakeCard extends Card {
     public FakeCard(Suit suit, Point point) {
         super(suit, point, -1);
         virtual = true;
-        name = "Dummy";
+        name = "FakeCard";
         nameZh = "假卡";
         subType = SubType.SUBTYPE_NO;
         subCards = new ArrayList<>();

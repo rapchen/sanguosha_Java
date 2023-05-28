@@ -1,6 +1,7 @@
 package com.rapchen.sanguosha.core.general.standard;
 
 import com.rapchen.sanguosha.core.data.Damage;
+import com.rapchen.sanguosha.core.data.card.CardChoose;
 import com.rapchen.sanguosha.core.general.General;
 import com.rapchen.sanguosha.core.player.Player;
 import com.rapchen.sanguosha.core.skill.Event;
@@ -33,9 +34,9 @@ public class XiahouDun extends General {
 
             if (source.alive && askForUse(owner)) {
                 doLog();
-                boolean discard = source.askForDiscard(2, source, false,
-                        "h", "请弃置两张手牌，否则受到一点伤害", name);
-                if (!discard) {
+                CardChoose choose = new CardChoose(source).fromSelf("h")
+                        .count(2).reason(name, "请弃置两张手牌，否则受到一点伤害");
+                if (!source.askForDiscard(choose)) {
                     owner.doDamage(new Damage(owner, source, 1, name));
                 }
             }

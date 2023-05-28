@@ -67,12 +67,11 @@ public abstract class TransformSkill extends Skill {
         chosenCards.clear();
         this.ask = ask;  // 设置当前请求，在选牌和转化时需要使用
         for (int i = 0; i < maxCardCount; i++) {
-            List<Card> choices = owner.getCards(owner, "he").stream()
-                    .filter(card -> !chosenCards.contains(card))
-                    .filter(this::cardFilter).toList();
             String prompt = String.format("你正在发动 %s, 请选择第%d张牌, 0停止选择：", nameZh, i+1);
             Card chosen = owner.chooseCard(
-                    new CardChoose(owner, choices, false, name, prompt));
+                    new CardChoose(owner).fromSelf("he")
+                            .filter(card -> !chosenCards.contains(card) && this.cardFilter(card))
+                            .reason(name, prompt));
             if (chosen == null) break;  // 放弃选择了，直接跳出
             chosenCards.add(chosen);
         }

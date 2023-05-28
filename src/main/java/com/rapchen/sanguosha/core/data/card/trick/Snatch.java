@@ -33,7 +33,8 @@ public class Snatch extends ImmediateTrickCard {
     @Override
     public void doEffect(CardEffect effect) {
         Player source = effect.getSource(), target = effect.target;
-        CardChoose choose = CardChoose.fromPlayer(source, target, "hej", true, name, "请选择要获取的牌：");
+        CardChoose choose = new CardChoose(source).fromPlayer(target, "hej")
+                .forced().reason(name, "请选择要获取的牌：");
         Card card = choose.chooseOne();
         if (card == null) return;
         Engine.eg.moveCard(card, Place.HAND, source, name);

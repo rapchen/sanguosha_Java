@@ -134,7 +134,10 @@ public abstract class Player {
     private void doDiscardPhase() {
         phase = Phase.PHASE_DISCARD;
         if (handCards.size() > hp) {
-            askForDiscard(handCards.size() - hp, "h", "DiscardPhase");
+            int count = handCards.size() - hp;
+            CardChoose choose = new CardChoose(this).fromSelf("h")
+                    .count(count).forced().reason("DiscardPhase", null);
+            askForDiscard(choose);
         }
     }
 
@@ -199,9 +202,9 @@ public abstract class Player {
     }
 
     /**
-     * 弃牌。目前只有将牌加入弃牌堆的逻辑。从原位移除的部分在doRemoveCard
+     * 弃牌
      */
-    protected void doDiscard(List<Card> cards) {
+    public void doDiscard(List<Card> cards) {
         engine.moveToDiscard(cards);
     }
 
@@ -245,6 +248,8 @@ public abstract class Player {
                 if (target.handCards.size() > 0) {  // 所有手牌作为一个选项，随机选一张
                     Card hCards = new FakeCard( target.handCards.size() + "张手牌");
                     hCards.addSubCards(target.handCards);
+                    hCards.place = Card.Place.HAND;  // 方便后续过滤
+                    hCards.owner = target;
                     cards.add(hCards);
                 }
             }
@@ -410,30 +415,17 @@ public abstract class Player {
     }
 
     /**
-     * 弃自己的牌
-     */
-    public boolean askForDiscard(int count, String pattern, String reason) {
-        return askForDiscard(count, this, true, pattern, null, reason);
-    }
-    /**
      * 要求弃牌
-     *
-     * @param count  弃牌数量
-     * @param target 弃牌目标
-     * @param forced 是否必须选择
-     * @param pattern 区域。hej
-     * @param prompt 提示语。默认为"请弃置{target}{count}张牌："
-     * @param reason 选牌原因，通常给AI做判断用
+     * @param choose 选牌参数
      * @return 是否弃牌
      */
-    public boolean askForDiscard(int count, Player target, boolean forced, String pattern, String prompt, String reason) {
-        if (prompt == null) prompt = String.format("请弃置 %s %d张牌：", target, count);
-        CardChoose choose = CardChoose.fromPlayer(this, target, pattern, count, forced, reason, prompt);
+    public boolean askForDiscard(CardChoose choose) {
+        if (choose.prompt == null) choose.prompt = String.format("请弃置 %s %d张牌：", choose.target, choose.count);
         List<Card> discards = choose.choose();
 
         if (discards == null) return false;  // 放弃弃牌了
         doDiscard(discards);  // 执行弃牌：一起移动到弃牌堆
-        log.warn("{} 弃了 {} {}张牌：{}", this.name, target.name, discards.size(), Card.cardsToString(discards));
+        log.warn("{} 弃了 {} {}张牌：{}", this, choose.target, discards.size(), Card.cardsToString(discards));
         return true;
     }
 
@@ -516,17 +508,15 @@ public abstract class Player {
      * @return 是否使用
      */
     private boolean askForPeach(Player target) {
-        List<Card> peaches = handCards.stream().filter(card -> card instanceof Peach).toList();
-        String prompt = String.format("%s 濒死，请求你使用一张桃，0放弃：", target);
-        Card card = null;  // 使用的无懈卡牌
         try (Fields.TmpField tf = xFields.tmpField("askForPeach_Target", target)) {
-            card = chooseCard(new CardChoose(this, peaches, false,
-                    "askForPeach", prompt));
+            CardAsk ask = new CardAsk(Peach.class, CardAsk.Scene.USE, this,
+                    "askForPeach", String.format("%s 濒死，请求你使用一张桃，0放弃：", target));
+            Card card = askForCard(ask);
+            if (card != null) {
+                useCard(card, Collections.singletonList(target));
+            }
+            return card != null;
         }
-        if (card != null) {
-            useCard(card, Collections.singletonList(target));
-        }
-        return card != null;
     }
 
     /**
@@ -537,7 +527,8 @@ public abstract class Player {
     public boolean askForNullification(CardEffect effect) {
         List<Card> nullis = handCards.stream().filter(card -> card instanceof Nullification).toList();
         if (nullis.isEmpty()) return false;  // 没有无懈，用不了
-        // 用户提示语
+
+        // 拼接用户提示语
         Card card = effect.getCard();
         String prompt;
         if (card instanceof DelayedTrickCard) {
@@ -551,10 +542,12 @@ public abstract class Player {
                     effect.getSource(), card, target);
         }
 
-        Nullification nulli = null;  // 使用的无懈卡牌
+        // 要求无懈卡牌
+        Nullification nulli;
         try (Fields.TmpField tf = xFields.tmpField("askForNulli_CardEffect", effect)) {
-            nulli = (Nullification) chooseCard(new CardChoose(this, nullis, false,
-                    "askForNullification", prompt));
+            CardAsk ask = new CardAsk(Nullification.class, CardAsk.Scene.USE, this,
+                    "askForNullification", prompt);
+            nulli = (Nullification) askForCard(ask);
         }
         if (nulli != null) {
             nulli.targetEffect = effect;  // 标记这张无懈的目标牌

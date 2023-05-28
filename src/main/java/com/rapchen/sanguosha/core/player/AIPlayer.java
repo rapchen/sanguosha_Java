@@ -47,6 +47,8 @@ public class AIPlayer extends Player {
                 return cards.get(0);
             } case "GangLie" -> {  // 刚烈：弃
                 return cards.get(0);
+            } case "WuSheng", "LongDan" -> {  // 武圣、龙胆：用
+                return cards.get(0);
             } default -> {  // 默认逻辑：必须选就选一张，否则放弃
                 return choose.forced ? cards.get(0) : null;
             }
