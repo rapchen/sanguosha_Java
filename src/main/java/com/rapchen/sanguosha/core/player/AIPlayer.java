@@ -2,6 +2,7 @@ package com.rapchen.sanguosha.core.player;
 
 import com.rapchen.sanguosha.core.Engine;
 import com.rapchen.sanguosha.core.data.card.Card;
+import com.rapchen.sanguosha.core.data.card.CardChoose;
 import com.rapchen.sanguosha.core.data.card.CardEffect;
 import com.rapchen.sanguosha.core.data.card.trick.Nullification;
 import com.rapchen.sanguosha.core.general.General;
@@ -30,9 +31,11 @@ public class AIPlayer extends Player {
     }
 
     @Override
-    public <T extends Card> T chooseCard(List<T> cards, boolean forced, String prompt, String reason) {
+    public <T extends Card> T chooseCard(CardChoose<T> choose) {
+        // TODO 现在所有AI逻辑都在这里，之后要拆到各个牌下面
+        List<T> cards = choose.cards;
         if (cards.isEmpty()) return null;
-        switch (reason) {
+        switch (choose.reason) {
             case "askForDodge", "askForSlash" -> {  // 要求出杀闪：总是出
                 return cards.get(0);
             } case "askForPeach" -> {  // 求桃：只给自己
@@ -44,24 +47,16 @@ public class AIPlayer extends Player {
                 if (calcBenefit(effect) < 0)
                     return cards.get(0);
                 return null;
-            } case "askForCardFromPlayer" -> {  // 要求一角色处的一张牌：目前默认是坏事，别人的总是选，自己的尽量不选
-                String reason1 = (String) xFields.get("askForCardFromPlayer_Reason");
-                Player target = (Player) xFields.get("askForCardFromPlayer_Target");
-                switch (reason1) {
-                    case "GangLie" -> {  // 刚烈：弃
-                        return cards.get(0);
-                    } default -> {
-                        if (target == this) return forced ? cards.get(0) : null;
-                        else return cards.get(0);
-                    }
-                }
+            } case "Snatch", "Dismantlement" -> {  // 拆顺：弃 TODO 如果是友方应该优先判定区
+                return cards.get(0);
             } case "KylinBowSkill" -> {  // 麒麟弓：弃
                 return cards.get(0);
+            } case "GangLie" -> {  // 刚烈：弃
+                return cards.get(0);
             } default -> {  // 默认逻辑：必须选就选一张，否则放弃
-                return forced ? cards.get(0) : null;
+                return choose.forced ? cards.get(0) : null;
             }
         }
-        // return cards.get(0);
     }
 
     @Override

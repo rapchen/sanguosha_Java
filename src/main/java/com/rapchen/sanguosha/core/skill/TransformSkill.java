@@ -2,6 +2,7 @@ package com.rapchen.sanguosha.core.skill;
 
 import com.rapchen.sanguosha.core.data.card.Card;
 import com.rapchen.sanguosha.core.data.card.CardAsk;
+import com.rapchen.sanguosha.core.data.card.CardChoose;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -70,7 +71,8 @@ public abstract class TransformSkill extends Skill {
                     .filter(card -> !chosenCards.contains(card))
                     .filter(this::cardFilter).toList();
             String prompt = String.format("你正在发动 %s, 请选择第%d张牌, 0停止选择：", nameZh, i+1);
-            Card chosen = owner.chooseCard(choices, false, prompt, name);
+            Card chosen = owner.chooseCard(
+                    new CardChoose<>(owner, choices, false, name, prompt));
             if (chosen == null) break;  // 放弃选择了，直接跳出
             chosenCards.add(chosen);
         }

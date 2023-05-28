@@ -8,9 +8,7 @@ import com.rapchen.sanguosha.core.skill.Event;
 import com.rapchen.sanguosha.core.skill.Timing;
 import com.rapchen.sanguosha.core.skill.TriggerSkill;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 /**
  * 青龙偃月刀 Green Dragon Crescent Blade

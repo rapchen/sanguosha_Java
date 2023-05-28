@@ -5,6 +5,7 @@ import com.rapchen.sanguosha.core.common.Utils;
 import com.rapchen.sanguosha.core.data.Damage;
 import com.rapchen.sanguosha.core.data.Table;
 import com.rapchen.sanguosha.core.data.card.Card;
+import com.rapchen.sanguosha.core.data.card.CardChoose;
 import com.rapchen.sanguosha.core.general.General;
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,28 +27,28 @@ public class UserPlayer extends Player {
 
     @Override
     protected Card choosePlayCard(List<Card> cards) {
-        return chooseCard(cards, false, "请使用一张牌，0结束：", "choosePlayCard");
+        return chooseCard(new CardChoose<>(this, cards, false,
+                "choosePlayCard", "请使用一张牌，0结束："));
     }
 
     @Override
     protected Card chooseDiscard(Player target, List<Card> cards) {
-        return chooseCard(cards, true, "请弃置一张手牌：", "chooseDiscard");
+        return chooseCard(new CardChoose<>(this, cards, true,
+                "chooseDiscard", "请弃置一张手牌："));
     }
 
     /**
      * 要求用户选一张牌
-     * @param cards  可选牌的列表
-     * @param forced 是否必须选择
-     * @param prompt 给用户的提示语
-     * @param reason 选牌原因，通常给AI做判断用
+     * @param choose 卡牌选择对象
      * @return 选择的牌。如果不选，就返回null。
      */
     @Override
-    public <T extends Card> T chooseCard(List<T> cards, boolean forced, String prompt, String reason) {
+    public <T extends Card> T chooseCard(CardChoose<T> choose) {
+        List<T> cards = choose.cards;
         while (true) {
-            log.warn(prompt);  // TODO 目前打给用户的都用WARN，后台的用INFO。之后可以打到不同的输出
+            log.warn(choose.prompt);  // TODO 目前打给用户的都用WARN，后台的用INFO。之后可以打到不同的输出
             log.warn(Card.cardsToString(cards, true));
-            int chosen = chooseNumber(cards.size(), forced);
+            int chosen = chooseNumber(cards.size(), choose.forced);
             if (chosen >= 0) {
                 return chosen == 0 ? null : cards.get(chosen - 1);
             }
@@ -137,7 +138,8 @@ public class UserPlayer extends Player {
         Table table = engine.table;
         List<Card> cards = new ArrayList<>(table.drawPile);
         cards.addAll(table.discardPile);
-        Card card = chooseCard(cards, false, "选择你要的牌：", "cheatGetCard");
+        Card card = chooseCard(new CardChoose<>(this, cards, false,
+                "cheatGetCard", "选择你要的牌："));
         if (card != null) {
             table.drawPile.remove(card);
             table.discardPile.remove(card);

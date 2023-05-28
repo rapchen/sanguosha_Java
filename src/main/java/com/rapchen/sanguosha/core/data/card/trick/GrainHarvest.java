@@ -2,6 +2,7 @@ package com.rapchen.sanguosha.core.data.card.trick;
 
 import com.rapchen.sanguosha.core.Engine;
 import com.rapchen.sanguosha.core.data.card.Card;
+import com.rapchen.sanguosha.core.data.card.CardChoose;
 import com.rapchen.sanguosha.core.data.card.CardEffect;
 import com.rapchen.sanguosha.core.data.card.CardUse;
 import com.rapchen.sanguosha.core.player.Player;
@@ -42,7 +43,8 @@ public class GrainHarvest extends ImmediateTrickCard {
     public void doEffect(CardEffect effect) {
         Player target = effect.target;
         if (choiceCards == null || choiceCards.isEmpty()) return;
-        Card card = target.chooseCard(choiceCards, true, "请选择一张五谷牌：", "GrainHarvest");
+        Card card = target.chooseCard(new CardChoose<>(target, choiceCards,
+                true, "GrainHarvest", "请选择一张五谷牌："));
         choiceCards.remove(card);
         Engine.eg.moveCard(card, Place.HAND, target, name);
         log.info("{} 获得了五谷牌：{}", target.name, card);

@@ -421,22 +421,22 @@ public abstract class Player {
      * @param count  弃牌数量
      * @param target 弃牌目标
      * @param forced 是否必须选择
-     * @param patten 区域。hej
+     * @param pattern 区域。hej
      * @param prompt 提示语。默认为"请弃置{target}{count}张牌："
      * @param reason 选牌原因，通常给AI做判断用
      * @return 是否弃牌
      */
-    public boolean askForDiscard(int count, Player target, boolean forced, String patten, String prompt, String reason) {
+    public boolean askForDiscard(int count, Player target, boolean forced, String pattern, String prompt, String reason) {
         List<Card> discards = new ArrayList<>();
         for (int i = 0; i < count; i++) {
-            Card card = askForCardFromPlayer(target, forced, patten,
+            Card card = askForCardFromPlayer(target, forced, pattern,
                     prompt == null ? String.format("请弃置 %s %d张牌：", target, count) : prompt, reason);
             if (card == null) continue;
             discards.add(card);
             target.doRemoveCard(card);  // 从角色处移除卡牌，避免重复选择（这里不触发失去牌的时机）
         }
         if (discards.size() < count) {
-            // TODO 不弃了要还回去，不一定手牌
+            // TODO 不弃了要还回去，不一定手牌  搞个CardChoose对象
             target.handCards.addAll(discards);
             return false;  // 弃牌张数不够，放弃弃牌了
         }
@@ -461,16 +461,14 @@ public abstract class Player {
      */
     public Card askForCardFromPlayer(Player target, boolean forced, String pattern, String prompt, String reason) {
         // 准备选项
-        List<Card> choices = getCards(target, pattern);
+        CardChoose<Card> choose = CardChoose.fromPlayer(this, target, pattern, forced, reason, prompt);
 
-        if (!choices.isEmpty()) {
+        if (!choose.cards.isEmpty()) {
             Card card;
-            try (Fields.TmpField tf = xFields.tmpField("askForCardFromPlayer_Reason", reason);
-                    Fields.TmpField tf2 = xFields.tmpField("askForCardFromPlayer_Target", target)) {
-                card = chooseCard(choices, forced, prompt, "askForCardFromPlayer");
-            }
+            card = chooseCard(choose);
             if (card == null) return null;
             if (card.isVirtual()) {  // 对于虚拟牌（如所有手牌）自动随机其中一张子卡
+                // TODO 放到CardChoose
                 int num = engine.random.nextInt(card.subCards.size());
                 card = card.subCards.get(num);
             }
@@ -481,17 +479,14 @@ public abstract class Player {
 
 
     /**
-     * 要求用户选一张牌
-     * @param cards  可选牌的列表
-     * @param forced 是否必须选择
-     * @param prompt 给用户的提示语
-     * @param reason 选牌原因，通常给AI做判断用
+     * 要求角色选一张牌
+     * @param choose 卡牌选择对象
      * @return 选择的牌。如果不选，就返回null。
      */
-    public abstract <T extends Card> T chooseCard(List<T> cards, boolean forced, String prompt, String reason);
+    public abstract <T extends Card> T chooseCard(CardChoose<T> choose);
 
     /**
-     * 要求用户选一个武将
+     * 要求角色选一个武将
      * @param generals 可选武将的列表
      * @param forced 是否必须选择
      * @param prompt 给用户的提示语
@@ -566,7 +561,8 @@ public abstract class Player {
         String prompt = String.format("%s 濒死，请求你使用一张桃，0放弃：", target);
         Card card = null;  // 使用的无懈卡牌
         try (Fields.TmpField tf = xFields.tmpField("askForPeach_Target", target)) {
-            card = chooseCard(peaches, false, prompt, "askForPeach");
+            card = chooseCard(new CardChoose<>(this, peaches, false,
+                    "askForPeach", prompt));
         }
         if (card != null) {
             useCard(card, Collections.singletonList(target));
@@ -598,7 +594,8 @@ public abstract class Player {
 
         Nullification nulli = null;  // 使用的无懈卡牌
         try (Fields.TmpField tf = xFields.tmpField("askForNulli_CardEffect", effect)) {
-            nulli = (Nullification) chooseCard(nullis, false, prompt, "askForNullification");
+            nulli = (Nullification) chooseCard(new CardChoose<>(this, nullis, false,
+                    "askForNullification", prompt));
         }
         if (nulli != null) {
             nulli.targetEffect = effect;  // 标记这张无懈的目标牌
@@ -612,14 +609,14 @@ public abstract class Player {
     }
 
     /**
-     * 要求角色使用/打出一张牌。这里处理可用牌、技能列表等逻辑，实际选牌交给chooseCard TODO
+     * 要求角色使用/打出一张牌。这里处理可用牌、技能列表等逻辑，实际选牌交给chooseCard
      * @return 使用/打出的牌
      */
     public Card askForCard(CardAsk ask) {
         while (true) {
             List<Card> cards = new ArrayList<>(handCards.stream().filter(ask::matches).toList());
             cards.addAll(engine.skills.getTransformedCards(ask));
-            Card card = chooseCard(cards, ask.forced, ask.prompt, ask.reason);
+            Card card = chooseCard(new CardChoose<>(this, cards, ask.forced, ask.reason, ask.prompt));
             if (card == null) return null;
             // 选择转化技之后的处理逻辑
             if (card.isVirtual() && card.skill instanceof TransformSkill skill) {
