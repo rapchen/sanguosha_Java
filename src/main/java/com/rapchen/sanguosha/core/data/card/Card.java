@@ -310,10 +310,12 @@ public abstract class Card {
      * @param source  使用者
      * @param targets 目标。例如冲阵可能会用
      */
-    public void doResponse(Player source, List<Player> targets) {
+    public void doRespond(Player source, List<Player> targets) {
         log.info("{} 打出了 {}", source, this);
-        // 弃牌
+        // 移到弃牌堆
         Engine.eg.moveCard(this, Place.DISCARD, null, "Response");
+        // 打出结束时机
+        Engine.eg.trigger(new Event(Timing.CARD_RESPONDED, source).withField("Card", this));
     }
 
     /* =============== end 子类需要实现的具体功能 ================ */

@@ -68,14 +68,12 @@ public abstract class Player {
         log.warn("---------------------- {} 回合开始 ----------------------", this);
         engine.currentPlayer = this;  // 切换当前回合角色
         engine.trigger(new Event(Timing.TURN_BEGIN, this));
-        doPreparePhase();
-        doJudgePhase();
-        doDrawPhase();
-        if (!isPhaseSkipped(Phase.PHASE_PLAY)) {
-            doPlayPhase();
-        }
-        doDiscardPhase();
-        doEndPhase();
+        tryPhase(Phase.PHASE_PREPARE);
+        tryPhase(Phase.PHASE_JUDGE);
+        tryPhase(Phase.PHASE_DRAW);
+        tryPhase(Phase.PHASE_PLAY);
+        tryPhase(Phase.PHASE_DISCARD);
+        tryPhase(Phase.PHASE_END);
         engine.trigger(new Event(Timing.TURN_END, this));
         phase = Phase.PHASE_OFF_TURN;
     }
@@ -83,20 +81,38 @@ public abstract class Player {
     /* =============== begin 阶段 ================ */
 
     /**
-     * 准备阶段。 TODO 各个阶段的开始结束共同逻辑可以用AOP，考虑整合SpringAOP
+     * 尝试执行一个阶段。涉及阶段跳过的判断和阶段执行逻辑
+     * @param phase 阶段
      */
-    private void doPreparePhase() {
-        phase = Phase.PHASE_PREPARE;
+    private void tryPhase(Phase phase) {
+        if (isPhaseSkipped(phase)) return;  // 跳过阶段
+        // 阶段开始前时机，发动阶段跳过和插入相关的技能
+        engine.trigger(new Event(Timing.PHASE_BEFORE, this).withField("Phase", phase));
+        if (isPhaseSkipped(phase)) return;
+
+        this.phase = phase;
+        // 阶段开始时机
         engine.trigger(new Event(Timing.PHASE_BEGIN, this).withField("Phase", phase));
+        doPhase(phase);
+    }
+
+    /**
+     * 执行一个阶段的具体功能
+     * @param phase 阶段
+     */
+    private void doPhase(Phase phase) {
+        switch (phase) {
+            case PHASE_JUDGE -> doJudgePhase();
+            case PHASE_DRAW -> doDrawPhase();
+            case PHASE_PLAY -> doPlayPhase();
+            case PHASE_DISCARD -> doDiscardPhase();
+        }
     }
 
     /**
      * 判定阶段
      */
     private void doJudgePhase() {
-        phase = Phase.PHASE_JUDGE;
-        engine.trigger(new Event(Timing.PHASE_BEGIN, this).withField("Phase", phase));
-
         // 闪电判定之后有可能回到原角色判定区，为了避免死循环要拷贝一份
         ArrayList<DelayedTrickCard> tricks = new ArrayList<>(judgeArea);
         // 后发先至，从后使用的开始依次判定
@@ -116,9 +132,6 @@ public abstract class Player {
      * 摸牌阶段
      */
     private void doDrawPhase() {
-        phase = Phase.PHASE_DRAW;
-        engine.trigger(new Event(Timing.PHASE_BEGIN, this).withField("Phase", phase));
-
         int drawCount = 2;
         drawCount = engine.triggerModify(new Event(Timing.MD_DRAW_COUNT, this), drawCount);
         this.drawCards(drawCount);
@@ -128,9 +141,6 @@ public abstract class Player {
      * 出牌阶段
      */
     private void doPlayPhase() {
-        phase = Phase.PHASE_PLAY;
-        engine.trigger(new Event(Timing.PHASE_BEGIN, this).withField("Phase", phase));
-
         slashTimes = 0;  // 重置杀使用数
         while (true) {
             if (!askForPlayCard()) break;
@@ -141,23 +151,12 @@ public abstract class Player {
      * 弃牌阶段
      */
     private void doDiscardPhase() {
-        phase = Phase.PHASE_DISCARD;
-        engine.trigger(new Event(Timing.PHASE_BEGIN, this).withField("Phase", phase));
-
         if (handCards.size() > hp) {
             int count = handCards.size() - hp;
             CardChoose choose = new CardChoose(this).fromSelf("h")
                     .count(count).forced().reason("DiscardPhase", null);
             askForDiscard(choose);
         }
-    }
-
-    /**
-     * 结束阶段
-     */
-    private void doEndPhase() {
-        phase = Phase.PHASE_END;
-        engine.trigger(new Event(Timing.PHASE_BEGIN, this).withField("Phase", phase));
     }
 
     public void skipPhase(Phase phase) {
@@ -238,8 +237,8 @@ public abstract class Player {
     /**
      * 打出牌
      */
-    protected void responseCard(Card card, List<Player> targets) {
-        card.doResponse(this, targets);
+    protected void respondCard(Card card, List<Player> targets) {
+        card.doRespond(this, targets);
     }
 
     /**
@@ -497,7 +496,7 @@ public abstract class Player {
             if (isUse) {
                 useCard(card, new ArrayList<>());
             } else {
-                responseCard(card, new ArrayList<>());
+                respondCard(card, new ArrayList<>());
             }
         }
         return card != null;
@@ -511,7 +510,7 @@ public abstract class Player {
         CardAsk ask = new CardAsk(Slash.class, CardAsk.Scene.RESPONSE, this,
                 "askForSlash", "请打出一张杀，0放弃：");
         Card card = askForCard(ask);
-        if (card != null) responseCard(card, new ArrayList<>());
+        if (card != null) respondCard(card, new ArrayList<>());
         return card != null;
     }
 

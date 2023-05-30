@@ -12,13 +12,16 @@ public enum Timing {
     // 回合、阶段相关。player为当前回合角色
     TURN_BEGIN,
     TURN_END,
-    PHASE_BEGIN,
+    PHASE_BEFORE,  // 阶段开始前时机。可以进行阶段的跳过和插入。 Phase
+    PHASE_BEGIN,  // 阶段开始时机。 Phase
 
     // 卡牌使用相关。player为使用者
     CARD_ASKED,  // 被要求打出（或使用闪）一张牌时。 CardAsk
     CARD_USING,  // 卡牌使用时立刻触发。早于修改目标的时机。 CardUse
     TARGET_CHOSEN,  // 牌指定目标后。修改目标应该在这之前。 CardUse
     CARD_USED,  // 卡牌使用结束。卡牌的响应也已经结束。 CardUse
+
+    CARD_RESPONDED,  // 卡牌打出结束。Player为打出者 Card
 
     // 杀相关
     SLASH_DODGED,  // 杀被闪避时。
