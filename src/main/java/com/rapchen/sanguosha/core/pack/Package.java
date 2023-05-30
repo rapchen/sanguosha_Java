@@ -2,6 +2,7 @@ package com.rapchen.sanguosha.core.pack;
 
 import com.rapchen.sanguosha.core.Engine;
 import com.rapchen.sanguosha.core.data.card.Card;
+import com.rapchen.sanguosha.core.data.card.Place;
 import com.rapchen.sanguosha.core.general.General;
 
 /**
@@ -23,7 +24,7 @@ public abstract class Package {
 
     public void addCard(Card card) {
         Engine.eg.table.drawPile.add(card);
-        card.place = Card.Place.DRAW;  // 放到摸牌堆
+        card.place = Place.DRAW;  // 放到摸牌堆
 
         card.id = Card.nextCardId;
         Card.nextCardId++;  // 目前Package管理真实卡牌的唯一ID

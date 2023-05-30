@@ -43,9 +43,14 @@ public abstract class Player {
     public General general;  // 武将
     public List<Skill> skills = new ArrayList<>();  // 技能
 
+    // 卡牌位置相关
     public List<Card> handCards;  // 手牌
     public EquipArea equips;  // 装备区
     public List<DelayedTrickCard> judgeArea;  // 判定区的延时类锦囊列表，按照使用顺序排列
+    public final Place HAND = new Place(Place.PlaceType.HAND, this);
+    public final Place EQUIP = new Place(Place.PlaceType.EQUIP, this);
+    public final Place JUDGE = new Place(Place.PlaceType.JUDGE, this);
+    public final Place JUDGE_CARD = new Place(Place.PlaceType.JUDGE_CARD, this);
 
     public Phase phase = Phase.PHASE_OFF_TURN;  // 当前阶段
     public int slashTimes = 0;  // 当前出牌阶段已使用的杀的数量
@@ -221,10 +226,10 @@ public abstract class Player {
      * 获得牌到手牌
      */
     public void obtain(Card card, String reason) {
-        engine.moveCard(card, Card.Place.HAND, this, reason);
+        engine.moveCard(card, this.HAND, reason);
     }
     public void obtain(List<Card> cards, String reason) {
-        engine.moveCards(cards, Card.Place.HAND, this, reason);
+        engine.moveCards(cards, this.HAND, reason);
     }
 
     /**
@@ -267,8 +272,7 @@ public abstract class Player {
                 if (target.handCards.size() > 0) {  // 所有手牌作为一个选项，随机选一张
                     Card hCards = new FakeCard( target.handCards.size() + "张手牌");
                     hCards.addSubCards(target.handCards);
-                    hCards.place = Card.Place.HAND;  // 方便后续过滤
-                    hCards.owner = target;
+                    hCards.place = target.HAND;  // 方便后续过滤
                     cards.add(hCards);
                 }
             }

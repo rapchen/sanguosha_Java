@@ -25,7 +25,7 @@ public class LiuBei extends General {
 
         @Override
         public boolean cardFilter(Card card) {
-            return card.place == Card.Place.HAND;  // 手牌
+            return card.place.isHand();  // 手牌
         }
 
         @Override

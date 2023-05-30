@@ -3,6 +3,7 @@ package com.rapchen.sanguosha.core.data.card.trick;
 import com.rapchen.sanguosha.core.data.Damage;
 import com.rapchen.sanguosha.core.data.Judgement;
 import com.rapchen.sanguosha.core.data.card.CardEffect;
+import com.rapchen.sanguosha.core.data.card.Place;
 import com.rapchen.sanguosha.core.player.Player;
 
 import java.util.List;
@@ -40,7 +41,7 @@ public class Lightning extends DelayedTrickCard {
     public void doAfterDelayedEffect(Player target) {
         if (xFields.remove("Lightning_Discard") == Boolean.TRUE) {
             // 如果生效则从判定区置入弃牌堆。已经被奸雄等技能移动的就不弃了
-            target.engine.moveToDiscard(this, Place.JUDGE);
+            target.engine.moveToDiscard(this, Place.PlaceType.JUDGE);
         } else {
             // 从下家开始依次遍历所有玩家，找到下一个合适的目标
             List<Player> players = target.getOtherPlayers();

@@ -32,7 +32,7 @@ public class ZhenJi extends General {
 
         @Override
         public boolean cardFilter(Card card) {
-            return card.isBlack() && card.place == Card.Place.HAND;
+            return card.isBlack() && card.place.isHand();
         }
 
         @Override

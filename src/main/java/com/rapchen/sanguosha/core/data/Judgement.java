@@ -2,6 +2,7 @@ package com.rapchen.sanguosha.core.data;
 
 import com.rapchen.sanguosha.core.Engine;
 import com.rapchen.sanguosha.core.data.card.Card;
+import com.rapchen.sanguosha.core.data.card.Place;
 import com.rapchen.sanguosha.core.player.Player;
 import com.rapchen.sanguosha.core.skill.Event;
 import com.rapchen.sanguosha.core.skill.Skill;
@@ -46,13 +47,14 @@ public class Judgement {
         // 判定牌生效后时机。天妒
         Engine.eg.trigger(new Event(Timing.JUDGE_DONE, player).withField("Judge", this));
 
-        Engine.eg.moveToDiscard(card, Card.Place.JUDGE_CARD);  // 仍在处理区的进入弃牌堆
+        Engine.eg.moveToDiscard(card, Place.PlaceType.JUDGE_CARD);  // 仍在处理区的进入弃牌堆
         String successStr = (success == null) ? "生效" : (success ? "成功" : "失败");
         log.warn("{} 的 {} 判定 {}，结果为 {}", player, nameZh, successStr, card);
         return this;
     }
 
     private void setCard(Card card) {
+        Engine.eg.moveCard(card, player.JUDGE_CARD, "judge");
         this.card = card;
         this.success = judgeFunc.apply(card);
     }
@@ -64,8 +66,8 @@ public class Judgement {
      * @param swap 是否是替换原判定牌。如果是则旧判定牌进入手牌，否则进入弃牌堆
      */
     public Judgement rejudge(Card newCard, Skill skill, boolean swap) {
-        // 新牌作为判定牌，进入处理区
-        Engine.eg.moveCard(newCard, Card.Place.JUDGE_CARD, null, "judge");
+        // 新牌进入处理区
+        Engine.eg.moveCard(newCard, Place.HANDLE, "judge");
         // 处理旧牌。
         if (swap) {
             skill.owner.obtain(this.card, skill.name);

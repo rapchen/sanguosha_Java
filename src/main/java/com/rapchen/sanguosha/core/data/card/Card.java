@@ -117,17 +117,6 @@ public abstract class Card {
         }
     }
 
-    public enum Place {
-        DRAW,  // 摸牌堆
-        DISCARD,  // 弃牌堆
-        HAND,  // 手牌
-        EQUIP,  // 装备区
-        JUDGE,  // 判定区
-        JUDGE_CARD,  // 判定牌（临时，算是处理区的一种）
-        HANDLE,  // 处理区（临时）
-        EXTRA,  // 游戏外，角色的额外牌堆
-    }
-
     public static int nextCardId = 1;  // 自增ID，从1开始。保证实体卡牌的唯一性
 
     public Suit suit;
@@ -137,7 +126,6 @@ public abstract class Card {
     public String name;  // 牌名。对于基本牌和锦囊牌，牌名即对象的类名；对于装备牌，同类的可能不同名（如赤兔和大宛）
     public String nameZh;  // 中文牌名，用于显示。
     public Place place;  // 卡牌位置。
-    public Player owner = null;  // 卡牌当前所属区域的角色（判定区和判定牌都算）。不属于某个角色则为null
 
     public boolean virtual = false;  // 是否虚拟卡
     public List<Card> subCards = new ArrayList<>();  // 子卡，通常用于虚拟卡
@@ -253,7 +241,7 @@ public abstract class Card {
     public void doUse(Player source, List<Player> targets) {
         doUseLog(source, targets);
         // 移动到处理区
-        Engine.eg.moveCard(this, Place.HANDLE, null, "Use");
+        Engine.eg.moveCard(this, Place.HANDLE, "Use");
 
         // 执行效果
         CardUse use = new CardUse(this, source, targets);
@@ -274,7 +262,7 @@ public abstract class Card {
 
         // 结算完毕，处理区的牌进入弃牌堆（已经被奸雄等技能获得的不动）
         if (throwAfterUse) {
-            source.engine.moveToDiscard(this, Place.HANDLE);
+            source.engine.moveToDiscard(this, Place.PlaceType.HANDLE);
         }
         Engine.eg.trigger(new Event(Timing.CARD_USED, source).withField("CardUse", use));  // 结算完毕
     }
@@ -313,7 +301,7 @@ public abstract class Card {
     public void doRespond(Player source, List<Player> targets) {
         log.info("{} 打出了 {}", source, this);
         // 移到弃牌堆
-        Engine.eg.moveCard(this, Place.DISCARD, null, "Response");
+        Engine.eg.moveCard(this, Place.DISCARD, "Response");
         // 打出结束时机
         Engine.eg.trigger(new Event(Timing.CARD_RESPONDED, source).withField("Card", this));
     }

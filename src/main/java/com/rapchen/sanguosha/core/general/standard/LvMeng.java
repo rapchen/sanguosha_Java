@@ -1,12 +1,9 @@
 package com.rapchen.sanguosha.core.general.standard;
 
 import com.rapchen.sanguosha.core.Engine;
-import com.rapchen.sanguosha.core.data.Damage;
 import com.rapchen.sanguosha.core.data.card.Card;
-import com.rapchen.sanguosha.core.data.card.CardEffect;
 import com.rapchen.sanguosha.core.data.card.CardUse;
 import com.rapchen.sanguosha.core.data.card.basic.Slash;
-import com.rapchen.sanguosha.core.data.card.trick.Duel;
 import com.rapchen.sanguosha.core.general.General;
 import com.rapchen.sanguosha.core.player.Phase;
 import com.rapchen.sanguosha.core.skill.Event;

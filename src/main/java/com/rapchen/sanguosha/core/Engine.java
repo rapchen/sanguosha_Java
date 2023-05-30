@@ -4,10 +4,10 @@ import com.rapchen.sanguosha.core.data.Damage;
 import com.rapchen.sanguosha.core.data.Table;
 import com.rapchen.sanguosha.core.data.UserTableVO;
 import com.rapchen.sanguosha.core.data.card.Card;
+import com.rapchen.sanguosha.core.data.card.Place;
 import com.rapchen.sanguosha.core.data.card.equip.EquipCard;
 import com.rapchen.sanguosha.core.data.card.trick.DelayedTrickCard;
 import com.rapchen.sanguosha.core.general.GeneralManager;
-import com.rapchen.sanguosha.core.general.standard.BaiBan;
 import com.rapchen.sanguosha.core.pack.StandardCards;
 import com.rapchen.sanguosha.core.player.*;
 import com.rapchen.sanguosha.core.skill.*;
@@ -108,7 +108,7 @@ public class Engine {
             table.drawPile.addAll(cards);
             table.discardPile.clear();
             for (Card card : cards) {
-                card.place = Card.Place.DRAW;
+                card.place = Place.DRAW;
             }
         }
         if (table.drawPile.isEmpty()) {
@@ -134,56 +134,54 @@ public class Engine {
      * 将牌放入弃牌堆（不管移除，只管添加到弃牌堆）
      */
     public void moveToDiscard(Card card) {
-        moveCard(card, Card.Place.DISCARD, null, "");
+        moveCard(card, Place.DISCARD, "");
     }
-    public void moveToDiscard(Card card, Card.Place sourcePlace) {
-        moveCard(card, Card.Place.DISCARD, null, sourcePlace, "");
+    public void moveToDiscard(Card card, Place.PlaceType sourcePlaceType) {
+        moveCard(card, Place.DISCARD, sourcePlaceType, "");
     }
     public void moveToDiscard(List<Card> cards) {
-        moveCards(cards, Card.Place.DISCARD, null, "");
+        moveCards(cards, Place.DISCARD, "");
     }
 
     /**
      * 移动牌
-     * @param card 移动的牌
+     * @param card        移动的牌
      * @param targetPlace 目标位置
-     * @param target 目标角色。如果无角色（如弃牌堆）则为null
-     * @param reason 移动原因
+     * @param reason      移动原因
      */
-    public void moveCard(Card card, Card.Place targetPlace, Player target, String reason) {
-        moveCards(Collections.singletonList(card), targetPlace, target, reason);
+    public void moveCard(Card card, Place targetPlace, String reason) {
+        moveCards(Collections.singletonList(card), targetPlace, reason);
     }
-    public void moveCard(Card card, Card.Place targetPlace, Player target,
-                         Card.Place sourcePlace, String reason) {
-        moveCards(Collections.singletonList(card), targetPlace, target, sourcePlace, reason);
+    public void moveCard(Card card, Place targetPlace,
+                         Place.PlaceType sourcePlaceType, String reason) {
+        moveCards(Collections.singletonList(card), targetPlace, sourcePlaceType, reason);
     }
-    public void moveCards(List<Card> cards, Card.Place targetPlace, Player target, String reason) {
-        moveCards(cards, targetPlace, target, null, reason);
+    public void moveCards(List<Card> cards, Place targetPlace, String reason) {
+        moveCards(cards, targetPlace, null, reason);
     }
     /**
      * 移动牌
-     * @param cards 移动的牌
-     * @param targetPlace 目标位置
-     * @param target 目标角色。如果无角色（如弃牌堆）则为null
-     * @param sourcePlace 原位置。只有这个位置的牌会被移动，为null则不限制，全部移动。
-     * @param reason 移动原因
+     * @param cards           移动的牌
+     * @param targetPlace     目标位置
+     * @param sourcePlaceType 原位置。只有这个位置的牌会被移动，为null则不限制，全部移动。
+     * @param reason          移动原因
      */
-    public void moveCards(List<Card> cards, Card.Place targetPlace, Player target,
-                          Card.Place sourcePlace, String reason) {
+    public void moveCards(List<Card> cards, Place targetPlace,
+                          Place.PlaceType sourcePlaceType, String reason) {
         // 处理虚拟牌：虚拟牌的所有子卡都一起移动
         List<Card> realCards = new ArrayList<>();
         for (Card card : cards) {
             if (card.virtual) realCards.addAll(card.subCards);
             else realCards.add(card);
         }
-        if (sourcePlace != null) {  // 过滤原位置不正确的牌
-            realCards = realCards.stream().filter(card -> card.place == sourcePlace).toList();
+        if (sourcePlaceType != null) {  // 过滤原位置不正确的牌
+            realCards = realCards.stream().filter(card -> card.place.type == sourcePlaceType).toList();
         }
         // 移除牌逻辑
         for (Card card : realCards) {
-            switch (card.place) {
+            switch (card.place.type) {
                 case HAND, EQUIP, JUDGE -> {
-                    card.owner.doRemoveCard(card);  // TODO 后面可以按位置拆，但是失去时机可以放一起
+                    card.place.owner.doRemoveCard(card);  // TODO 后面可以按位置拆，但是失去时机可以放一起
                 } case DRAW -> {
                     table.drawPile.remove(card);
                 } case DISCARD -> {
@@ -194,7 +192,7 @@ public class Engine {
             card.place = targetPlace;  // 变更卡牌位置
         }
         // 添加牌逻辑
-        switch (targetPlace) {
+        switch (targetPlace.type) {
             case DRAW -> {  // 加入摸牌堆。目前默认是放到牌堆顶
                 for (int i = realCards.size() - 1; i >= 0; i--) {
                     Card card = realCards.get(i);
@@ -203,14 +201,14 @@ public class Engine {
             } case DISCARD -> {
                 table.discardPile.addAll(realCards);
             } case HAND -> {
-                target.handCards.addAll(realCards);
+                targetPlace.owner.handCards.addAll(realCards);
             } case EQUIP -> {
                 for (Card card : realCards) {
-                    target.equips.putEquip((EquipCard) card);
+                    targetPlace.owner.equips.putEquip((EquipCard) card);
                 }
             } case JUDGE -> {
                 for (Card card : realCards) {
-                    target.judgeArea.add((DelayedTrickCard) card);
+                    targetPlace.owner.judgeArea.add((DelayedTrickCard) card);
                 }
             }
             // TODO 添加牌的逻辑
@@ -218,7 +216,6 @@ public class Engine {
         // 变更卡牌位置对应角色
         for (Card card : realCards) {
             card.place = targetPlace;
-            card.owner = target;
         }
     }
 

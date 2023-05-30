@@ -2,6 +2,7 @@ package com.rapchen.sanguosha.core.data.card.trick;
 
 import com.rapchen.sanguosha.core.Engine;
 import com.rapchen.sanguosha.core.data.card.CardEffect;
+import com.rapchen.sanguosha.core.data.card.Place;
 import com.rapchen.sanguosha.core.player.Player;
 
 /**
@@ -28,7 +29,7 @@ public abstract class DelayedTrickCard extends TrickCard {
     @Override
     public void doEffect(CardEffect effect) {
         // 延时类锦囊统一处理逻辑：添加到判定区最后
-        Engine.eg.moveCard(this, Place.JUDGE, effect.target, "useDelayedTrickCard");
+        Engine.eg.moveCard(this, effect.target.JUDGE, "useDelayedTrickCard");
     }
 
     /**
@@ -40,6 +41,6 @@ public abstract class DelayedTrickCard extends TrickCard {
      * 延时类锦囊的后处理，默认是进弃牌堆，而闪电则是转移。这个效果不会被无懈
      */
     public void doAfterDelayedEffect(Player target) {
-        Engine.eg.moveToDiscard(this, Place.JUDGE);
+        Engine.eg.moveToDiscard(this, Place.PlaceType.JUDGE);
     }
 }
