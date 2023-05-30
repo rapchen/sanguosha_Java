@@ -45,10 +45,12 @@ public class EquipArea {
      * @return 是否有这张装备
      */
     public boolean remove(Card card) {
-        if (!(card instanceof EquipCard)) return false;
-        if (equips.get(card.subType) == card) {
-            equips.remove(card.subType);
-            return true;
+        if (card instanceof EquipCard equip) {
+            if (equips.get(equip.subType) == equip) {
+                equips.remove(equip.subType);
+                equip.onRemove();
+                return true;
+            }
         }
         return false;
     }

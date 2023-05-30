@@ -4,6 +4,7 @@ import com.rapchen.sanguosha.core.data.Damage;
 import com.rapchen.sanguosha.core.data.Table;
 import com.rapchen.sanguosha.core.data.UserTableVO;
 import com.rapchen.sanguosha.core.data.card.Card;
+import com.rapchen.sanguosha.core.data.card.CardMove;
 import com.rapchen.sanguosha.core.data.card.Place;
 import com.rapchen.sanguosha.core.data.card.equip.EquipCard;
 import com.rapchen.sanguosha.core.data.card.trick.DelayedTrickCard;
@@ -16,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * 单例Engine，实际控制游戏流程
@@ -174,20 +176,29 @@ public class Engine {
             if (card.virtual) realCards.addAll(card.subCards);
             else realCards.add(card);
         }
-        if (sourcePlaceType != null) {  // 过滤原位置不正确的牌
-            realCards = realCards.stream().filter(card -> card.place.type == sourcePlaceType).toList();
+        // 过滤原位置不正确的牌；过滤原位置和目标位置一样的牌
+        Stream<Card> cardStream = realCards.stream();
+        if (sourcePlaceType != null) {
+            cardStream = cardStream.filter(card -> card.place.type == sourcePlaceType);
         }
+        realCards = cardStream.filter(card -> card.place != targetPlace).toList();
+
+        CardMove move = new CardMove(realCards, targetPlace, reason);
         // 移除牌逻辑
         for (Card card : realCards) {
+            Player owner = card.place.owner;
             switch (card.place.type) {
-                case HAND, EQUIP, JUDGE -> {
-                    card.place.owner.doRemoveCard(card);  // TODO 后面可以按位置拆，但是失去时机可以放一起
-                } case DRAW -> {
-                    table.drawPile.remove(card);
-                } case DISCARD -> {
-                    table.discardPile.remove(card);
+                case DRAW -> table.drawPile.remove(card);
+                case DISCARD -> table.discardPile.remove(card);
+                case HAND -> {
+                    owner.handCards.remove(card);
+                    if (owner.handCards.isEmpty()) move.loseLastHandcardPlayers.add(owner);
                 }
-                // TODO 移除牌的逻辑
+                case EQUIP -> owner.equips.remove(card);
+                case JUDGE -> owner.judgeArea.remove((DelayedTrickCard) card);
+                case EXTRA -> {
+                    // TODO 移除牌的逻辑
+                }
             }
             card.place = targetPlace;  // 变更卡牌位置
         }
@@ -210,13 +221,16 @@ public class Engine {
                 for (Card card : realCards) {
                     targetPlace.owner.judgeArea.add((DelayedTrickCard) card);
                 }
+            } case EXTRA -> {
+                // TODO 添加牌的逻辑
             }
-            // TODO 添加牌的逻辑
         }
-        // 变更卡牌位置对应角色
+        // 变更卡牌位置
         for (Card card : realCards) {
             card.place = targetPlace;
         }
+        // 卡牌移动后时机
+        trigger(new Event(Timing.CARD_MOVED, targetPlace.owner).withField("CardMove", move));
     }
 
     // 角色相关

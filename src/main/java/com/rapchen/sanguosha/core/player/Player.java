@@ -186,36 +186,6 @@ public abstract class Player {
     }
 
     /**
-     * 从角色处移除一张牌（是基本方法，被move调用，只包含移除部分，不包含移动到部分）
-     * @return 是否成功移除。找不到牌就返回false
-     */
-    public boolean doRemoveCard(Card card) {
-        if (card.isVirtual()) {  // 对于虚拟牌，移除所有的子卡。移除至少一张视为成功
-            int removedCnt = doRemoveCards(card.subCards);
-            return removedCnt > 0;
-        }
-        if (handCards.remove(card)) return true;
-        if (equips.remove(card)) {
-            ((EquipCard)card).onRemove();
-            return true;
-        }
-        if (judgeArea.remove(card)) return true;
-        return false;
-    }
-
-    /**
-     * 从角色处移除多张牌
-     * @return 成功移除牌的数量
-     */
-    public int doRemoveCards(List<Card> cards) {
-        int count = 0;
-        for (Card card : cards) {
-            if (doRemoveCard(card)) count++;
-        }
-        return count;
-    }
-
-    /**
      * 弃牌
      */
     public void doDiscard(List<Card> cards) {

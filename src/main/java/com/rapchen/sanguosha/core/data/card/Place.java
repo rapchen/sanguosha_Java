@@ -23,8 +23,8 @@ public class Place {
     public Player owner = null;  // 当前区域对应的角色（判定区和判定牌都算）。不属于某个角色则为null
 
     public final static Place DRAW = new Place(PlaceType.DRAW);
-    public final static Place DISCARD = new Place(PlaceType.DRAW);
-    public final static Place HANDLE = new Place(PlaceType.DRAW);
+    public final static Place DISCARD = new Place(PlaceType.DISCARD);
+    public final static Place HANDLE = new Place(PlaceType.HANDLE);
 
     public Place(PlaceType type) {
         this.type = type;
@@ -47,5 +47,10 @@ public class Place {
     }
     public boolean isJudge() {
         return type == PlaceType.JUDGE;
+    }
+
+    @Override
+    public String toString() {
+        return (owner == null ? "" : owner + "的") + type + "区";
     }
 }

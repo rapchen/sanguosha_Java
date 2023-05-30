@@ -23,6 +23,9 @@ public enum Timing {
 
     CARD_RESPONDED,  // 卡牌打出结束。Player为打出者 Card
 
+    // 卡牌移动相关。Player为移动目标位置所属角色（可为null）
+    CARD_MOVED,  // 卡牌移动后。 CardMove
+
     // 杀相关
     SLASH_DODGED,  // 杀被闪避时。
 
