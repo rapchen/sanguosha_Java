@@ -18,7 +18,7 @@ public class Dismantlement extends ImmediateTrickCard {
     }
 
     @Override
-    public boolean canUseTo(Player source, Player target) {
+    public boolean canUseToOriginally(Player source, Player target) {
         return target != source && target.getCardCount("hej") > 0;
     }
 

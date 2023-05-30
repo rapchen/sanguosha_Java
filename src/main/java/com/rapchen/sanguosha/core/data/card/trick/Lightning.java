@@ -21,9 +21,9 @@ public class Lightning extends DelayedTrickCard {
     }
 
     @Override
-    public boolean canUseTo(Player source, Player target) {
+    public boolean canUseToOriginally(Player source, Player target) {
         // TODO 这里是否是合法目标和出牌阶段是否可用还要拆开，例如顺手的距离判断、闪电的转移等
-        return target == source && super.canUseTo(source, target);
+        return target == source && super.canUseToOriginally(source, target);
     }
 
     @Override

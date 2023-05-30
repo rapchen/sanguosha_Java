@@ -17,7 +17,7 @@ public class PeachOrchard extends ImmediateTrickCard {
     }
 
     @Override
-    public boolean canUseTo(Player source, Player target) {
+    public boolean canUseToOriginally(Player source, Player target) {
         return true;
     }
 

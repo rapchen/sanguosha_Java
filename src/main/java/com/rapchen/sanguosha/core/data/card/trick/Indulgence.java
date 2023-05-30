@@ -20,8 +20,8 @@ public class Indulgence extends DelayedTrickCard {
     }
 
     @Override
-    public boolean canUseTo(Player source, Player target) {
-        return target != source && super.canUseTo(source, target);
+    public boolean canUseToOriginally(Player source, Player target) {
+        return target != source && super.canUseToOriginally(source, target);
     }
 
     @Override

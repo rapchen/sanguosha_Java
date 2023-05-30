@@ -305,6 +305,10 @@ public class Engine {
     public int triggerModify(Event event, int value) {
         return skills.triggerModify(event, value);
     }
+    public boolean triggerModify(Event event, boolean value) {
+        // boolean映射到int：false-0；true-1
+        return skills.triggerModify(event, value ? 1 : 0) == 1;
+    }
 
     /**
      * 判断游戏是否结束 TODO 多人局

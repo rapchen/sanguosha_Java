@@ -215,11 +215,23 @@ public abstract class Card {
     }
 
     /**
-     * 检测此牌是否可用（忽略距离检查）。默认能对所有其他角色使用。
+     * 检测此牌是否可用（忽略距离检查）。这里会考虑合法目标相关的技能
      * @param source 使用者
      * @param target 目标
      */
     public boolean canUseTo(Player source, Player target) {
+        boolean canUse = canUseToOriginally(source, target);
+        canUse = Engine.eg.triggerModify(new Event(Timing.MD_TARGET_VALIDATION, target)
+                .withField("Card", this).withField("Source", source), canUse);
+        return canUse;
+    }
+
+    /**
+     * 定义此牌可用目标（忽略距离检查）。默认能对所有其他角色使用。
+     * @param source 使用者
+     * @param target 目标
+     */
+    public boolean canUseToOriginally(Player source, Player target) {
         return target != source;
     }
 

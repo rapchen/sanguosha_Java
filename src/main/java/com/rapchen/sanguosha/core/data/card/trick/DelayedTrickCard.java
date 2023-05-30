@@ -18,7 +18,7 @@ public abstract class DelayedTrickCard extends TrickCard {
     }
 
     @Override
-    public boolean canUseTo(Player source, Player target) {
+    public boolean canUseToOriginally(Player source, Player target) {
         // 延时类锦囊默认判断逻辑：判定区不存在同名锦囊。子类可以在此基础上加判断
         for (DelayedTrickCard card : target.judgeArea) {
             if (card.name.equals(name)) return false;

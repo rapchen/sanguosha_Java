@@ -41,7 +41,8 @@ public enum Timing {
 
     // =============== 以下MD开头为修正时机 ===============
     MD_SLASH_LIMIT,  // 修正回合内杀的次数限制
-    MD_DISTANCE,  // 修正距离。 Target
-    MD_DISTANCE_LIMIT,  // 修正卡牌使用的距离限制。 Target, Card
+    MD_DISTANCE,  // 修正距离。Player为使用者。 Target
+    MD_DISTANCE_LIMIT,  // 修正卡牌使用的距离限制。Player为使用者。 Target, Card
     MD_DRAW_COUNT,  // 修正摸牌阶段摸牌数
+    MD_TARGET_VALIDATION,  // 修正是否为合法目标(boolean)。Player为目标。 Source, Card
 }
