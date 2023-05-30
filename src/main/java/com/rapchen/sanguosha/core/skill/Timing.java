@@ -9,7 +9,9 @@ public enum Timing {
     // 游戏相关
     GAME_START,
 
-    // 阶段相关。player为当前回合角色
+    // 回合、阶段相关。player为当前回合角色
+    TURN_BEGIN,
+    TURN_END,
     PHASE_BEGIN,
 
     // 卡牌使用相关。player为使用者
@@ -22,12 +24,18 @@ public enum Timing {
     SLASH_DODGED,  // 杀被闪避时。
 
     // 伤害相关。DAMAGE_时机player为伤害制造者；DAMAGED_时机player为受伤者。
+    DAMAGE_BEFORE,  // 造成伤害前。适合各种修改伤害的效果。 Damage
     DAMAGE_DOING,  // 造成伤害时。 Damage
     DAMAGE_DONE,  // 造成伤害后。 Damage
     DAMAGED_DONE,  // 受到伤害后。 Damage
+
+    // 判定相关。
+    JUDGE_BEFORE_EFFECT,  // 判定牌生效前。改判时机。 Judge
+    JUDGE_DONE,  // 判定牌生效后。 Judge
 
     // =============== 以下MD开头为修正时机 ===============
     MD_SLASH_LIMIT,  // 修正回合内杀的次数限制
     MD_DISTANCE,  // 修正距离。 Target
     MD_DISTANCE_LIMIT,  // 修正卡牌使用的距离限制。 Target, Card
+    MD_DRAW_COUNT,  // 修正摸牌阶段摸牌数
 }

@@ -67,7 +67,7 @@ public abstract class Player {
     public void doTurn() {
         log.warn("---------------------- {} 回合开始 ----------------------", this);
         engine.currentPlayer = this;  // 切换当前回合角色
-        // TODO 回合开始时机
+        engine.trigger(new Event(Timing.TURN_BEGIN, this));
         doPreparePhase();
         doJudgePhase();
         doDrawPhase();
@@ -76,7 +76,7 @@ public abstract class Player {
         }
         doDiscardPhase();
         doEndPhase();
-        // TODO 回合结束时机
+        engine.trigger(new Event(Timing.TURN_END, this));
         phase = Phase.PHASE_OFF_TURN;
     }
 
@@ -119,7 +119,9 @@ public abstract class Player {
         phase = Phase.PHASE_DRAW;
         engine.trigger(new Event(Timing.PHASE_BEGIN, this).withField("Phase", phase));
 
-        this.drawCards(2);
+        int drawCount = 2;
+        drawCount = engine.triggerModify(new Event(Timing.MD_DRAW_COUNT, this), drawCount);
+        this.drawCards(drawCount);
     }
 
     /**
@@ -335,14 +337,7 @@ public abstract class Player {
      * 进行一次判定，返回判定结果（判定牌、是否成功）
      */
     public Judgement doJudge(String nameZh, Function<Card, Boolean> judgeFunc) {
-        Card card = engine.getCardFromDrawPile();
-        card.place = Card.Place.JUDGE_CARD;
-        // 改判和获取判定牌要插在这里
-        engine.moveToDiscard(card, Card.Place.JUDGE_CARD);  // 仍在处理区的进入弃牌堆
-        Boolean success = judgeFunc.apply(card);
-        String successStr = (success == null) ? "完成" : (success ? "成功" : "失败");
-        log.warn("{} 的 {} 判定 {}，结果为 {}", this, nameZh, successStr, card);
-        return new Judgement(card, success);
+        return new Judgement(this, nameZh, judgeFunc).judge();
     }
 
     /**  濒死，请求救援 */

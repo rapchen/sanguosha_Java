@@ -38,7 +38,7 @@ public class Snatch extends ImmediateTrickCard {
         Card card = choose.chooseOne();
         if (card == null) return;
         source.obtain(card, name);
-        log.info("{} 从 {} 处获得了 {}张牌：{}", source.name, target.name, 1, card);
+        log.info("{} 从 {} 处获得了 {}", source.name, target.name, card);
     }
 
 }

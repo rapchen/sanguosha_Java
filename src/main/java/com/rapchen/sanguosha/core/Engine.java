@@ -242,9 +242,11 @@ public class Engine {
      */
     public void doDamage(Damage damage) {
         Player source = damage.source, target = damage.target;
-        if (source != null) {  // 造成伤害时
-            trigger(new Event(Timing.DAMAGE_DOING, source).withField("Damage", damage));
-        }
+        // 造成伤害前。可以修改伤害
+        trigger(new Event(Timing.DAMAGE_BEFORE, source).withField("Damage", damage));
+        // 造成伤害时。
+        trigger(new Event(Timing.DAMAGE_DOING, source).withField("Damage", damage));
+
         target.hp -= damage.count;
         if (source == null) {
             log.info("{} 受到了 {} 点伤害，无伤害来源", target, damage.count);
@@ -252,6 +254,7 @@ public class Engine {
             log.info("{} 对 {} 造成了 {} 点伤害", source, target, damage.count);
         }
         checkDeath(target);
+
         // 造成伤害后
         if (source != null) {
             trigger(new Event(Timing.DAMAGE_DONE, source).withField("Damage", damage));
