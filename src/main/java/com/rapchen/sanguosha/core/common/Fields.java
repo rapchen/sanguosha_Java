@@ -33,6 +33,29 @@ public class Fields extends HashMap<String, Object> {
         return this;
     }
 
+    /** 加 */
+    public void incr(String key, int num) {
+        Object value = get(key);
+        if (value == null) put(key, num);
+        else if (value instanceof Integer i) {
+            put(key, i+num);
+        } else {
+            throw new IllegalArgumentException(
+                    String.format("incr字段 %s=%s 类型错误: %s", key, value, value.getClass()));
+        }
+    }
+
+    public int getInt(String key, int defaultValue) {
+        Object value = get(key);
+        if (value == null) return defaultValue;
+        else if (value instanceof Integer i) {
+            return i;
+        } else {
+            throw new IllegalArgumentException(
+                    String.format("getInt字段 %s=%s 类型错误: %s", key, value, value.getClass()));
+        }
+    }
+
     /** 插入二级字段 */
     public void put(String key, String subKey, Object value) {
         if (!containsKey(key)) {

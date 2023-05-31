@@ -20,7 +20,6 @@ public class FakeCard extends Card {
         name = "FakeCard";
         nameZh = "假卡";
         subType = SubType.SUBTYPE_NO;
-        subCards = new ArrayList<>();
     }
 
     @Override

@@ -78,7 +78,11 @@ public abstract class Card {
     }
 
     enum Type {
-        TYPE_NO("无类别"), BASIC("基本牌"), TRICK("锦囊牌"), EQUIPMENT("装备牌");
+        TYPE_NO("无类别"),
+        BASIC("基本牌"),
+        TRICK("锦囊牌"),
+        EQUIPMENT("装备牌"),
+        SKILL("技能牌");
 
         public final String name;
 
@@ -101,7 +105,8 @@ public abstract class Card {
         EQUIP_ARMOR(Type.EQUIPMENT, "防具"),
         EQUIP_HORSE_DEF(Type.EQUIPMENT, "防御马"),
         EQUIP_HORSE_OFF(Type.EQUIPMENT, "进攻马"),
-        EQUIP_TREASURE(Type.EQUIPMENT, "宝物");
+        EQUIP_TREASURE(Type.EQUIPMENT, "宝物"),
+        SKILL(Type.SKILL, "技能牌");
 
         public final Type type;
         public final String name;
@@ -255,12 +260,17 @@ public abstract class Card {
         // 移动到处理区
         Engine.eg.moveCard(this, Place.HANDLE, "Use");
 
-        // 执行效果
+        // 效果前的时机：卡牌使用时、指定目标后
         CardUse use = new CardUse(this, source, targets);
         Engine.eg.trigger(new Event(Timing.CARD_USING, source).withField("CardUse", use));  // 卡牌使用时
         // TODO 这里插入改变目标的时机
         Engine.eg.trigger(new Event(Timing.TARGET_CHOSEN, source).withField("CardUse", use));  // 指定目标后
 
+        // 卡牌使用记录
+        source.turnFields.incr("Used_" + this.getClass().getSimpleName(), 1);
+        source.phaseFields.incr("Used_" + this.getClass().getSimpleName(), 1);
+
+        // 执行效果
         doUseToAll(use);  // 全体效果
         for (Player target : targets) {  // 单个目标的效果
             CardEffect effect = new CardEffect(use, target);
@@ -279,7 +289,7 @@ public abstract class Card {
         Engine.eg.trigger(new Event(Timing.CARD_USED, source).withField("CardUse", use));  // 结算完毕
     }
 
-    private void doUseLog(Player source, List<Player> targets) {
+    public void doUseLog(Player source, List<Player> targets) {
         log.info("{}{} 使用了 {}", source,
                 targets.isEmpty() ? "" : (" 对 " + Player.playersToString(targets)),
                 this);
@@ -351,14 +361,21 @@ public abstract class Card {
      * @param clazz 牌的类型
      */
     public static <T extends Card> T createTmpCard(Class<T> clazz) {
-        try {
-            T card = clazz.getConstructor(Suit.class, Point.class).newInstance(Suit.SUIT_NO, Point.POINT_NO);
+        try {  // 先尝试无参构造。技能卡通常可以用无参构造
+            T card = clazz.getConstructor().newInstance();
             card.virtual = true;
             return card;
         } catch (NoSuchMethodException | InstantiationException |
                  IllegalAccessException | InvocationTargetException e) {
-            log.info("创建虚拟牌 {} 失败： {}", clazz.getName(), e.toString());
-            return null;
+            try {  // 再尝试花色点数构造。实体卡通常用这个构造
+                T card = clazz.getConstructor(Suit.class, Point.class).newInstance(Suit.SUIT_NO, Point.POINT_NO);
+                card.virtual = true;
+                return card;
+            } catch (NoSuchMethodException | InstantiationException |
+                     IllegalAccessException | InvocationTargetException e2) {
+                log.info("创建虚拟牌 {} 失败： {}; {}", clazz.getName(), e.toString(), e2.toString());
+                return null;
+            }
         }
     }
 

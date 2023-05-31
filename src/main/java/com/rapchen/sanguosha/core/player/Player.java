@@ -6,7 +6,6 @@ import com.rapchen.sanguosha.core.data.Damage;
 import com.rapchen.sanguosha.core.data.Judgement;
 import com.rapchen.sanguosha.core.data.card.*;
 import com.rapchen.sanguosha.core.data.card.basic.*;
-import com.rapchen.sanguosha.core.data.card.equip.EquipCard;
 import com.rapchen.sanguosha.core.data.card.equip.Weapon;
 import com.rapchen.sanguosha.core.data.card.trick.DelayedTrickCard;
 import com.rapchen.sanguosha.core.data.card.trick.Nullification;
@@ -54,7 +53,9 @@ public abstract class Player {
 
     public Phase phase = Phase.PHASE_OFF_TURN;  // 当前阶段
     public int slashTimes = 0;  // 当前出牌阶段已使用的杀的数量
-    public Fields xFields;  // 额外字段，用于临时存储一些数据
+    public Fields xFields = new Fields();  // 额外字段，用于临时存储一些数据
+    public Fields turnFields = new Fields();  // 回合字段，存储回合内的临时数据，回合结束销毁
+    public Fields phaseFields = new Fields();  // 阶段字段，存储阶段内的临时数据，阶段结束销毁
 
     public Player(Engine engine, int id, String name) {
         this.engine = engine;
@@ -63,7 +64,6 @@ public abstract class Player {
         this.handCards = new ArrayList<>();
         this.equips = new EquipArea(this);
         this.judgeArea = new ArrayList<>();
-        this.xFields = new Fields();
     }
 
     /**
@@ -72,13 +72,18 @@ public abstract class Player {
     public void doTurn() {
         log.warn("---------------------- {} 回合开始 ----------------------", this);
         engine.currentPlayer = this;  // 切换当前回合角色
+        for (Player player : engine.players) {  // 重置所有角色的回合字段
+            player.turnFields.clear();
+        }
         engine.trigger(new Event(Timing.TURN_BEGIN, this));
+
         tryPhase(Phase.PHASE_PREPARE);
         tryPhase(Phase.PHASE_JUDGE);
         tryPhase(Phase.PHASE_DRAW);
         tryPhase(Phase.PHASE_PLAY);
         tryPhase(Phase.PHASE_DISCARD);
         tryPhase(Phase.PHASE_END);
+
         engine.trigger(new Event(Timing.TURN_END, this));
         phase = Phase.PHASE_OFF_TURN;
     }
@@ -90,14 +95,18 @@ public abstract class Player {
      * @param phase 阶段
      */
     private void tryPhase(Phase phase) {
-        if (isPhaseSkipped(phase)) return;  // 跳过阶段
-        // 阶段开始前时机，发动阶段跳过和插入相关的技能
+        if (isPhaseSkipped(phase)) return;  // 判断是否已经被跳过
+        for (Player player : engine.players) {  // 重置所有角色的阶段字段
+            player.phaseFields.clear();
+        }
+        // 阶段开始前时机，触发阶段跳过和插入相关的技能
         engine.trigger(new Event(Timing.PHASE_BEFORE, this).withField("Phase", phase));
         if (isPhaseSkipped(phase)) return;
 
         this.phase = phase;
         // 阶段开始时机
         engine.trigger(new Event(Timing.PHASE_BEGIN, this).withField("Phase", phase));
+        // 执行阶段原本的功能
         doPhase(phase);
     }
 
@@ -278,6 +287,19 @@ public abstract class Player {
         return limit;  // 默认1
     }
 
+    /** 获取某类牌本阶段内已使用的次数 */
+    public int getUsedTimes(Class<? extends Card> clazz, String pattern) {
+        if ("phase".equals(pattern)) {
+            return phaseFields.getInt("Used_" + clazz.getSimpleName(), 0);
+        } else if ("turn".equals(pattern)) {
+            return turnFields.getInt("Used_" + clazz.getSimpleName(), 0);
+        }
+        return 0;
+    }
+    public boolean hasUsed(Class<? extends Card> clazz, String pattern) {
+        return getUsedTimes(clazz, pattern) >= 1;
+    }
+
     /** 计算距离 */
     public int getDistance(Player target) {
         if (target == this) return 0;  // 到自己的距离永远是0
@@ -304,6 +326,22 @@ public abstract class Player {
     public void doRecover(int count) {
         hp = Math.min(maxHp, hp + count);
         log.info("{} 回复了 {}点体力，目前体力为：{}/{}", this.name, count, hp, maxHp);
+    }
+
+    /**
+     * 流失体力
+     */
+    public void loseHp(int count) {
+        log.info("{} 流失了 {} 点体力", this, count);
+        reduceHp(count);
+    }
+
+    /**
+     * 扣减体力，并进行濒死判断。可以被伤害或体力流失触发。
+     */
+    public void reduceHp(int count) {
+        hp -= count;
+        engine.checkDeath(this);
     }
 
     /**

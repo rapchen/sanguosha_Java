@@ -258,13 +258,12 @@ public class Engine {
         // 造成伤害时。
         trigger(new Event(Timing.DAMAGE_DOING, source).withField("Damage", damage));
 
-        target.hp -= damage.count;
         if (source == null) {
             log.info("{} 受到了 {} 点伤害，无伤害来源", target, damage.count);
         } else {
             log.info("{} 对 {} 造成了 {} 点伤害", source, target, damage.count);
         }
-        checkDeath(target);
+        target.reduceHp(damage.count);
 
         // 造成伤害后
         if (source != null) {
@@ -276,7 +275,7 @@ public class Engine {
     /**
      * 判断角色是否死亡
      */
-    private void checkDeath(Player player) {
+    public void checkDeath(Player player) {
         if (player.hp <= 0) {
             log.info("{} 陷入濒死！", player);
             player.callRescue();  // 求桃

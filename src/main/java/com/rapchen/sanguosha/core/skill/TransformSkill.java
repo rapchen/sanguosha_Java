@@ -3,6 +3,7 @@ package com.rapchen.sanguosha.core.skill;
 import com.rapchen.sanguosha.core.data.card.Card;
 import com.rapchen.sanguosha.core.data.card.CardAsk;
 import com.rapchen.sanguosha.core.data.card.CardChoose;
+import com.rapchen.sanguosha.core.data.card.SkillCard;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -83,8 +84,10 @@ public abstract class TransformSkill extends Skill {
             return null;
         }
         servedAs.setSkill(this);
-        log.warn("{} 发动了 {}, 将 {} 当作 {}",
-                owner, this, Card.cardsToString(chosenCards), servedAs);
+        if (!(servedAs instanceof SkillCard)) {
+            doLog(String.format("将 %s 当作 %s",
+                    Card.cardsToString(chosenCards), servedAs));
+        }
         return servedAs;
     }
 }
