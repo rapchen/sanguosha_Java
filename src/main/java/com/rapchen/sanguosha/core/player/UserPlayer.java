@@ -51,6 +51,25 @@ public class UserPlayer extends Player {
     }
 
     /**
+     * 要求角色选择一名角色
+     * @param choose 角色选择对象
+     * @return 选择的角色。如果不选，就返回null。
+     */
+    @Override
+    public Player choosePlayer(PlayerChoose choose) {
+        List<Player> players = choose.candidates;
+        while (true) {
+            log.warn(choose.prompt);
+            log.warn(Player.playersToString(players, true));
+            int chosen = chooseNumber(players.size(), choose.forced);
+            if (chosen >= 0) {
+                return chosen == 0 ? null : players.get(chosen - 1);
+            }
+            log.warn("请重新选择：");  // 返回<0的结果就重新询问
+        }
+    }
+
+    /**
      * 要求用户选一个武将
      */
     @Override

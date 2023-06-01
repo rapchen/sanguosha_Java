@@ -43,7 +43,7 @@ public class Standard extends Package {
 
         addGeneral(new DiaoChan());
 //        addGeneral(new LvBu());
-//        addGeneral(new HuaTuo());
+        addGeneral(new HuaTuo());
         addGeneral(new BaiBan());
     }
 }

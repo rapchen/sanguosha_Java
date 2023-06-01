@@ -1,7 +1,10 @@
 package com.rapchen.sanguosha.core.data.card.trick;
 
+import com.rapchen.sanguosha.core.Engine;
 import com.rapchen.sanguosha.core.data.card.CardEffect;
 import com.rapchen.sanguosha.core.player.Player;
+
+import java.util.List;
 
 /**
  * 桃园结义
@@ -17,8 +20,8 @@ public class PeachOrchard extends ImmediateTrickCard {
     }
 
     @Override
-    public boolean canUseToOriginally(Player source, Player target) {
-        return true;
+    public List<Player> getFixedTargets(Player source) {
+        return Engine.eg.getAllPlayers();
     }
 
     @Override

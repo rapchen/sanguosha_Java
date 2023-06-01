@@ -6,6 +6,8 @@ import com.rapchen.sanguosha.core.data.card.CardEffect;
 import com.rapchen.sanguosha.core.player.Player;
 import com.rapchen.sanguosha.core.skill.Skill;
 
+import java.util.List;
+
 /**
  * 装备牌
  * @author Chen Runwen
@@ -23,8 +25,8 @@ public abstract class EquipCard extends Card {
     }
 
     @Override
-    public boolean canUseToOriginally(Player source, Player target) {
-        return target == source;
+    public List<Player> getFixedTargets(Player source) {
+        return List.of(source);
     }
 
     @Override

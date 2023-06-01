@@ -4,6 +4,8 @@ import com.rapchen.sanguosha.core.data.Damage;
 import com.rapchen.sanguosha.core.data.card.CardEffect;
 import com.rapchen.sanguosha.core.player.Player;
 
+import java.util.List;
+
 /**
  * 万箭齐发
  * @author Chen Runwen
@@ -14,6 +16,11 @@ public class ArchersAttack extends ImmediateTrickCard {
         super(suit, point);
         name = "ArchersAttack";
         nameZh = "万箭齐发";
+    }
+
+    @Override
+    public List<Player> getFixedTargets(Player source) {
+        return source.getOtherPlayers();
     }
 
     @Override

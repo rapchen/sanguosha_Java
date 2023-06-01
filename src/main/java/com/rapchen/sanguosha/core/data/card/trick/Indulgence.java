@@ -20,11 +20,6 @@ public class Indulgence extends DelayedTrickCard {
     }
 
     @Override
-    public boolean canUseToOriginally(Player source, Player target) {
-        return target != source && super.canUseToOriginally(source, target);
-    }
-
-    @Override
     public void doDelayedEffect(CardEffect effect) {
         Player target = effect.target;
         Judgement judge = target.doJudge(nameZh, card -> card.suit != Suit.HEART);

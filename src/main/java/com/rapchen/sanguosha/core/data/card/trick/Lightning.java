@@ -21,9 +21,8 @@ public class Lightning extends DelayedTrickCard {
     }
 
     @Override
-    public boolean canUseToOriginally(Player source, Player target) {
-        // TODO 这里是否是合法目标和出牌阶段是否可用还要拆开，例如顺手的距离判断、闪电的转移等
-        return target == source && super.canUseToOriginally(source, target);
+    public List<Player> getFixedTargets(Player source) {
+        return List.of(source);
     }
 
     @Override
@@ -47,7 +46,7 @@ public class Lightning extends DelayedTrickCard {
             List<Player> players = target.getOtherPlayers();
             players.add(target);
             for (Player player : players) {
-                if (super.canUseTo(null, player)) {
+                if (super.validTarget(null, player)) {
                     player.judgeArea.add(this);
                     return;
                 }

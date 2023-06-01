@@ -4,6 +4,9 @@ import com.rapchen.sanguosha.core.data.card.CardEffect;
 import com.rapchen.sanguosha.core.player.Phase;
 import com.rapchen.sanguosha.core.player.Player;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * 桃
  * @author Chen Runwen
@@ -18,10 +21,10 @@ public class Peach extends BasicCard {
     }
 
     @Override
-    public boolean canUseToOriginally(Player source, Player target) {
-        // 对自己用；或者对濒死角色用
-        return (target == source && target.hp < target.maxHp && target.phase == Phase.PHASE_PLAY)
-                || target.hp <= 0;
+    public List<Player> getFixedTargets(Player source) {
+        // 出牌阶段合法目标只有自己，如果满血则不能使用，返回空列表。
+        if (source.injured()) return List.of(source);
+        else return new ArrayList<>();
     }
 
     @Override

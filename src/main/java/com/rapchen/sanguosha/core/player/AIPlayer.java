@@ -47,10 +47,25 @@ public class AIPlayer extends Player {
                 return cards.get(0);
             } case "GangLie" -> {  // 刚烈：弃
                 return cards.get(0);
-            } case "WuSheng", "LongDan" -> {  // 武圣、龙胆：用
+            } case "WuSheng", "LongDan", "JiJiu" -> {  // 武圣、龙胆、急救：用
                 return cards.get(0);
+            } case "QingNang" -> {  // 青囊：自己受伤采用，给自己补
+                return injured() ? cards.get(0) : null;
             } default -> {  // 默认逻辑：必须选就选一张，否则放弃
                 return choose.forced ? cards.get(0) : null;
+            }
+        }
+    }
+
+    @Override
+    public Player choosePlayer(PlayerChoose choose) {
+        // TODO 现在所有AI逻辑都在这里，之后要拆到各个牌下面
+        List<Player> players = choose.candidates;
+        if (players.isEmpty()) return null;
+        switch (choose.reason) {
+            default -> {  // 默认逻辑：选第一个候选
+                return players.get(0);
+//                return choose.forced ? players.get(0) : null;
             }
         }
     }

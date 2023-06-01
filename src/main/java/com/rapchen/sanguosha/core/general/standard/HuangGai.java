@@ -9,6 +9,8 @@ import com.rapchen.sanguosha.core.player.AIPlayer;
 import com.rapchen.sanguosha.core.player.Player;
 import com.rapchen.sanguosha.core.skill.TransformSkill;
 
+import java.util.List;
+
 /**
  * 黄盖
  * @author Chen Runwen
@@ -36,10 +38,9 @@ public class HuangGai extends General {
     }
 
     public static class KuRouCard extends SkillCard {
-
         @Override
-        public boolean canUseToOriginally(Player source, Player target) {
-            return source == target;
+        public List<Player> getFixedTargets(Player source) {
+            return List.of(source);
         }
 
         @Override

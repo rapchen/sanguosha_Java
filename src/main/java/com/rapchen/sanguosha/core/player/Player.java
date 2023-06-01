@@ -52,7 +52,6 @@ public abstract class Player {
     public final Place JUDGE_CARD = new Place(Place.PlaceType.JUDGE_CARD, this);
 
     public Phase phase = Phase.PHASE_OFF_TURN;  // 当前阶段
-    public int slashTimes = 0;  // 当前出牌阶段已使用的杀的数量
     public Fields xFields = new Fields();  // 额外字段，用于临时存储一些数据
     public Fields turnFields = new Fields();  // 回合字段，存储回合内的临时数据，回合结束销毁
     public Fields phaseFields = new Fields();  // 阶段字段，存储阶段内的临时数据，阶段结束销毁
@@ -155,7 +154,6 @@ public abstract class Player {
      * 出牌阶段
      */
     private void doPlayPhase() {
-        slashTimes = 0;  // 重置杀使用数
         while (true) {
             if (!askForPlayCard()) break;
         }
@@ -168,7 +166,7 @@ public abstract class Player {
         if (handCards.size() > hp) {
             int count = handCards.size() - hp;
             CardChoose choose = new CardChoose(this).fromSelf("h")
-                    .count(count).forced().reason("DiscardPhase", null);
+                    .count(count).forced().reason("DiscardPhase", String.format("弃牌阶段，请弃置%s张牌", count));
             askForDiscard(choose);
         }
     }
@@ -190,7 +188,7 @@ public abstract class Player {
     public void drawCards(int count) {
         List<Card> cards = engine.getCardsFromDrawPile(count);
         obtain(cards, "drawCards");
-        log.info("{} 摸了{}张牌：{}", this.name, cards.size(), Card.cardsToString(cards));
+        log.info("{} 摸了{}张牌：{}", this, cards.size(), Card.cardsToString(cards));
         // TODO 获得牌事件：只触发一次就行
     }
 
@@ -325,7 +323,7 @@ public abstract class Player {
      */
     public void doRecover(int count) {
         hp = Math.min(maxHp, hp + count);
-        log.info("{} 回复了 {}点体力，目前体力为：{}/{}", this.name, count, hp, maxHp);
+        log.info("{} 回复了 {}点体力，目前体力为：{}/{}", this, count, hp, maxHp);
     }
 
     /**
@@ -342,6 +340,10 @@ public abstract class Player {
     public void reduceHp(int count) {
         hp -= count;
         engine.checkDeath(this);
+    }
+
+    public boolean injured() {
+        return hp < maxHp;
     }
 
     /**
@@ -421,6 +423,7 @@ public abstract class Player {
 
             // 3. 选择目标
             List<Player> targets = chooseTargets(card);
+            if (targets == null) return false;  // TODO 应该也是把这个卡加到本次ask的黑名单，然后再选一次
 
             // 4. 使用
             useCard(card, targets);
@@ -431,11 +434,11 @@ public abstract class Player {
     protected abstract Card choosePlayCard(List<Card> cards);
 
     /**
-     * 选择牌的目标 TODO 现在自动选目标，后面要改成手动选
+     * 选择牌的目标
      * @param card 使用的牌
      */
     private List<Player> chooseTargets(Card card) {
-        return card.getAvailableTargets(this);
+        return card.chooseTargets(this);
     }
 
     /**
@@ -459,6 +462,13 @@ public abstract class Player {
      * @return 选择的牌。如果不选，就返回null。
      */
     public abstract Card chooseCard(CardChoose choose);
+
+    /**
+     * 要求角色选择一名角色
+     * @param choose 角色选择对象
+     * @return 选择的角色。如果不选，就返回null。
+     */
+    public abstract Player choosePlayer(PlayerChoose choose);
 
     /**
      * 要求角色选一个武将

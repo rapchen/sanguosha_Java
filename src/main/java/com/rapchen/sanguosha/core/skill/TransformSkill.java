@@ -84,6 +84,7 @@ public abstract class TransformSkill extends Skill {
             return null;
         }
         servedAs.setSkill(this);
+        if (servedAs.nameZh == null) servedAs.nameZh = nameZh;
         if (!(servedAs instanceof SkillCard)) {
             doLog(String.format("将 %s 当作 %s",
                     Card.cardsToString(chosenCards), servedAs));

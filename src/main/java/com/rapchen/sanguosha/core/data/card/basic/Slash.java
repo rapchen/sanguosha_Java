@@ -24,17 +24,12 @@ public class Slash extends BasicCard {
 
     @Override
     public boolean validInPlayPhase(Player player) {
-        return player.slashTimes < player.getSlashLimit();
+        return player.getUsedTimes(Slash.class, "phase") < player.getSlashLimit();
     }
 
     @Override
     public int distanceLimit(Player source, Player target) {
         return source.getRange();
-    }
-
-    @Override
-    public void doUseToAll(CardUse use) {
-        use.source.slashTimes++;
     }
 
     @Override

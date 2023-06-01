@@ -7,6 +7,8 @@ import com.rapchen.sanguosha.core.data.card.CardEffect;
 import com.rapchen.sanguosha.core.player.Player;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.List;
+
 /**
  * 顺手牵羊
  * @author Chen Runwen
@@ -21,8 +23,8 @@ public class Snatch extends ImmediateTrickCard {
     }
 
     @Override
-    public boolean canUseToOriginally(Player source, Player target) {
-        return target != source && target.getCardCount("hej") > 0;
+    public boolean originalValidTarget(Player source, Player target) {
+        return target.getCardCount("hej") > 0;
     }
 
     @Override
@@ -38,7 +40,7 @@ public class Snatch extends ImmediateTrickCard {
         Card card = choose.chooseOne();
         if (card == null) return;
         source.obtain(card, name);
-        log.info("{} 从 {} 处获得了 {}", source.name, target.name, card);
+        log.info("{} 从 {} 处获得了 {}", source, target, card);
     }
 
 }

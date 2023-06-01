@@ -5,6 +5,8 @@ import com.rapchen.sanguosha.core.data.card.Card;
 import com.rapchen.sanguosha.core.data.card.CardEffect;
 import com.rapchen.sanguosha.core.player.Player;
 
+import java.util.List;
+
 /**
  * 南蛮入侵
  * @author Chen Runwen
@@ -15,6 +17,11 @@ public class BarbarianInvasion extends ImmediateTrickCard {
         super(suit, point);
         name = "BarbarianInvasion";
         nameZh = "南蛮入侵";
+    }
+
+    @Override
+    public List<Player> getFixedTargets(Player source) {
+        return source.getOtherPlayers();
     }
 
     @Override

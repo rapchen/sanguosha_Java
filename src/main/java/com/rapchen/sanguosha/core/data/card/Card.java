@@ -3,6 +3,7 @@ package com.rapchen.sanguosha.core.data.card;
 import com.rapchen.sanguosha.core.Engine;
 import com.rapchen.sanguosha.core.common.Fields;
 import com.rapchen.sanguosha.core.player.Player;
+import com.rapchen.sanguosha.core.player.PlayerChoose;
 import com.rapchen.sanguosha.core.skill.Event;
 import com.rapchen.sanguosha.core.skill.Skill;
 import com.rapchen.sanguosha.core.skill.Timing;
@@ -139,6 +140,10 @@ public abstract class Card {
     public int benefit = -100;  // 对于目标来说的有益程度。越大越有益，0为无关，负数有害
     public Fields xFields = new Fields();  // 额外字段，用于临时存储一些数据
 
+    // 使用相关
+    public int maxTargetCount = 1;  // 最大目标数。默认1
+    public List<Player> chosenTargets = new ArrayList<>();  // 已选目标。使用牌时临时存储。
+
     /**
      * 创建卡牌。ID自增由Package做
      */
@@ -178,6 +183,54 @@ public abstract class Card {
     /* =============== end 通用功能执行 ================ */
 
     /* =============== begin 子类需要实现的具体功能 ================ */
+    /* =============== begin 卡牌目标选择和可用性判断 ================ */
+
+    /**
+     * 让角色选择这张牌的目标
+     * @param source 角色
+     * @return 选择的目标列表。如果放弃选择或无法选择，返回null
+     */
+    public List<Player> chooseTargets(Player source) {
+        chosenTargets.clear();
+        // 对于不需要选择目标的卡牌，尝试获取卡牌天然自带的目标，然后进行合法性过滤
+        List<Player> fixedTargets = getFixedTargets(source);
+        if (fixedTargets != null) {
+            chosenTargets.addAll(fixedTargets.stream().filter(target -> validTargetDistance(source, target)).toList());
+            return chosenTargets.isEmpty() ? null : chosenTargets;
+        }
+        // 快速选择唯一目标：如果卡牌要求正好1个目标（0个不行），且可选目标也只有一个，直接选。
+        if (maxTargetCount == 1 && !targetsValid()) {
+            List<Player> targets = getAvailableTargets(source);
+            if (targets.size() == 1) chosenTargets.addAll(targets);
+        }
+        // 手动选择目标
+        for (int i = chosenTargets.size(); i < maxTargetCount; i++) {
+            String prompt = String.format("你正在使用 %s, 请选择第%d个目标, 0停止选择：", nameZh, i+1);
+            Player chosen = source.choosePlayer(
+                    new PlayerChoose(source).inAll()
+                            .filter(target -> !chosenTargets.contains(target) && this.canUseTo(source, target))
+                            .reason(name, prompt));
+            if (chosen == null) break;  // 放弃选择了，直接跳出
+            chosenTargets.add(chosen);
+        }
+        if (!targetsValid()) return null;  // 选择角色列表不符合要求，选择失败
+        return chosenTargets;
+    }
+
+    /**
+     * 对于不需要手动选择目标的卡牌，重写这个方法返回卡牌天然自带的目标（如桃园结义选所有角色）
+     */
+    public List<Player> getFixedTargets(Player source) {
+        return null;  // TODO 子类
+    }
+
+    /**
+     * 判断当前已选择的目标是否合法（如离间必须2个目标，铁索连环0-2个都合法）
+     */
+    private boolean targetsValid() {
+        // 默认逻辑：选满目标数量
+        return chosenTargets.size()  == maxTargetCount;
+    }
 
     /**
      * 检查出牌阶段是否可使用。模板方法，先检查是否合法，然后检查是否有可用目标
@@ -193,51 +246,74 @@ public abstract class Card {
     }
 
     /**
-     * 此牌可用的所有目标。使用canUseTo依次检测
+     * 返回此牌可用的所有目标，用于可用牌的过滤。使用canUseTo依次检测是否能选为第一个目标
      * @param source 使用者
      */
-    public List<Player> getAvailableTargets(Player source) {
-        List<Player> targets = new ArrayList<>();
+    private List<Player> getAvailableTargets(Player source) {
+        chosenTargets.clear();  // 清除已选目标
+        List<Player> targets = getFixedTargets(source);
+        if (targets != null) {  // 对自带目标的，判断一下自带目标是否有合法的
+            return targets.stream().filter(target -> validTargetDistance(source, target)).toList();
+        }
+        // 不自带目标的，判断是否有能选择为目标的
+        targets = new ArrayList<>();
         for (Player target : source.engine.getAllPlayers()) {
-            if (canUseToDistance(source, target)) targets.add(target);
+            if (canUseTo(source, target)) targets.add(target);
         }
         return targets;
     }
 
     /**
-     * 检测此牌是否可用。模板方法，在canUseTo的基础上检查距离。
-     * @param source 使用者
-     * @param target 目标
-     */
-    public boolean canUseToDistance(Player source, Player target) {
-        int distanceLimit = distanceLimit(source, target);
-        Event event = new Event(Timing.MD_DISTANCE_LIMIT, source)
-                .withField("Target", target)
-                .withField("Card", this);
-        distanceLimit = Engine.eg.triggerModify(event, distanceLimit);  // 触发距离限制的修正
-        return canUseTo(source, target) &&
-                source.getDistance(target) <= distanceLimit;
-    }
-
-    /**
-     * 检测此牌是否可用（忽略距离检查）。这里会考虑合法目标相关的技能
+     * 判断当前将要选择的目标是否合法。
+     * **可重写**，技能牌直接重写这个方法就可以。
+     * 有getFixedTargets的不会进入选目标，可以不管这个。
+     * 相比validTargetDistance增加：使用者和已选目标对新目标选择的影响
+     * 这里可以通过不调用validTargetDistance来绕过合法性修改、距离修改技能的判断（如【借刀杀人】）
      * @param source 使用者
      * @param target 目标
      */
     public boolean canUseTo(Player source, Player target) {
-        boolean canUse = canUseToOriginally(source, target);
+        // 默认：检测目标是否合法 + 不能选使用者，不考虑和已选目标的关系
+        return validTargetDistance(source, target) && target != source;
+    }
+
+    /**
+     * 检测目标是否合法，包含距离检查。
+     * 模板方法，在validTarget的基础上检查距离。这里触发距离限制修改时机
+     * @param source 使用者
+     * @param target 目标
+     */
+    public final boolean validTargetDistance(Player source, Player target) {
+        int distanceLimit = distanceLimit(source, target);
+        // 触发距离限制的修正
+        Event event = new Event(Timing.MD_DISTANCE_LIMIT, source)
+                .withField("Target", target)
+                .withField("Card", this);
+        distanceLimit = Engine.eg.triggerModify(event, distanceLimit);
+        return validTarget(source, target) &&
+                source.getDistance(target) <= distanceLimit;
+    }
+
+    /**
+     * 检测目标是否合法（忽略距离检查）。这里会考虑合法目标相关的技能
+     * @param source 使用者
+     * @param target 目标
+     */
+    public final boolean validTarget(Player source, Player target) {
+        boolean canUse = originalValidTarget(source, target);
         canUse = Engine.eg.triggerModify(new Event(Timing.MD_TARGET_VALIDATION, target)
                 .withField("Card", this).withField("Source", source), canUse);
         return canUse;
     }
 
     /**
-     * 定义此牌可用目标（忽略距离检查）。默认能对所有其他角色使用。
+     * 定义此牌本身的合法目标限制（忽略距离检查）。**可重写**。
      * @param source 使用者
      * @param target 目标
      */
-    public boolean canUseToOriginally(Player source, Player target) {
-        return target != source;
+    public boolean originalValidTarget(Player source, Player target) {
+        // 默认能对所有角色使用
+        return true;
     }
 
     /**
@@ -248,6 +324,9 @@ public abstract class Card {
     public int distanceLimit(Player source, Player target) {
         return 10000;
     }
+
+    /* =============== end 卡牌目标选择和可用性判断 ================ */
+    /* =============== begin 卡牌使用效果 ================ */
 
     /**
      * 使用牌，执行牌的效果。模板方法
@@ -328,6 +407,7 @@ public abstract class Card {
         Engine.eg.trigger(new Event(Timing.CARD_RESPONDED, source).withField("Card", this));
     }
 
+    /* =============== end 卡牌使用效果 ================ */
     /* =============== end 子类需要实现的具体功能 ================ */
 
     /* =============== begin 工具方法 ================ */

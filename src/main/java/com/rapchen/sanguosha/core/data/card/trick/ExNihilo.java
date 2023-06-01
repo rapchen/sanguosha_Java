@@ -4,6 +4,8 @@ import com.rapchen.sanguosha.core.data.card.Card;
 import com.rapchen.sanguosha.core.data.card.CardEffect;
 import com.rapchen.sanguosha.core.player.Player;
 
+import java.util.List;
+
 /**
  * 无中生有
  * @author Chen Runwen
@@ -19,8 +21,8 @@ public class ExNihilo extends ImmediateTrickCard {
     }
 
     @Override
-    public boolean canUseToOriginally(Player source, Player target) {
-        return target == source;
+    public List<Player> getFixedTargets(Player source) {
+        return List.of(source);
     }
 
     @Override
