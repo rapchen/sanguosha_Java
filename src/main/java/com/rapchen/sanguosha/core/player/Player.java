@@ -195,8 +195,13 @@ public abstract class Player {
     /**
      * 弃牌
      */
-    public void doDiscard(List<Card> cards) {
+    public void doDiscard(List<Card> cards, Player target) {
+        log.warn("{} 弃置了{} {}张牌：{}", this, target == this ? "" : (" " + target),
+                cards.size(), Card.cardsToString(cards));
         engine.moveToDiscard(cards);
+    }
+    public void doDiscard(List<Card> cards) {
+        doDiscard(cards, this);
     }
 
     /**
@@ -451,8 +456,7 @@ public abstract class Player {
         List<Card> discards = choose.choose();
 
         if (discards == null) return false;  // 放弃弃牌了
-        doDiscard(discards);  // 执行弃牌：一起移动到弃牌堆
-        log.warn("{} 弃了 {} {}张牌：{}", this, choose.target, discards.size(), Card.cardsToString(discards));
+        doDiscard(discards, choose.target);  // 执行弃牌：一起移动到弃牌堆
         return true;
     }
 

@@ -136,7 +136,7 @@ public abstract class Card {
     public boolean virtual = false;  // 是否虚拟卡
     public List<Card> subCards = new ArrayList<>();  // 子卡，通常用于虚拟卡
     public Skill skill = null;  // 生成卡牌的技能。通常是转化技
-    public boolean throwAfterUse = true;  // 使用完毕后是否进入弃牌堆。默认进入
+    public boolean willThrow = true;  // 使用完毕后是否进入弃牌堆。默认进入
     public int benefit = -100;  // 对于目标来说的有益程度。越大越有益，0为无关，负数有害
     public Fields xFields = new Fields();  // 额外字段，用于临时存储一些数据
 
@@ -336,8 +336,12 @@ public abstract class Card {
      */
     public void doUse(Player source, List<Player> targets) {
         doUseLog(source, targets);
-        // 移动到处理区
-        Engine.eg.moveCard(this, Place.HANDLE, "Use");
+        // 对于真实卡牌，生效前先移动到处理区。技能牌则直接弃置
+        if (!(this instanceof SkillCard)) {
+            Engine.eg.moveCard(this, Place.HANDLE, "Use");
+        } else if (willThrow) {
+            source.doDiscard(List.of(this));
+        }
 
         // 效果前的时机：卡牌使用时、指定目标后
         CardUse use = new CardUse(this, source, targets);
@@ -362,7 +366,7 @@ public abstract class Card {
         doAfterUse(use);  // 后处理
 
         // 结算完毕，处理区的牌进入弃牌堆（已经被奸雄等技能获得的不动）
-        if (throwAfterUse) {
+        if (willThrow) {
             source.engine.moveToDiscard(this, Place.PlaceType.HANDLE);
         }
         Engine.eg.trigger(new Event(Timing.CARD_USED, source).withField("CardUse", use));  // 结算完毕

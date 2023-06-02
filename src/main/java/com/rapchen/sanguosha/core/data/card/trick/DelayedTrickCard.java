@@ -14,7 +14,7 @@ public abstract class DelayedTrickCard extends TrickCard {
     public DelayedTrickCard(Suit suit, Point point) {
         super(suit, point);
         subType = SubType.TRICK_DELAYED;
-        throwAfterUse = false;  // 不进入弃牌堆
+        willThrow = false;  // 不进入弃牌堆
     }
 
     @Override

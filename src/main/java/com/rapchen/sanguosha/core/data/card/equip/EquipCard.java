@@ -21,7 +21,7 @@ public abstract class EquipCard extends Card {
         super(suit, point);
         this.name = name;
         this.nameZh = nameZh;
-        throwAfterUse = false;  // 不进入弃牌堆
+        willThrow = false;  // 不进入弃牌堆
     }
 
     @Override

@@ -4,9 +4,12 @@ import com.rapchen.sanguosha.core.Engine;
 import com.rapchen.sanguosha.core.data.card.Card;
 import com.rapchen.sanguosha.core.data.card.CardChoose;
 import com.rapchen.sanguosha.core.data.card.CardEffect;
+import com.rapchen.sanguosha.core.data.card.basic.Peach;
+import com.rapchen.sanguosha.core.data.card.equip.EquipCard;
 import com.rapchen.sanguosha.core.data.card.trick.Nullification;
 import com.rapchen.sanguosha.core.general.General;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -27,7 +30,7 @@ public class AIPlayer extends Player {
     @Override
     public Card chooseCard(CardChoose choose) {
         // TODO 现在所有AI逻辑都在这里，之后要拆到各个牌下面
-        List<Card> cards = choose.candidates;
+        List<Card> cards = new ArrayList<>(choose.candidates);
         if (cards.isEmpty()) return null;
         switch (choose.reason) {
             case "askForDodge", "askForSlash" -> {  // 要求出杀闪：总是出
@@ -51,6 +54,9 @@ public class AIPlayer extends Player {
                 return cards.get(0);
             } case "QingNang" -> {  // 青囊：自己受伤采用，给自己补
                 return injured() ? cards.get(0) : null;
+            } case "ZhiHeng" -> {  // 制衡：除了桃和装备都制衡
+                return cards.stream().filter(card -> !(card instanceof Peach) && !(card instanceof EquipCard))
+                        .findFirst().orElse(null);
             } default -> {  // 默认逻辑：必须选就选一张，否则放弃
                 return choose.forced ? cards.get(0) : null;
             }
