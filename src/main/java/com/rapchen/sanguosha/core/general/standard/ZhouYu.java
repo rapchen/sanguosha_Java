@@ -3,10 +3,8 @@ package com.rapchen.sanguosha.core.general.standard;
 import com.rapchen.sanguosha.core.Engine;
 import com.rapchen.sanguosha.core.data.Damage;
 import com.rapchen.sanguosha.core.data.card.Card;
-import com.rapchen.sanguosha.core.data.card.CardAsk;
 import com.rapchen.sanguosha.core.data.card.CardEffect;
 import com.rapchen.sanguosha.core.data.card.SkillCard;
-import com.rapchen.sanguosha.core.data.card.basic.Peach;
 import com.rapchen.sanguosha.core.general.General;
 import com.rapchen.sanguosha.core.player.Player;
 import com.rapchen.sanguosha.core.skill.Event;
@@ -15,7 +13,6 @@ import com.rapchen.sanguosha.core.skill.TransformSkill;
 import com.rapchen.sanguosha.core.skill.TriggerSkill;
 
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * 周瑜
@@ -24,7 +21,7 @@ import java.util.List;
  */
 public class ZhouYu extends General {
     public ZhouYu() {
-        super("ZhouYu", "周瑜", Gender.MALE, Nation.QUN, 3);
+        super("ZhouYu", "周瑜", Gender.MALE, Nation.WU, 3);
         skills.add(YingZi.class);
         skills.add(FanJian.class);
     }

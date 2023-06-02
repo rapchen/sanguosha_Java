@@ -16,7 +16,7 @@ public class Standard extends Package {
 
     @Override
     public void init() {
-//        addGeneral(new LiuBei());
+        addGeneral(new LiuBei());
         addGeneral(new GuanYu());
         addGeneral(new ZhangFei());
         addGeneral(new ZhaoYun());
@@ -33,7 +33,7 @@ public class Standard extends Package {
 //        addGeneral(new ZhangLiao());
 
         addGeneral(new SunQuan());
-//        addGeneral(new SunShangxiang());
+        addGeneral(new SunShangxiang());
         addGeneral(new ZhouYu());
         addGeneral(new LvMeng());
         addGeneral(new LuXun());

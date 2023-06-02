@@ -32,6 +32,9 @@ public abstract class Skill {
     public void doLog(String suffix) {
         log.warn("{} 发动了 {}, {}", owner, nameZh, suffix);
     }
+    public void doLog(String suffix, Object ... objs) {
+        doLog(String.format(suffix, objs));
+    }
 
     /**
      * 向某个角色询问是否使用本技能
