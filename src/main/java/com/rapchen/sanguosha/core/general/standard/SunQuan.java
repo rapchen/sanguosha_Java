@@ -24,7 +24,7 @@ public class SunQuan extends General {
     public static class ZhiHeng extends TransformSkill {
         public ZhiHeng() {
             super("ZhiHeng", "制衡");
-            maxCardCount = 9999;
+            maxCardCount = 10000;
         }
 
         @Override

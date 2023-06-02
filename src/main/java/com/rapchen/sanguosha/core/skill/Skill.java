@@ -38,13 +38,10 @@ public abstract class Skill {
      */
     public boolean askForUse(Player player) {
         if (useByDefault) return true;  // 默认发动
-        int choice = player.askForChoice(null, false, String.format("是否发动 %s ?", nameZh), name);
-        return choice == 1;
+        return player.askForConfirm(String.format("是否发动 %s ?", nameZh), name);
     }
     public boolean askForUse(Player player, Player target) {
-        int choice = player.askForChoice(null, false,
-                String.format("是否对 %s 发动 %s ?", target, nameZh), name);
-        return choice == 1;
+        return player.askForConfirm(String.format("是否对 %s 发动 %s ?", target, nameZh), name);
     }
 
     @Override

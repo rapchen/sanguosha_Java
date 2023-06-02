@@ -91,7 +91,7 @@ public class UserPlayer extends Player {
      * @param forced  是否必须选择
      * @param prompt  给用户的提示语
      * @param reason  选择原因，通常给AI做判断用
-     * @return 选择的选项序号。如果不选，就返回null。
+     * @return 选择的选项序号。如果不选，就返回0。
      */
     @Override
     protected int chooseChoice(List<String> choices, boolean forced, String prompt, String reason) {

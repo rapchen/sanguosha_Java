@@ -485,14 +485,20 @@ public abstract class Player {
     public abstract <T extends General> T chooseGeneral(List<T> generals, boolean forced, String prompt, String reason);
 
     /**
-     * 要求用户进行选择（默认为选是否）。
-     * @param forced 是否必须选择，非必选的话可以用0跳过
+     * 要求用户选择是/否。
      */
-    public int askForChoice(List<String> choices, boolean forced, String prompt, String reason) {
-        if (choices == null) {
-            choices = List.of("是");
-        }
-        return chooseChoice(choices, forced, prompt, reason);
+    public boolean askForConfirm(String prompt, String reason) {
+        List<String> choices = List.of("是");
+        return chooseChoice(choices, true, prompt, reason) == 1;
+    }
+
+    /**
+     * 要求用户进行选择。
+     */
+    public <T> T askForChoice(List<T> choices, boolean forced, String prompt, String reason) {
+        List<String> strs = choices.stream().map(Object::toString).toList();
+        int choice = chooseChoice(strs, forced, prompt, reason);
+        return choice == 0 ? null : choices.get(choice-1);
     }
 
     protected abstract int chooseChoice(List<String> choices, boolean forced, String prompt, String reason);

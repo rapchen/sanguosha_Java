@@ -1,7 +1,7 @@
 package com.rapchen.sanguosha.core.data.card;
 
 import com.rapchen.sanguosha.core.Engine;
-import com.rapchen.sanguosha.core.common.Fields;
+import com.rapchen.sanguosha.core.common.Choose;
 import com.rapchen.sanguosha.core.player.Player;
 
 import java.util.ArrayList;
@@ -14,34 +14,18 @@ import java.util.stream.Collectors;
  * @author Chen Runwen
  * @time 2023/5/20 15:22
  */
-public class CardChoose {
+public class CardChoose extends Choose<Card> {
 
-    public List<Card> candidates;  // 候选卡牌范围
-    public int count = 1;  // 选择卡牌数量
-//    public Scene scene;  // 场景：使用/打出/技能/出牌阶段
-    public Player player;  // 被要求的角色
-    public boolean forced = false;  // 是否强制选择
-    public String reason;  // 原因
-    public String prompt;  // 提示词
-    public Player target = null;  // 候选牌的目标角色（没有则为null）
-    public Fields xFields = new Fields();  // 额外字段
+    public Player target = null;  // 候选牌来源的目标角色，可以辅助AI判断（没有则为null）
 
-    private final List<Card> chosen = new ArrayList<>();  // 已选的牌
-    //    public int chosenTimes = 0;  // 已选的牌
-//    public boolean gaveUp = false;  // 是否已放弃（有一次没选牌就是放弃了）
-
-    // ************** 构造选择
+    // ************** 构造
     public CardChoose(Player player, List<? extends Card> candidates,
                       boolean forced, String reason, String prompt) {
-        this.player = player;
-        this.candidates = new ArrayList<>(candidates);
-        this.forced = forced;
-        this.reason = reason;
-        this.prompt = prompt;
+        super(player, candidates, forced, reason, prompt);
     }
 
     public CardChoose(Player player) {
-        this.player = player;
+        super(player);
     }
 
     // ************* 链式编程 *************

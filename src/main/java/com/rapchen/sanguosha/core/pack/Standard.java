@@ -34,7 +34,7 @@ public class Standard extends Package {
 
         addGeneral(new SunQuan());
 //        addGeneral(new SunShangxiang());
-//        addGeneral(new ZhouYu());
+        addGeneral(new ZhouYu());
         addGeneral(new LvMeng());
         addGeneral(new LuXun());
 //        addGeneral(new DaQiao());

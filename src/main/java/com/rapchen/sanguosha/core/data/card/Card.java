@@ -339,8 +339,8 @@ public abstract class Card {
         // 对于真实卡牌，生效前先移动到处理区。技能牌则直接弃置
         if (!(this instanceof SkillCard)) {
             Engine.eg.moveCard(this, Place.HANDLE, "Use");
-        } else if (willThrow) {
-            source.doDiscard(List.of(this));
+        } else if (willThrow && !subCards.isEmpty()) {
+            source.doDiscard(subCards);
         }
 
         // 效果前的时机：卡牌使用时、指定目标后
