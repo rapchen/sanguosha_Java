@@ -24,10 +24,13 @@ public class SkillManager {
     }
 
     /**
-     * 添加技能。需要事先指定技能拥有者
+     * 添加技能
+     * @param owner 技能拥有者
      */
-    public void add(Skill skill) {
+    public void add(Skill skill, Player owner) {
+        if (skill == null) return;
         skills.add(skill);
+        skill.owner = owner;
         if (skill.owner != null) {
             skill.owner.skills.add(skill);
         }
@@ -39,10 +42,13 @@ public class SkillManager {
             }
             transformSkills.get(tSkill.owner).add(tSkill);
         }
+        for (Skill subSkill : skill.subSkills) {
+            subSkill.owner = skill.owner;
+        }
     }
 
     /**
-     * 移除技能。不能在此之前先置空技能拥有者
+     * 移除技能。
      */
     public void remove(Skill skill) {
         skills.remove(skill);
@@ -56,6 +62,10 @@ public class SkillManager {
             if (tSkills != null) {
                 tSkills.remove(skill);
             }
+        }
+        skill.owner = null;
+        for (Skill subSkill : skill.subSkills) {
+            subSkill.owner = null;
         }
     }
 

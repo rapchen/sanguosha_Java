@@ -35,8 +35,7 @@ public abstract class EquipCard extends Card {
         Player target = effect.target;
         Engine.eg.moveCard(this, target.EQUIP, "useEquip");
         if (skill != null) {
-            skill.owner = target;  // 武器技能拥有者为武器拥有者
-            Engine.eg.skills.add(skill);
+            Engine.eg.skills.add(skill, target);
         }
     }
 
@@ -46,7 +45,6 @@ public abstract class EquipCard extends Card {
     public void onRemove() {
         if (skill != null) {
             Engine.eg.skills.remove(skill);
-            skill.owner = null;
         }
     }
 }

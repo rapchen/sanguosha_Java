@@ -145,9 +145,12 @@ public abstract class Player {
      * 摸牌阶段
      */
     private void doDrawPhase() {
-        int drawCount = 2;
-        drawCount = engine.triggerModify(new Event(Timing.MD_DRAW_COUNT, this), drawCount);
-        this.drawCards(drawCount);
+        // 判断是否已跳过摸牌
+        if (phaseFields.remove("DrawPhase_SkipDraw") != Boolean.TRUE) {
+            int drawCount = 2;
+            drawCount = engine.triggerModify(new Event(Timing.MD_DRAW_COUNT, this), drawCount);
+            this.drawCards(drawCount);
+        }
     }
 
     /**
@@ -380,24 +383,10 @@ public abstract class Player {
         for (Class<? extends Skill> skillClass : general.skills) {
             Skill skill = Skill.createSkill(skillClass);
             if (skill != null) {
-                skill.owner = this;
-                engine.skills.add(skill);
+                engine.skills.add(skill, this);
             }
         }
         log.warn("{} 选择了武将 {}", this, general);
-    }
-
-    /** 添加技能 */
-    public void addSkill(Class<? extends Skill> skillClass) {
-        try {
-            Skill skill = skillClass.getConstructor().newInstance();
-            skill.owner = this;
-            engine.skills.add(skill);
-        } catch (NoSuchMethodException | InvocationTargetException |
-                 InstantiationException | IllegalAccessException e) {
-            log.error("获取技能 {} 失败！ {}", skillClass, e.toString());
-            e.printStackTrace();
-        }
     }
 
     /* =============== end 功能执行 ================ */
@@ -442,7 +431,7 @@ public abstract class Player {
      * 选择牌的目标
      * @param card 使用的牌
      */
-    private List<Player> chooseTargets(Card card) {
+    public List<Player> chooseTargets(Card card) {
         return card.chooseTargets(this);
     }
 

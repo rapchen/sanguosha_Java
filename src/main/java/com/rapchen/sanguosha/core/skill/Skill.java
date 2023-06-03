@@ -4,6 +4,8 @@ import com.rapchen.sanguosha.core.player.Player;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 技能抽象类
@@ -17,6 +19,8 @@ public abstract class Skill {
     public Player owner;  // 技能拥有者
     public boolean compulsory = false;  // 是否是锁定技
     public boolean useByDefault = false;  // 是否默认发动
+    public boolean visible = true;  // 是否可见（如有些触发技绑定的转化技应该不可见）
+    public List<Skill> subSkills = new ArrayList<>();  // 子技能列表。这些技能会与本技能同步获得或失去
 
     public Skill(String name, String nameZh) {
         this.name = name;

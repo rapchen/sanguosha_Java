@@ -227,7 +227,7 @@ public abstract class Card {
     /**
      * 判断当前已选择的目标是否合法（如离间必须2个目标，铁索连环0-2个都合法）
      */
-    private boolean targetsValid() {
+    public boolean targetsValid() {
         // 默认逻辑：选满目标数量
         return chosenTargets.size()  == maxTargetCount;
     }

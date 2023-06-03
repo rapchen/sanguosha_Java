@@ -31,4 +31,9 @@ public abstract class SkillCard extends Card {
             skill.doLog(String.format("目标是 %s", Player.playersToString(targets)));
         }
     }
+
+    @Override
+    public String toString() {
+        return nameZh + "牌[" + suit + point + "]";
+    }
 }

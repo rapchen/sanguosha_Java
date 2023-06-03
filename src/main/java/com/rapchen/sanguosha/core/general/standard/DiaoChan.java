@@ -25,7 +25,8 @@ public class DiaoChan extends General {
 
         @Override
         public void onTrigger(Event event) {
-            if (owner.phase != Phase.PHASE_END) return;
+            final Phase phase = (Phase) event.xFields.get("Phase");
+            if (phase != Phase.PHASE_END) return;
             if (askForUse(owner)) {
                 doLog();
                 owner.drawCards(1);

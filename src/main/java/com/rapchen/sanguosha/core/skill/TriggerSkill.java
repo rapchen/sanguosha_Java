@@ -1,5 +1,11 @@
 package com.rapchen.sanguosha.core.skill;
 
+import com.rapchen.sanguosha.core.data.card.Card;
+import com.rapchen.sanguosha.core.data.card.CardAsk;
+import com.rapchen.sanguosha.core.player.Player;
+
+import java.util.List;
+
 /**
  * 触发技（包括修改类的技能）
  * @author Chen Runwen
@@ -9,6 +15,7 @@ public abstract class TriggerSkill extends Skill {
 
     public Timing[] timings;
     public boolean onlyOwner = true;  // 是否只有技能拥有者的对应事件可以触发这个技能。默认是
+    public TransformSkill transformSkill = null;  // 该触发技绑定的转化技。
 
     public TriggerSkill(String name, String nameZh, Timing[] timings) {
         super(name, nameZh);
@@ -39,4 +46,30 @@ public abstract class TriggerSkill extends Skill {
         if (onlyOwner) return event.player == owner;
         return true;
     }
+
+    /* =============== end 子类重写的方法 =============== */
+    /* =============== begin 工具方法 =============== */
+
+    public void setTransformSkill(TransformSkill transformSkill) {
+        this.transformSkill = transformSkill;
+        subSkills.add(transformSkill);
+    }
+
+    /**
+     * 要求角色使用该技能绑定的转化技
+     * @return 是否使用
+     */
+    public final boolean askForTransform(Player player) {
+        if (transformSkill == null) return false;
+        // 1. 选牌
+        Card card = transformSkill.askForTransform(new CardAsk(CardAsk.Scene.SKILL, player));
+        if (card == null) return false;
+        // 2. 选择目标
+        List<Player> targets = player.chooseTargets(card);
+        if (targets == null) return false;
+        // 3. 使用
+        player.useCard(card, targets);
+        return true;
+    }
+
 }
