@@ -170,10 +170,18 @@ public class Engine {
      */
     public void moveCards(List<Card> cards, Place targetPlace,
                           Place.PlaceType sourcePlaceType, String reason) {
-        // 处理虚拟牌：虚拟牌的所有子卡都一起移动
+        CardMove move = moveCardsFrom(cards, targetPlace, sourcePlaceType, reason);
+        moveCardsTo(cards, targetPlace, sourcePlaceType);
+        // 卡牌移动后时机
+        trigger(new Event(Timing.CARD_MOVED, targetPlace.owner).withField("CardMove", move));
+    }
+
+    /** 将牌从原位移除 */
+    private CardMove moveCardsFrom(List<Card> cards, Place targetPlace, Place.PlaceType sourcePlaceType, String reason) {
+        // 处理虚拟牌：判定区直接移除虚拟牌，其他移除子卡。
         List<Card> realCards = new ArrayList<>();
         for (Card card : cards) {
-            if (card.virtual) realCards.addAll(card.subCards);
+            if (card.virtual && !card.place.isJudge()) realCards.addAll(card.subCards);
             else realCards.add(card);
         }
         // 过滤原位置不正确的牌；过滤原位置和目标位置一样的牌
@@ -200,8 +208,30 @@ public class Engine {
                     // TODO 移除牌的逻辑
                 }
             }
-            card.place = targetPlace;  // 变更卡牌位置
         }
+        return move;
+    }
+
+    /** 将牌添加到新位置 */
+    private void moveCardsTo(List<Card> cards, Place targetPlace,
+                             Place.PlaceType sourcePlaceType) {
+        // 处理虚拟牌：判定区直接添加虚拟牌，其他添加子卡。
+        List<Card> realCards = new ArrayList<>();
+        if (targetPlace.isJudge()) {
+            realCards.addAll(cards);
+        } else {
+            for (Card card : cards) {
+                if (card.virtual) realCards.addAll(card.subCards);
+                else realCards.add(card);
+            }
+        }
+        // 过滤原位置不正确的牌；过滤原位置和目标位置一样的牌
+        Stream<Card> cardStream = realCards.stream();
+        if (sourcePlaceType != null) {
+            cardStream = cardStream.filter(card -> card.place.type == sourcePlaceType);
+        }
+        realCards = cardStream.filter(card -> card.place != targetPlace).toList();
+
         // 添加牌逻辑
         switch (targetPlace.type) {
             case DRAW -> {  // 加入摸牌堆。目前默认是放到牌堆顶
@@ -220,6 +250,9 @@ public class Engine {
             } case JUDGE -> {
                 for (Card card : realCards) {
                     targetPlace.owner.judgeArea.add((DelayedTrickCard) card);
+                    for (Card subCard : card.subCards) {
+                        subCard.place = targetPlace;
+                    }
                 }
             } case EXTRA -> {
                 // TODO 添加牌的逻辑
@@ -229,8 +262,6 @@ public class Engine {
         for (Card card : realCards) {
             card.place = targetPlace;
         }
-        // 卡牌移动后时机
-        trigger(new Event(Timing.CARD_MOVED, targetPlace.owner).withField("CardMove", move));
     }
 
     // 角色相关

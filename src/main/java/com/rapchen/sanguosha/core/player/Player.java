@@ -285,6 +285,9 @@ public abstract class Player {
         if (weapon != null) return weapon.range;
         return 1;  // 默认1
     }
+    public boolean inRange(Player target) {
+        return getDistance(target) <= getRange();
+    }
 
     /** 获取杀的次数限制 */
     public int getSlashLimit() {

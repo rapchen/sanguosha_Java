@@ -131,7 +131,7 @@ public abstract class Card {
     public int id = -1;  // 在牌堆里的唯一ID，从1开始。虚拟卡<0
     public String name;  // 牌名。对于基本牌和锦囊牌，牌名即对象的类名；对于装备牌，同类的可能不同名（如赤兔和大宛）
     public String nameZh;  // 中文牌名，用于显示。
-    public Place place;  // 卡牌位置。
+    public Place place = Place.NO;  // 卡牌位置。
 
     public boolean virtual = false;  // 是否虚拟卡
     public List<Card> subCards = new ArrayList<>();  // 子卡，通常用于虚拟卡
@@ -229,7 +229,7 @@ public abstract class Card {
      */
     public boolean targetsValid() {
         // 默认逻辑：选满目标数量
-        return chosenTargets.size()  == maxTargetCount;
+        return chosenTargets.size() == maxTargetCount;
     }
 
     /**
@@ -343,11 +343,29 @@ public abstract class Card {
             source.doDiscard(subCards);
         }
 
-        // 效果前的时机：卡牌使用时、指定目标后
+        // 注：卡牌使用流程：选择目标后、使用时、指定目标时、成为目标时、指定目标后、成为目标后
+        // https://www.bilibili.com/read/cv19848277/
         CardUse use = new CardUse(this, source, targets);
+        // 选择目标后。使用者改变目标。
+        Engine.eg.trigger(new Event(Timing.TARGET_CHOOSING, source).withField("CardUse", use));
+        // 卡牌使用时
         Engine.eg.trigger(new Event(Timing.CARD_USING, source).withField("CardUse", use));  // 卡牌使用时
-        // TODO 这里插入改变目标的时机
-        Engine.eg.trigger(new Event(Timing.TARGET_CHOSEN, source).withField("CardUse", use));  // 指定目标后
+        // 指定目标时。第三方改变目标。
+        Engine.eg.trigger(new Event(Timing.TARGET_CHOOSING, source).withField("CardUse", use));
+        // 成为目标时。目标可以改变目标。
+        List<Player> tmpTargets = new ArrayList<>(targets);  // 当前触发事件的目标
+        while (!tmpTargets.isEmpty()) {
+            for (Player target : tmpTargets) {
+                Engine.eg.trigger(new Event(Timing.TARGETED_CHOOSING, target).withField("CardUse", use));
+            }
+            List<Player> newTargets = new ArrayList<>(targets);
+            newTargets.removeAll(tmpTargets);
+            tmpTargets = newTargets;  // 对所有新增的目标触发下一轮事件
+        }
+        // 指定目标后
+        Engine.eg.trigger(new Event(Timing.TARGET_CHOSEN, source).withField("CardUse", use));
+        // 成为目标后
+        Engine.eg.trigger(new Event(Timing.TARGETED_CHOSEN, source).withField("CardUse", use));
 
         // 卡牌使用记录
         source.turnFields.incr("Used_" + this.getClass().getSimpleName(), 1);

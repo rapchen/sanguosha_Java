@@ -18,7 +18,10 @@ public enum Timing {
     // 卡牌使用相关。player为使用者
     CARD_ASKED,  // 被要求打出（或使用闪）一张牌时。 CardAsk
     CARD_USING,  // 卡牌使用时立刻触发。早于修改目标的时机。 CardUse
+    TARGET_CHOOSING,  // 牌指定目标时。可以修改目标。 CardUse
+    TARGETED_CHOOSING,  // 被牌指定为目标时，player为目标。可以修改目标。 CardUse
     TARGET_CHOSEN,  // 牌指定目标后。修改目标应该在这之前。 CardUse
+    TARGETED_CHOSEN,  // 被牌指定为目标后，player为目标。修改目标应该在这之前。 CardUse
     CARD_USED,  // 卡牌使用结束。卡牌的响应也已经结束。 CardUse
 
     CARD_RESPONDED,  // 卡牌打出结束。Player为打出者 Card

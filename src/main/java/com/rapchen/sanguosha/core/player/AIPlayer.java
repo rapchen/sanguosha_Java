@@ -54,6 +54,8 @@ public class AIPlayer extends Player {
                 return cards.get(0);
             } case "QingNang" -> {  // 青囊：自己受伤采用，给自己补
                 return injured() ? cards.get(0) : null;
+            } case "LiuLiTrans" -> {  // 流离：用
+                return cards.get(0);
             } case "ZhiHeng" -> {  // 制衡：除了桃和装备都制衡
                 return cards.stream().filter(card -> !(card instanceof Peach) && !(card instanceof EquipCard))
                         .findFirst().orElse(null);

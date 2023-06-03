@@ -1,6 +1,7 @@
 package com.rapchen.sanguosha.core.data.card;
 
 import com.rapchen.sanguosha.core.player.Player;
+import com.rapchen.sanguosha.core.skill.Event;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.List;
  */
 @Slf4j
 public abstract class SkillCard extends Card {
+    public Event event = null;  // 关联对应触发技的Event
 
     public SkillCard(Suit suit, Point point) {
         super(suit, point);

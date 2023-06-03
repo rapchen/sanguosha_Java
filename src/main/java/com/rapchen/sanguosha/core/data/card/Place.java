@@ -9,6 +9,7 @@ import com.rapchen.sanguosha.core.player.Player;
  */
 public class Place {
     public enum PlaceType {
+        NO,  // 无位置（临时虚拟牌）
         DRAW,  // 摸牌堆
         DISCARD,  // 弃牌堆
         HAND,  // 手牌
@@ -22,6 +23,7 @@ public class Place {
     public PlaceType type;
     public Player owner = null;  // 当前区域对应的角色（判定区和判定牌都算）。不属于某个角色则为null
 
+    public final static Place NO = new Place(PlaceType.NO);
     public final static Place DRAW = new Place(PlaceType.DRAW);
     public final static Place DISCARD = new Place(PlaceType.DISCARD);
     public final static Place HANDLE = new Place(PlaceType.HANDLE);

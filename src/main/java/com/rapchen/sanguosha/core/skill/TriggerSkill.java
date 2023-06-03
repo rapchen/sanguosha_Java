@@ -15,7 +15,7 @@ public abstract class TriggerSkill extends Skill {
 
     public Timing[] timings;
     public boolean onlyOwner = true;  // 是否只有技能拥有者的对应事件可以触发这个技能。默认是
-    public TransformSkill transformSkill = null;  // 该触发技绑定的转化技。
+    public TriggeredTransformSkill transSkill = null;  // 该触发技绑定的转化技。
 
     public TriggerSkill(String name, String nameZh, Timing[] timings) {
         super(name, nameZh);
@@ -50,26 +50,33 @@ public abstract class TriggerSkill extends Skill {
     /* =============== end 子类重写的方法 =============== */
     /* =============== begin 工具方法 =============== */
 
-    public void setTransformSkill(TransformSkill transformSkill) {
-        this.transformSkill = transformSkill;
-        subSkills.add(transformSkill);
+    public void setTransSkill(TriggeredTransformSkill transSkill) {
+        transSkill.triggerSkill = this;
+        transSkill.nameZh = nameZh;
+
+        this.transSkill = transSkill;
+        subSkills.add(transSkill);
     }
 
     /**
-     * 要求角色使用该技能绑定的转化技
+     * 要求技能拥有者使用本触发技绑定的转化技
+     * @param event 当前触发本触发技的事件
      * @return 是否使用
      */
-    public final boolean askForTransform(Player player) {
-        if (transformSkill == null) return false;
+    public final boolean askForTransform(Event event) {
+        if (transSkill == null) return false;
         // 1. 选牌
-        Card card = transformSkill.askForTransform(new CardAsk(CardAsk.Scene.SKILL, player));
+        Card card = transSkill.askForTransform(new CardAsk(event, owner));
         if (card == null) return false;
         // 2. 选择目标
-        List<Player> targets = player.chooseTargets(card);
+        List<Player> targets = owner.chooseTargets(card);
         if (targets == null) return false;
         // 3. 使用
-        player.useCard(card, targets);
+        owner.useCard(card, targets);
         return true;
+    }
+    public final boolean askForTransform() {
+        return askForTransform(null);
     }
 
 }

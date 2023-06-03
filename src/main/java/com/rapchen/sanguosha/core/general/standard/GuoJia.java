@@ -7,10 +7,7 @@ import com.rapchen.sanguosha.core.data.Judgement;
 import com.rapchen.sanguosha.core.data.card.*;
 import com.rapchen.sanguosha.core.general.General;
 import com.rapchen.sanguosha.core.player.Player;
-import com.rapchen.sanguosha.core.skill.Event;
-import com.rapchen.sanguosha.core.skill.Timing;
-import com.rapchen.sanguosha.core.skill.TransformSkill;
-import com.rapchen.sanguosha.core.skill.TriggerSkill;
+import com.rapchen.sanguosha.core.skill.*;
 
 import java.util.List;
 
@@ -48,7 +45,7 @@ public class GuoJia extends General {
         public YiJi() {
             super("YiJi", "遗计", new Timing[]{Timing.DAMAGED_DONE});
             useByDefault = true;
-            setTransformSkill(new YiJiTrans());
+            setTransSkill(new YiJiTrans());
         }
 
         @Override
@@ -59,8 +56,8 @@ public class GuoJia extends General {
                     List<Card> cards = Engine.eg.getCardsFromDrawPile(2);
                     // 发牌给其他角色
                     try (Fields.TmpField tf = owner.xFields.tmpField("YiJi_Cards", cards)) {
-                        boolean succ = askForTransform(owner);
-                        if (succ && !cards.isEmpty()) askForTransform(owner);
+                        boolean succ = askForTransform();
+                        if (succ && !cards.isEmpty()) askForTransform();
                     }
                     // 剩余牌给自己
                     if (!cards.isEmpty()) {
@@ -72,11 +69,10 @@ public class GuoJia extends General {
         }
     }
 
-    public static class YiJiTrans extends TransformSkill {
+    public static class YiJiTrans extends TriggeredTransformSkill {
         public YiJiTrans() {
-            super("YiJiTrans", "遗计");
+            super(YiJiCard.class);
             maxCardCount = 2;
-            visible = false;
         }
 
         @Override
@@ -93,11 +89,6 @@ public class GuoJia extends General {
         public Card serveAs() {
             if (chosenCards.isEmpty()) return null;
             return Card.createVirtualCard(YiJiCard.class, chosenCards);
-        }
-
-        @Override
-        public boolean usableInPlayPhase() {
-            return false;
         }
     }
 

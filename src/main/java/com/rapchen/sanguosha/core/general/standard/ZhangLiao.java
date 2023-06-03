@@ -5,10 +5,7 @@ import com.rapchen.sanguosha.core.data.card.*;
 import com.rapchen.sanguosha.core.general.General;
 import com.rapchen.sanguosha.core.player.Phase;
 import com.rapchen.sanguosha.core.player.Player;
-import com.rapchen.sanguosha.core.skill.Event;
-import com.rapchen.sanguosha.core.skill.Timing;
-import com.rapchen.sanguosha.core.skill.TransformSkill;
-import com.rapchen.sanguosha.core.skill.TriggerSkill;
+import com.rapchen.sanguosha.core.skill.*;
 
 /**
  * 张辽
@@ -25,14 +22,14 @@ public class ZhangLiao extends General {
     public static class TuXi extends TriggerSkill {
         public TuXi() {
             super("TuXi", "突袭", new Timing[]{Timing.PHASE_BEGIN});
-            setTransformSkill(new TuXiTrans());
+            setTransSkill(new TuXiTrans());
         }
 
         @Override
         public void onTrigger(Event event) {
             final Phase phase = (Phase) event.xFields.get("Phase");
             if (phase != Phase.PHASE_DRAW) return;
-            askForTransform(owner);
+            askForTransform();
         }
 
         @Override
@@ -40,22 +37,11 @@ public class ZhangLiao extends General {
             return super.canTrigger(event) && owner.phaseFields.get("DrawPhase_SkipDraw") != Boolean.TRUE;
         }
     }
-    
-    public static class TuXiTrans extends TransformSkill {
+
+    public static class TuXiTrans extends TriggeredTransformSkill {
         public TuXiTrans() {
-            super("TuXiTrans", "突袭");
+            super(TuXiCard.class);
             maxCardCount = 0;
-            visible = false;
-        }
-
-        @Override
-        public Card serveAs() {
-            return Card.createVirtualCard(TuXiCard.class, chosenCards);
-        }
-
-        @Override
-        public boolean usableInPlayPhase() {
-            return false;
         }
     }
 

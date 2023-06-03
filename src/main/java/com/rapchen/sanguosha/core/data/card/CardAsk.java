@@ -1,6 +1,7 @@
 package com.rapchen.sanguosha.core.data.card;
 
 import com.rapchen.sanguosha.core.player.Player;
+import com.rapchen.sanguosha.core.skill.Event;
 import com.rapchen.sanguosha.core.skill.Skill;
 
 import java.util.Collections;
@@ -28,6 +29,7 @@ public class CardAsk {
     public boolean forced = false;  // 是否强制使用
     public String reason;  // 原因
     public String prompt;  // 提示词
+    public Event event = null;  // 关联的事件，通常是要求技能卡时
 
     public Set<Skill> bannedSkills = new HashSet<>();  // 不可用的技能列表
 
@@ -46,6 +48,13 @@ public class CardAsk {
     public CardAsk(Scene scene, Player player) {
         this.scene = scene;
         this.player = player;
+    }
+
+    /** 适用于触发技要求技能牌的场景 */
+    public CardAsk(Event event, Player player) {
+        this.event = event;
+        this.player = player;
+        this.scene = Scene.SKILL;
     }
 
     /**
