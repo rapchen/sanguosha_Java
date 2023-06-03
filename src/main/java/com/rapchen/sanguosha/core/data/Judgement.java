@@ -44,12 +44,14 @@ public class Judgement {
         log.warn("{} 因 {} 翻开了判定牌 {}", player, nameZh, card);
         // 判定牌生效前时机。可以改判
         Engine.eg.trigger(new Event(Timing.JUDGE_BEFORE_EFFECT, player).withField("Judge", this));
-        // 判定牌生效后时机。天妒
-        Engine.eg.trigger(new Event(Timing.JUDGE_DONE, player).withField("Judge", this));
 
-        Engine.eg.moveToDiscard(card, Place.PlaceType.JUDGE_CARD);  // 仍在处理区的进入弃牌堆
         String successStr = (success == null) ? "生效" : (success ? "成功" : "失败");
         log.warn("{} 的 {} 判定 {}，结果为 {}", player, nameZh, successStr, card);
+
+        // 判定牌生效后时机。天妒
+        Engine.eg.trigger(new Event(Timing.JUDGE_DONE, player).withField("Judge", this));
+        // 仍在处理区的进入弃牌堆
+        Engine.eg.moveToDiscard(card, Place.PlaceType.JUDGE_CARD);
         return this;
     }
 

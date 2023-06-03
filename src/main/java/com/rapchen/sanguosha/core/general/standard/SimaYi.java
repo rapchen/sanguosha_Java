@@ -32,8 +32,8 @@ public class SimaYi extends General {
         @Override
         public void onTrigger(Event event) {
             final Damage damage = (Damage) event.xFields.get("Damage");
-            if (damage.effect == null || damage.effect.getSource() == null) return;
-            Player source = damage.effect.getSource();
+            Player source = damage.source;
+            if (source == null) return;
 
             if (source.alive && askForUse(owner)) {
                 CardChoose choose = new CardChoose(owner).fromPlayer(source, "he")

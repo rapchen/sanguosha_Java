@@ -54,6 +54,12 @@ public class CardChoose extends Choose<Card> {
         return fromPlayer(player, pattern);
     }
 
+    /** 向candidates添加额外选项 */
+    public CardChoose add(List<Card> cards) {
+        if (cards != null) candidates.addAll(cards);
+        return this;
+    }
+
     /** 过滤candidates */
     public CardChoose filter(Predicate<Card> filter) {
         candidates = candidates.stream().filter(filter).collect(Collectors.toList());

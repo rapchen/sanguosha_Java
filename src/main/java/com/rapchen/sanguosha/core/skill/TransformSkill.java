@@ -36,6 +36,13 @@ public abstract class TransformSkill extends Skill {
     }
 
     /**
+     * 返回额外卡牌选择范围。默认范围为使用者的手牌和装备牌，其他可选牌需要放到这里
+     */
+    public List<Card> extraCards() {
+        return null;
+    }
+
+    /**
      * 返回转化后的卡牌
      * @return 转化后的卡牌。如果不能转化，
      */
@@ -70,7 +77,7 @@ public abstract class TransformSkill extends Skill {
         for (int i = 0; i < maxCardCount; i++) {
             String prompt = String.format("你正在发动 %s, 请选择第%d张牌, 0停止选择：", nameZh, i+1);
             Card chosen = owner.chooseCard(
-                    new CardChoose(owner).fromSelf("he")
+                    new CardChoose(owner).fromSelf("he").add(extraCards())
                             .filter(card -> !chosenCards.contains(card) && this.cardFilter(card))
                             .reason(name, prompt));
             if (chosen == null) break;  // 放弃选择了，直接跳出

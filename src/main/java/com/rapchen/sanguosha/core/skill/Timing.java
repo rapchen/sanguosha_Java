@@ -35,7 +35,7 @@ public enum Timing {
     DAMAGE_DONE,  // 造成伤害后。 Damage
     DAMAGED_DONE,  // 受到伤害后。 Damage
 
-    // 判定相关。
+    // 判定相关。 Player为进行判定的角色
     JUDGE_BEFORE_EFFECT,  // 判定牌生效前。改判时机。 Judge
     JUDGE_DONE,  // 判定牌生效后。 Judge
 

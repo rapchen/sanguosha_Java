@@ -57,12 +57,6 @@ public class ZhangLiao extends General {
         public boolean usableInPlayPhase() {
             return false;
         }
-
-        @Override
-        public boolean usableAtResponse(CardAsk ask) {
-            // TODO 可以抽出一个TransformSkill的子类，就是只能响应技能卡
-            return ask.contains(TuXiCard.class);
-        }
     }
 
     public static class TuXiCard extends SkillCard {
