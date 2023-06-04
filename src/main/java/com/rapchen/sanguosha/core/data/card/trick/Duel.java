@@ -1,8 +1,11 @@
 package com.rapchen.sanguosha.core.data.card.trick;
 
+import com.rapchen.sanguosha.core.Engine;
 import com.rapchen.sanguosha.core.data.Damage;
 import com.rapchen.sanguosha.core.data.card.CardEffect;
 import com.rapchen.sanguosha.core.player.Player;
+import com.rapchen.sanguosha.core.skill.Event;
+import com.rapchen.sanguosha.core.skill.Timing;
 
 /**
  * 决斗
@@ -20,15 +23,28 @@ public class Duel extends ImmediateTrickCard {
     public void doEffect(CardEffect effect) {
         Player source = effect.getSource(), target = effect.target;
         while (true) {
-            if (!target.askForSlash()) {
+            if (!askForSlash(target, effect)) {
                 source.doDamage(new Damage(effect));
                 break;
             }
-            if (!source.askForSlash()) {
+            if (!askForSlash(source, effect)) {
                 target.doDamage(new Damage(target, source, 1, effect));
                 break;
             }
         }
+    }
+
+    /** 要求角色打出杀响应决斗 */
+    private boolean askForSlash(Player player, CardEffect effect) {
+        // 需要的杀的数量。无双会修改
+        int remainCount = 1;
+        remainCount = Engine.eg.triggerModify(new Event(Timing.MD_CARD_ASK_COUNT, player)
+                .withField("CardEffect", effect), remainCount);
+        while (remainCount > 0) {
+            if (!player.askForSlash()) return false;
+            remainCount--;
+        }
+        return true;
     }
 
 }

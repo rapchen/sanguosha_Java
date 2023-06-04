@@ -2,6 +2,7 @@ package com.rapchen.sanguosha.core.general.standard;
 
 import com.rapchen.sanguosha.core.data.Judgement;
 import com.rapchen.sanguosha.core.data.card.Card;
+import com.rapchen.sanguosha.core.data.card.CardEffect;
 import com.rapchen.sanguosha.core.data.card.CardUse;
 import com.rapchen.sanguosha.core.data.card.basic.Slash;
 import com.rapchen.sanguosha.core.general.General;
@@ -45,13 +46,13 @@ public class MaChao extends General {
         public void onTrigger(Event event) {
             final CardUse use = (CardUse) event.xFields.get("CardUse");
             if (!(use.card instanceof Slash)) return;
-            for (Player target : use.targets) {
-                if (askForUse(owner, target)) {
+            for (CardEffect effect : use.effects) {
+                if (askForUse(owner, effect.target)) {
                     Judgement judge = owner.doJudge(nameZh, Card::isRed);
                     if (judge.success) {
-                        doLog(String.format("此杀不可被 %s 闪避", target));
+                        doLog(String.format("此杀不可被 %s 闪避", effect.target));
                         // 设置不可被target闪避的字段
-                        use.card.xFields.put("CannotDodge", target.idStr(), true);
+                        effect.xFields.put("CannotDodge", true);
                     }
                 }
             }

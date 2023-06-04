@@ -336,13 +336,14 @@ public abstract class Card {
      */
     public void doUse(Player source, List<Player> targets) {
         doUseLog(source, targets);
-        // 对于真实卡牌，生效前先移动到处理区。技能牌则直接弃置
+        // 1. 对于真实卡牌，生效前先移动到处理区。技能牌则直接弃置
         if (!(this instanceof SkillCard)) {
             Engine.eg.moveCard(this, Place.HANDLE, "Use");
         } else if (willThrow && !subCards.isEmpty()) {
             source.doDiscard(subCards);
         }
 
+        // 2. 目标确定前
         // 注：卡牌使用流程：选择目标后、使用时、指定目标时、成为目标时、指定目标后、成为目标后
         // https://www.bilibili.com/read/cv19848277/
         CardUse use = new CardUse(this, source, targets);
@@ -362,20 +363,26 @@ public abstract class Card {
             newTargets.removeAll(tmpTargets);
             tmpTargets = newTargets;  // 对所有新增的目标触发下一轮事件
         }
-        // 指定目标后
+
+        // 3. 目标变更完毕，对最终目标重新排序，生成CardEffect对象
+        targets.sort(Engine.eg.playerComparator);
+        use.effects = new ArrayList<>();
+        for (Player target : targets) {  // 单个目标的效果
+            use.effects.add(new CardEffect(use, target));
+        }
+
+        // 4. 指定目标后
         Engine.eg.trigger(new Event(Timing.TARGET_CHOSEN, source).withField("CardUse", use));
         // 成为目标后
         Engine.eg.trigger(new Event(Timing.TARGETED_CHOSEN, source).withField("CardUse", use));
 
-        // 卡牌使用记录
+        // 卡牌使用记录 TODO 对XX使用过也需要记录，如自守、窃听
         source.turnFields.incr("Used_" + this.getClass().getSimpleName(), 1);
         source.phaseFields.incr("Used_" + this.getClass().getSimpleName(), 1);
 
-        // 执行效果
+        // 5. 执行效果
         doUseToAll(use);  // 全体效果
-        for (Player target : targets) {  // 单个目标的效果
-            CardEffect effect = new CardEffect(use, target);
-            use.currentTarget = target;
+        for (CardEffect effect : use.effects) {  // 单个目标的效果
             // 对每个目标生效前，询问无懈
             if (!checkCanceled(effect)) {
                 doEffect(effect);
@@ -383,7 +390,7 @@ public abstract class Card {
         }
         doAfterUse(use);  // 后处理
 
-        // 结算完毕，处理区的牌进入弃牌堆（已经被奸雄等技能获得的不动）
+        // 6. 结算完毕，处理区的牌进入弃牌堆（已经被奸雄等技能获得的不动）
         if (willThrow) {
             source.engine.moveToDiscard(this, Place.PlaceType.HANDLE);
         }

@@ -43,9 +43,13 @@ public enum Timing {
     JUDGE_DONE,  // 判定牌生效后。 Judge
 
     // =============== 以下MD开头为修正时机 ===============
+    // 回合相关
     MD_SLASH_LIMIT,  // 修正回合内杀的次数限制
+    MD_DRAW_COUNT,  // 修正摸牌阶段摸牌数
+
+    // 卡牌使用相关
     MD_DISTANCE,  // 修正距离。Player为使用者。 Target
     MD_DISTANCE_LIMIT,  // 修正卡牌使用的距离限制。Player为使用者。 Target, Card
-    MD_DRAW_COUNT,  // 修正摸牌阶段摸牌数
     MD_TARGET_VALIDATION,  // 修正是否为合法目标(boolean)。Player为目标。 Source, Card
+    MD_CARD_ASK_COUNT,  // 修正要求卡牌的数量，如无双。Player被要求的角色。 Effect
 }

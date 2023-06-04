@@ -14,7 +14,7 @@ public class CardUse {
     public Card card;
     public Player source;
     public List<Player> targets;
-    public Player currentTarget;
+    public List<CardEffect> effects;
 
     public CardUse(Card card, Player source, List<Player> targets) {
         this.card = card;

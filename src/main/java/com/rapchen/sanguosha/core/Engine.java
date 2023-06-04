@@ -32,6 +32,7 @@ public class Engine {
     public List<Player> players;
     public List<Player> playersWithDead;  // 包括死亡武将在内的
     public Player currentPlayer;  // 当前回合角色
+    public Comparator<Player> playerComparator;  // 用于角色排序。按当前回合角色顺序
     public SkillManager skills;  // 技能管理器
     public GeneralManager generals;  // 武将管理器
 
@@ -48,6 +49,7 @@ public class Engine {
         players.add(new UserPlayer(this, 0, "user"));
         players.add(new AIPlayer(this, 1,"AI"));
         playersWithDead = new ArrayList<>(players);
+        playerComparator = (o1, o2) -> getAllPlayers().indexOf(o1) - getAllPlayers().indexOf(o2);
 
         // 选将
         skills = new SkillManager();

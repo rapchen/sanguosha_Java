@@ -1,5 +1,6 @@
 package com.rapchen.sanguosha.core.data.card;
 
+import com.rapchen.sanguosha.core.common.Fields;
 import com.rapchen.sanguosha.core.player.Player;
 
 /**
@@ -10,6 +11,7 @@ import com.rapchen.sanguosha.core.player.Player;
 public class CardEffect {
     public CardUse use;
     public Player target;
+    public Fields xFields = new Fields();
 
     public CardEffect(CardUse use, Player target) {
         this.use = use;

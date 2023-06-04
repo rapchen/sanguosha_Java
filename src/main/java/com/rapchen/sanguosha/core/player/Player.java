@@ -511,11 +511,7 @@ public abstract class Player {
                 isUse ? CardAsk.Scene.USE : CardAsk.Scene.RESPONSE,
                 this, "askForDodge",
                 isUse ? "请使用一张闪：" : "请打出一张闪：");
-        engine.trigger(new Event(Timing.CARD_ASKED, this).withField("CardAsk", ask));
-        Card card = (Card) xFields.remove("CardProvided");  // 尝试获取技能提供的闪 TODO 一个技能提供卡后是否要打断该事件
-        if (card == null) {
-            card = askForCard(ask);  // 要求角色提供闪
-        }
+        Card card = askForCard(ask);  // 要求角色提供闪
         if (card != null) {
             if (isUse) {
                 useCard(card, new ArrayList<>());
@@ -601,10 +597,15 @@ public abstract class Player {
      * @return 使用/打出的牌
      */
     public Card askForCard(CardAsk ask) {
+        engine.trigger(new Event(Timing.CARD_ASKED, this).withField("CardAsk", ask));
+        // 尝试获取技能提供的闪 TODO 一个技能提供卡后是否要打断该事件
+        Card card = (Card) xFields.remove("CardProvided");
+        if (card != null) return card;
+        // 判断时机是否被打断
         while (true) {
             List<Card> cards = new ArrayList<>(handCards.stream().filter(ask::matches).toList());
             cards.addAll(engine.skills.getTransformedCards(ask));
-            Card card = chooseCard(new CardChoose(this, cards, ask.forced, ask.reason, ask.prompt));
+            card = chooseCard(new CardChoose(this, cards, ask.forced, ask.reason, ask.prompt));
             if (card == null) return null;
             // 选择转化技之后的处理逻辑
             if (card.isVirtual() && card.skill instanceof TransformSkill skill) {
