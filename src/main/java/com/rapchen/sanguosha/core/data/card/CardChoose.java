@@ -76,6 +76,12 @@ public class CardChoose extends Choose<Card> {
         return this;
     }
 
+    public CardChoose count(int count, int minCount) {
+        this.count = count;
+        this.minCount = minCount;
+        return this;
+    }
+
     public CardChoose reason(String reason, String prompt) {
         this.reason = reason;
         this.prompt = prompt;
@@ -98,8 +104,11 @@ public class CardChoose extends Choose<Card> {
         for (int i = 0; i < count; i++) {
             prompt = basePrompt + "(" + (i+1) + "/" + count + ")";
             Card card = chooseOne();
-            // 目前是选不满就视为失败 TODO 【天命】之类不足全弃的逻辑需要另外写
-            if (card == null) return null;  // 没有选牌，终止选择，返回null
+            // 选不满minCount就视为失败。 【天命】之类不足全弃的逻辑需要另外写
+            if (card == null) {
+                if (minCount >= 0 && chosen.size() >= minCount) return chosen;
+                return null;
+            }
             chosen.add(card);
             candidates.remove(card);  // 从候选牌中移除卡牌，避免重复选择
         }

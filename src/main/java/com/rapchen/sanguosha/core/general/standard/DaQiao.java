@@ -71,7 +71,7 @@ public class DaQiao extends General {
             // 不能是自己，要在自己攻击范围内，要是合法目标
             return target != source
                     && source.inRange(target)
-//                    && target != use.source && !use.targets.contains(target)
+                    && target != use.source && !use.targets.contains(target)
                     && use.card.validTarget(use.source, target);
         }
 

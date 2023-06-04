@@ -33,10 +33,16 @@ public class LvBu extends General {
             final CardEffect effect = (CardEffect) event.xFields.get("CardEffect");
             Player source = effect.getSource(), target = effect.target;
             if (effect.getCard() instanceof Slash) {
-                if (source == owner) return 2;
+                if (source == owner) {
+                    doLog("%s 需要使用两张【闪】", target);
+                    return 2;
+                }
             } else if (effect.getCard() instanceof Duel) {
-                if (source == owner && target == event.player) return 2;
-                if (target == owner && source == event.player) return 2;
+                if ((source == owner && target == event.player)
+                    || (target == owner && source == event.player)) {
+                    doLog("%s 需要打出两张【杀】", event.player);
+                    return 2;
+                }
             }
             return value;
         }

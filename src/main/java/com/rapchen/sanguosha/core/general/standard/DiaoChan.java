@@ -15,6 +15,7 @@ public class DiaoChan extends General {
     public DiaoChan() {
         super("DiaoChan", "貂蝉", Gender.FEMALE, Nation.QUN, 3);
         skills.add(BiYue.class);
+        // TODO 离间
     }
 
     public static class BiYue extends TriggerSkill {

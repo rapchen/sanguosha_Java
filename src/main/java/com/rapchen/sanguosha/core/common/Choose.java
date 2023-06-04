@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 public class Choose <T> {
     public List<T> candidates;  // 候选范围
     public int count = 1;  // 需要选择的数量
+    public int minCount = -1;  // 最少可以选择的数量。少于这个数量时视为放弃。-1为必须选满。
     public Player player;  // 被要求做选择的角色
     public boolean forced = false;  // 是否强制选择
     public String reason;  // 原因
