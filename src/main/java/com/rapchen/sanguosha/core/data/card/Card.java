@@ -162,11 +162,9 @@ public abstract class Card {
     }
 
     public void addSubCards(List<Card> cards) {
-        if (subCards == null) subCards = new ArrayList<>();
         subCards.addAll(cards);
     }
     public void addSubCard(Card card) {
-        if (subCards == null) subCards = new ArrayList<>();
         subCards.add(card);
     }
 
@@ -335,6 +333,7 @@ public abstract class Card {
      * @param targets 目标
      */
     public void doUse(Player source, List<Player> targets) {
+        targets = new ArrayList<>(targets);  // 防止不可变
         doUseLog(source, targets);
         // 1. 对于真实卡牌，生效前先移动到处理区。技能牌则直接弃置
         if (!(this instanceof SkillCard)) {
@@ -496,7 +495,7 @@ public abstract class Card {
     public static <T extends Card> T createVirtualCard(Class<T> clazz, List<Card> subCards) {
         T tmpCard = createTmpCard(clazz);
         if (tmpCard == null) return null;
-        tmpCard.addSubCards(subCards);
+        if (subCards != null) tmpCard.addSubCards(subCards);
         tmpCard.refreshSuitPoint();
         return tmpCard;
     }

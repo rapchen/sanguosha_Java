@@ -21,10 +21,12 @@ public abstract class TrickCard extends Card {
      * @return 是否有人无懈
      */
     public boolean askForNullification(CardEffect effect) {
-        // TODO 应该是同时询问。以及现在如果第一个人用的无懈被无懈了，还会问第二个人
-        for (Player player : Engine.eg.getAllPlayers()) {
-            if (player.askForNullification(effect)) {
-                return true;
+        if (effect.xFields.remove("CannotNullify") != Boolean.TRUE) {
+            // TODO 应该是同时询问。以及现在如果第一个人用的无懈被无懈了，还会问第二个人
+            for (Player player : Engine.eg.getAllPlayers()) {
+                if (player.askForNullification(effect)) {
+                    return true;
+                }
             }
         }
         return false;

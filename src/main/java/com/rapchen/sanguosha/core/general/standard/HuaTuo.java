@@ -25,7 +25,6 @@ public class HuaTuo extends General {
     public static class QingNang extends TransformSkill {
         public QingNang() {
             super("QingNang", "青囊");
-            maxCardCount = 1;
         }
 
         @Override
