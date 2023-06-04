@@ -41,7 +41,7 @@ public class Duel extends ImmediateTrickCard {
         remainCount = Engine.eg.triggerModify(new Event(Timing.MD_CARD_ASK_COUNT, player)
                 .withField("CardEffect", effect), remainCount);
         while (remainCount > 0) {
-            if (!player.askForSlash()) return false;
+            if (!player.askForSlash(false, null)) return false;
             remainCount--;
         }
         return true;

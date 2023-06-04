@@ -59,7 +59,7 @@ public class DiaoChan extends General {
         @Override
         public void doUseToAll(CardUse use) {
             Player source = use.targets.get(0), target = use.targets.get(1);
-            Duel duel = Card.createVirtualCard(Duel.class, null);
+            Duel duel = Card.createTmpCard(Duel.class);
             duel.skill = skill;
             skill.doLog();
             source.useCard(duel, List.of(target));

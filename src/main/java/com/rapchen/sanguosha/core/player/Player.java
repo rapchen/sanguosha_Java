@@ -17,7 +17,6 @@ import com.rapchen.sanguosha.core.skill.Timing;
 import com.rapchen.sanguosha.exception.BadPlayerException;
 import lombok.extern.slf4j.Slf4j;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -526,11 +525,19 @@ public abstract class Player {
      * 要求角色打出一张杀
      * @return 是否打出
      */
-    public boolean askForSlash() {
-        CardAsk ask = new CardAsk(Slash.class, CardAsk.Scene.RESPONSE, this,
-                "askForSlash", "请打出一张杀，0放弃：");
+    public boolean askForSlash(boolean isUse, Player target) {
+        CardAsk ask = new CardAsk(Slash.class,
+                isUse ? CardAsk.Scene.USE : CardAsk.Scene.RESPONSE,
+                this, "askForSlash",
+                isUse ? String.format("请对 %s 使用一张杀：", target) : "请打出一张杀：");
         Card card = askForCard(ask);
-        if (card != null) respondCard(card, new ArrayList<>());
+        if (card != null) {
+            if (isUse) {
+                useCard(card, List.of(target));
+            } else {
+                respondCard(card, new ArrayList<>());
+            }
+        }
         return card != null;
     }
 

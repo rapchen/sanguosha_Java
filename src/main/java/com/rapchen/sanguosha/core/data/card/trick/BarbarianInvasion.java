@@ -27,7 +27,7 @@ public class BarbarianInvasion extends ImmediateTrickCard {
     @Override
     public void doEffect(CardEffect effect) {
         Player source = effect.getSource(), target = effect.target;
-        if (!target.askForSlash()) {
+        if (!target.askForSlash(false, null)) {
             source.doDamage(new Damage(effect));
         }
     }

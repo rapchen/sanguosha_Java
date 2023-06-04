@@ -121,6 +121,9 @@ public class StandardCards extends Package {
         addCard(new Duel(CLUB, POINT_A));
         addCard(new Duel(DIAMOND, POINT_A));
 
+        addCard(new BorrowingKnife(CLUB, POINT_Q));
+        addCard(new BorrowingKnife(CLUB, POINT_K));
+
         addCard(new Nullification(SPADE, POINT_J));
         addCard(new Nullification(CLUB, POINT_Q));
         addCard(new Nullification(CLUB, POINT_K));
