@@ -22,6 +22,7 @@ public enum Timing {
     TARGETED_CHOOSING,  // 被牌指定为目标时，player为目标。可以修改目标。 CardUse
     TARGET_CHOSEN,  // 牌指定目标后。修改目标应该在这之前。 CardUse
     TARGETED_CHOSEN,  // 被牌指定为目标后，player为目标。修改目标应该在这之前。 CardUse
+    EFFECT_BEFORE,  // 卡牌效果生效前，player为目标。 CardEffect
     CARD_USED,  // 卡牌使用结束。卡牌的响应也已经结束。 CardUse
 
     CARD_RESPONDED,  // 卡牌打出结束。Player为打出者 Card

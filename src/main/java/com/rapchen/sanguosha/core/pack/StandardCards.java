@@ -155,5 +155,11 @@ public class StandardCards extends Package {
         addCard(new EightDiagram(SPADE, POINT_2));
         addCard(new EightDiagram(CLUB, POINT_2));
 
+        // EX卡牌
+//        addCard(new RenWangShield(SPADE, POINT_2));
+        addCard(new RenWangShield(CLUB, POINT_2));
+        addCard(new Lightning(HEART, POINT_Q));
+        addCard(new Nullification(DIAMOND, POINT_Q));
+
     }
 }

@@ -19,7 +19,7 @@ public class EightDiagram extends Armor {
         skill = new EightDiagramSkill();
     }
 
-    // 当你使用【杀】指定一名异性角色为目标后，你可以令其选择一项：弃一张手牌；或令你摸一张牌。
+    // 每当你需要使用或打出一张【闪】时，你可以进行判定：若结果为红色，视为你使用或打出了一张【闪】。
     private static class EightDiagramSkill extends TriggerSkill {
         public EightDiagramSkill() {
             super("EightDiagramSkill", "八卦阵", new Timing[]{Timing.CARD_ASKED});

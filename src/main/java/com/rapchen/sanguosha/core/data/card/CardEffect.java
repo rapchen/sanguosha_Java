@@ -11,6 +11,7 @@ import com.rapchen.sanguosha.core.player.Player;
 public class CardEffect {
     public CardUse use;
     public Player target;
+    public boolean canceled = false;  // 是否有效。如贞烈、仁王盾等会设置次字段
     public Fields xFields = new Fields();
 
     public CardEffect(CardUse use, Player target) {

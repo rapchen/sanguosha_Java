@@ -382,8 +382,11 @@ public abstract class Card {
         // 5. 执行效果
         doUseToAll(use);  // 全体效果
         for (CardEffect effect : use.effects) {  // 单个目标的效果
+            if (effect.canceled) continue;
+            // 触发Effect结算开始事件，仁王盾、智迟等可以无效该Effect
+            Engine.eg.trigger(new Event(Timing.EFFECT_BEFORE, effect.target).withField("CardEffect", effect));
             // 对每个目标生效前，询问无懈
-            if (!checkCanceled(effect)) {
+            if (!effect.canceled && !checkCanceled(effect)) {
                 doEffect(effect);
             }
         }
