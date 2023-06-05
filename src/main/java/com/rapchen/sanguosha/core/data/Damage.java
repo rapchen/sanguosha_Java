@@ -14,6 +14,7 @@ public class Damage {
     public int count;
     public String reason;
     public CardEffect effect;  // 伤害来自哪个卡牌效果
+    public boolean avoided = false;  // 伤害是否被防止
 
     public Damage(Player source, Player target, int count, String reason) {
         this.source = source;

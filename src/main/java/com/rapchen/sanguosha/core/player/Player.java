@@ -480,7 +480,7 @@ public abstract class Player {
      */
     public boolean askForConfirm(String prompt, String reason) {
         List<String> choices = List.of("是");
-        return chooseChoice(choices, true, prompt, reason) == 1;
+        return chooseChoice(choices, false, prompt, reason) == 1;
     }
 
     /**

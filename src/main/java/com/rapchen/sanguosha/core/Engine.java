@@ -288,8 +288,9 @@ public class Engine {
         Player source = damage.source, target = damage.target;
         // 造成伤害前。可以修改伤害
         trigger(new Event(Timing.DAMAGE_BEFORE, source).withField("Damage", damage));
-        // 造成伤害时。
+        // 造成伤害时。可以防止伤害
         trigger(new Event(Timing.DAMAGE_DOING, source).withField("Damage", damage));
+        if (damage.avoided) return;
 
         if (source == null) {
             log.info("{} 受到了 {} 点伤害，无伤害来源", target, damage.count);
@@ -299,9 +300,7 @@ public class Engine {
         target.reduceHp(damage.count);
 
         // 造成伤害后
-        if (source != null) {
-            trigger(new Event(Timing.DAMAGE_DONE, source).withField("Damage", damage));
-        }
+        trigger(new Event(Timing.DAMAGE_DONE, source).withField("Damage", damage));
         trigger(new Event(Timing.DAMAGED_DONE, target).withField("Damage", damage));
     }
 

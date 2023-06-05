@@ -35,7 +35,7 @@ public enum Timing {
 
     // 伤害相关。DAMAGE_时机player为伤害制造者；DAMAGED_时机player为受伤者。
     DAMAGE_BEFORE,  // 造成伤害前。适合各种修改伤害的效果。 Damage
-    DAMAGE_DOING,  // 造成伤害时。 Damage
+    DAMAGE_DOING,  // 造成伤害时，此时可以防止伤害。 Damage
     DAMAGE_DONE,  // 造成伤害后。 Damage
     DAMAGED_DONE,  // 受到伤害后。 Damage
 
