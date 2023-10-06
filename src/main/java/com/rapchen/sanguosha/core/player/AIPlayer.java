@@ -101,9 +101,13 @@ public class AIPlayer extends Player {
     protected int chooseChoice(List<String> choices, boolean forced, String prompt, String reason) {
         if (choices.isEmpty()) return 1;
         switch (reason) {
+            // TODO 这里的AI逻辑以后可以拆到各个技能里
+            // 这里的总是发动只是AI策略，而useByDefault代表通常不会有害
             case "DoubleSwordSkill" -> {  // 雌雄，总是发动
                 return 1;
             } case "EightDiagramSkill" -> {  // 八卦，总是发动
+                return 1;
+            } case "TieQi", "LieGong" -> {  // 铁骑、烈弓，总是发动
                 return 1;
             } default -> {  // 默认逻辑：必须选就选1，否则放弃
                 return forced ? 1 : 0;

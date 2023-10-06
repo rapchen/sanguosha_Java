@@ -12,7 +12,8 @@ public enum Phase {
     PHASE_DRAW("Draw", "摸牌阶段"),
     PHASE_PLAY("Play", "出牌阶段"),
     PHASE_DISCARD("Discard", "弃牌阶段"),
-    PHASE_END("End", "结束阶段");
+    PHASE_END("End", "结束阶段"),
+    PHASE_NONE("None", "无阶段");  // 如回合开始、结束时等时机
 
     public final String name;
     public final String nameZh;

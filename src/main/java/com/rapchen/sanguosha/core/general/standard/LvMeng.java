@@ -51,7 +51,8 @@ public class LvMeng extends General {
                 } else if (event.timing == Timing.CARD_RESPONDED) {
                     card = (Card) event.xFields.get("Card");
                 }
-                if (card instanceof Slash && Engine.eg.currentPlayer == owner) {
+                if (card instanceof Slash && owner.isCurrentPlayer()
+                        && owner.phase == Phase.PHASE_PLAY) {
                     owner.xFields.put("KeJi_Failed", true);
                 }
             }

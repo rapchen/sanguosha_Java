@@ -73,8 +73,11 @@ public abstract class Player {
         for (Player player : engine.players) {  // 重置所有角色的回合字段
             player.turnFields.clear();
         }
+        // 回合开始时时机
+        phase = Phase.PHASE_NONE;
         engine.trigger(new Event(Timing.TURN_BEGIN, this));
 
+        // 执行各阶段
         tryPhase(Phase.PHASE_PREPARE);
         tryPhase(Phase.PHASE_JUDGE);
         tryPhase(Phase.PHASE_DRAW);
@@ -82,6 +85,8 @@ public abstract class Player {
         tryPhase(Phase.PHASE_DISCARD);
         tryPhase(Phase.PHASE_END);
 
+        // 回合结束时时机
+        phase = Phase.PHASE_NONE;
         engine.trigger(new Event(Timing.TURN_END, this));
         phase = Phase.PHASE_OFF_TURN;
     }
@@ -181,6 +186,10 @@ public abstract class Player {
         boolean skipped = xFields.remove("SkipPhase_" + phase.name) == Boolean.TRUE;
         if (skipped) log.warn("{} 跳过了 {}", this, phase);
         return skipped;
+    }
+
+    public boolean isCurrentPlayer() {
+        return engine.currentPlayer == this;
     }
 
     /* =============== end 阶段 ================ */
@@ -324,6 +333,7 @@ public abstract class Player {
         return Math.max(distance, 1);
     }
 
+    // 体力相关
     public void doDamage(Damage damage) {
         engine.doDamage(damage);
     }

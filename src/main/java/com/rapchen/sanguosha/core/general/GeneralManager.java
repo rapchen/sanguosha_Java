@@ -1,7 +1,7 @@
 package com.rapchen.sanguosha.core.general;
 
-import com.rapchen.sanguosha.core.Engine;
 import com.rapchen.sanguosha.core.pack.Standard;
+import com.rapchen.sanguosha.core.pack.Wind;
 import com.rapchen.sanguosha.core.player.Player;
 
 import java.util.ArrayList;
@@ -18,6 +18,7 @@ public class GeneralManager {
 
     public void init() {
         new Standard().init();
+        new Wind().init();
         Collections.shuffle(generals);
     }
 

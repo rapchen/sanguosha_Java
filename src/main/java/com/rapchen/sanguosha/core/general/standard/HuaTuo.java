@@ -6,6 +6,7 @@ import com.rapchen.sanguosha.core.data.card.CardEffect;
 import com.rapchen.sanguosha.core.data.card.SkillCard;
 import com.rapchen.sanguosha.core.data.card.basic.Peach;
 import com.rapchen.sanguosha.core.general.General;
+import com.rapchen.sanguosha.core.player.Phase;
 import com.rapchen.sanguosha.core.player.Player;
 import com.rapchen.sanguosha.core.skill.TransformSkill;
 
@@ -85,7 +86,7 @@ public class HuaTuo extends General {
 
         @Override
         public boolean usableAtResponse(CardAsk ask) {
-            return ask.contains(Peach.class);
+            return ask.contains(Peach.class) && !owner.isCurrentPlayer();
         }
     }
 
